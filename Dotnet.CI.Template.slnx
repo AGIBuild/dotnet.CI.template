@@ -1,0 +1,8 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/Dotnet.CI.Template.Sample/Dotnet.CI.Template.Sample.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/Dotnet.CI.Template.Sample.Tests/Dotnet.CI.Template.Sample.Tests.csproj" />
+  </Folder>
+</Solution>

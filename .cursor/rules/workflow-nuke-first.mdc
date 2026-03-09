@@ -1,0 +1,12 @@
+---
+description: Enforce NUKE-first workflow execution in CI
+alwaysApply: true
+---
+
+# Workflow Must Use NUKE Targets
+
+- For `/.github/workflows/*.yml`, always call `build.sh` / `build.ps1` NUKE targets for build, test, pack, and publish actions.
+- Do not implement a separate `dotnet build/test/pack/publish` logic in workflows when an equivalent NUKE target exists.
+- If workflow requirements are not covered by existing targets, extend `build/BuildTask.cs` first, then call the new target from workflows.
+- Keep target naming domain-oriented and generic; avoid workflow-specific suffixes such as `*App`.
+- Keep orchestration (trigger, matrix, permissions, artifacts) in workflows, and keep build logic in NUKE targets.

@@ -1,0 +1,8 @@
+<Project>
+
+  <!-- Enable deterministic builds on CI servers -->
+  <PropertyGroup Condition="'$(CI)' == 'true'">
+    <ContinuousIntegrationBuild>true</ContinuousIntegrationBuild>
+  </PropertyGroup>
+
+</Project>
