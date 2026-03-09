@@ -28,7 +28,7 @@ manual dispatch
 
 ### `Release`
 - 触发：手动 `workflow_dispatch`
-- 作用：解析版本/标签 -> build/test/pack -> 创建 GitHub Release -> 可选推送 NuGet
+- 作用：解析版本 -> build/test/pack -> 创建新 tag 与 GitHub Release -> 可选推送 NuGet
 - 特点：带版本一致性校验，避免 tag 与包版本漂移
 
 ### `App Publish Artifacts`
@@ -49,7 +49,6 @@ manual dispatch
    观察 `CI` 和 `CodeQL` 是否都绿。
 
 2. 手动触发一次 `Release`
-   - `mode=create_and_release`
    - `publish_nuget=false`（先做演练）
 
 3. 去 Releases 页面确认
@@ -60,13 +59,10 @@ manual dispatch
 
 ## 3) Release 输入参数怎么选
 
-### `mode`
-- `create_and_release`：从 `Directory.Build.props` 读取 `VersionPrefix`，自动生成 tag 并发布
-- `release_existing_tag`：使用你传入的 `tag`（如 `v1.2.3`）进行发布
-
-### `tag`
-- 仅在 `release_existing_tag` 模式下必填
-- 格式必须是 `v<semver>`（例如 `v1.2.3`、`v1.2.3-rc.1`）
+### 版本输入（说明）
+- 当前 workflow 不接受 `version` 或 `tag` 输入。
+- 每次触发都会从 `Directory.Build.props` 的 `VersionPrefix` 读取版本，并尝试创建**新的** `v<semver>` tag。
+- 若该 tag 已存在，运行会直接失败（不支持基于已有 tag 触发）。
 
 ### `publish_nuget`
 - `true`：若仓库配置了 `NUGET_API_KEY`，会执行 NuGet 推送
@@ -78,13 +74,13 @@ manual dispatch
 
 ### Q1: 触发 `Release` 时“未指定版本”会怎样？
 - 当前 workflow 没有 `version` 输入参数。
-- `create_and_release` 模式会从 `Directory.Build.props` 读取 `VersionPrefix` 作为版本。
+- `Release` 会从 `Directory.Build.props` 读取 `VersionPrefix` 作为版本。
 - 如果对应 tag 已存在（例如 `VersionPrefix=0.1.0` 且 `v0.1.0` 已存在），运行会失败并报 `Tag already exists`。
-- `release_existing_tag` 模式如果未提供 `tag`，会直接失败并报 `Tag input is required`。
+- 当前 workflow 不支持“使用已有 tag”触发发布。
 
 ### Q2: Release 时如果要改主版本，怎么反映到最新代码？
 - 正确方式是先改代码：通过 PR 修改 `Directory.Build.props` 里的 `VersionPrefix`（例如 `0.1.0 -> 1.0.0`），并合并到 `main`。
-- 再触发 `Release` 的 `create_and_release`，它会基于当前 `main` 的最新提交打 tag 并发布。
+- 再触发 `Release`，它会基于当前 `main` 的最新提交打 tag 并发布。
 - 也就是说，**版本变更通过代码提交生效**；`Release` 本身不会回写或修改仓库文件。
 
 ---
@@ -105,10 +101,10 @@ manual dispatch
 
 ```bash
 # 触发 release（自动创建 tag + release，不推 NuGet）
-gh workflow run release.yml --ref main -f mode=create_and_release -f publish_nuget=false
+gh workflow run release.yml --ref main -f publish_nuget=false
 
-# 用已有 tag 触发 release
-gh workflow run release.yml --ref main -f mode=release_existing_tag -f tag=v1.2.3 -f publish_nuget=false
+# 触发 release 并推送 NuGet（要求 NUGET_API_KEY 已配置）
+gh workflow run release.yml --ref main -f publish_nuget=true
 
 # 触发应用产物发布
 gh workflow run app-publish-artifacts.yml --ref main -f configuration=Release -f run_tests=true -f self_contained=false -f runtimes=win-x64,linux-x64
@@ -118,7 +114,7 @@ gh workflow run app-publish-artifacts.yml --ref main -f configuration=Release -f
 
 ## 7) 常见问题排查（先看这里）
 
-- `Release` 报 tag 已存在：检查是否重复发布同一 `VersionPrefix`
+- `Release` 报 tag 已存在：说明同版本已发布；请先通过 PR 提升 `VersionPrefix`
 - `publish_nuget=true` 但未推送：确认仓库是否配置 `NUGET_API_KEY`
 - 包版本校验失败：检查 `Directory.Build.props` 的 `VersionPrefix` 与目标 tag 是否一致
 - Windows/Linux 行为不一致：确认 `.gitattributes` 已生效，特别是 `*.sh` 的 LF

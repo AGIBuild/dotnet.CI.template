@@ -17,7 +17,6 @@
 
 在 GitHub Actions 里手动运行 `Release`：
 
-- `mode`: `create_and_release`
 - `publish_nuget`: `false`（首次建议先关闭）
 
 然后点击 **Run workflow**。
@@ -36,19 +35,19 @@
 
 ## 3) 要发 NuGet 怎么做
 
-确认 `NUGET_API_KEY` 已配置后，再次运行 `Release`：
+确认 `NUGET_API_KEY` 已配置后，在运行 `Release` 时直接设置：
 
-- `mode`: `release_existing_tag`
-- `tag`: 例如 `v0.1.0`
 - `publish_nuget`: `true`
 
-> `tag` 必须是 `v<semver>` 格式，例如 `v1.2.3`、`v1.2.3-rc.1`。
+> 当前 workflow 不支持使用已存在 tag 触发。  
+> 如果某个版本已发布且当时未推 NuGet，需要先提升 `VersionPrefix` 后再发下一个版本。
 
 ---
 
 ## 4) 关于版本的两条规则（必读）
 
 - 触发 `create_and_release` 时不需要也不能手填 `version`，版本来自 `Directory.Build.props` 的 `VersionPrefix`。
+- 触发 `Release` 时不需要也不能手填 `version` 或 `tag`，版本来自 `Directory.Build.props` 的 `VersionPrefix`。
 - 如果要升级主版本（例如 `0.x -> 1.0.0`），先通过 PR 修改 `VersionPrefix` 并合并到 `main`，再触发 `Release`。  
   `Release` 不会自动修改仓库文件，它只基于现有提交打 tag 和发版。
 
@@ -56,8 +55,7 @@
 
 ## 5) 常见失败快速定位
 
-- `Tag already exists`: 版本已发过，改版本或使用 `release_existing_tag`
-- `Invalid tag format`: tag 不是 `v<semver>`
+- `Tag already exists`: 版本已发过，先提升 `VersionPrefix` 再重试
 - `No .nupkg files found`: 打包阶段没有产物，先看 `Build/Test/Pack` 日志
 - `publish_nuget requested but NUGET_API_KEY...`: 未配置 NuGet secret
 
@@ -67,10 +65,10 @@
 
 ```bash
 # 创建并发布（不推 NuGet）
-gh workflow run release.yml --ref main -f mode=create_and_release -f publish_nuget=false
+gh workflow run release.yml --ref main -f publish_nuget=false
 
-# 用已有 tag 推 NuGet
-gh workflow run release.yml --ref main -f mode=release_existing_tag -f tag=v0.1.0 -f publish_nuget=true
+# 创建并发布（推 NuGet）
+gh workflow run release.yml --ref main -f publish_nuget=true
 ```
 
 ---
