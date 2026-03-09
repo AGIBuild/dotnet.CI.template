@@ -255,7 +255,7 @@ jobs:
           echo "Created and pushed tag $TAG at $SHA"
 
       - name: Download package artifacts
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           path: packages
           pattern: packages-*
@@ -295,7 +295,7 @@ jobs:
 
     steps:
       - name: Download package artifacts
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           path: packages
           pattern: packages-*
