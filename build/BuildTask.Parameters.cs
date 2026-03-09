@@ -5,6 +5,7 @@ partial class BuildTask
 {
     // Stable external build interface (allowed CLI parameters):
     //   - Configuration
+    //   - VersionPrefix  (used only by UpdateVersion target)
     //   - VersionSuffix  (prerelease suffix, e.g., "ci.158")
     //   - Runtime
     //   - SelfContained
@@ -12,6 +13,9 @@ partial class BuildTask
 
     [Parameter("Configuration to build - Default is 'Debug' (local) or 'Release' (server)")]
     readonly Configuration Configuration = IsLocalBuild ? Configuration.Debug : Configuration.Release;
+
+    [Parameter("Version prefix used by UpdateVersion target (e.g., 1.2.3)")]
+    readonly string VersionPrefix = string.Empty;
 
     [Parameter("Version suffix for prerelease builds (e.g., ci.158)")]
     readonly string VersionSuffix = string.Empty;
@@ -37,4 +41,5 @@ partial class BuildTask
 
     AbsolutePath BuildOutputsMarkerFile => ArtifactsDirectory / ".build-outputs" / "build-outputs.json";
     AbsolutePath ToolManifestFile => RootDirectory / ".config" / "dotnet-tools.json";
+    AbsolutePath DirectoryBuildPropsFile => RootDirectory / "Directory.Build.props";
 }

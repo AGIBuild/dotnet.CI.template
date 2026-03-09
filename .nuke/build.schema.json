@@ -29,7 +29,8 @@
         "Pack",
         "Publish",
         "Restore",
-        "Test"
+        "Test",
+        "UpdateVersion"
       ]
     },
     "Verbosity": {
@@ -118,6 +119,10 @@
         "SelfContained": {
           "type": "boolean",
           "description": "Publish self-contained output in Publish target"
+        },
+        "VersionPrefix": {
+          "type": "string",
+          "description": "Version prefix used by UpdateVersion target (e.g., 1.2.3)"
         },
         "VersionSuffix": {
           "type": "string",
