@@ -41,7 +41,7 @@ jobs:
       publish_nuget: ${{ steps.flags.outputs.publish_nuget }}
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         with:
           fetch-depth: 0
 
@@ -154,7 +154,7 @@ jobs:
       publish_nuget: ${{ needs.resolve.outputs.publish_nuget }}
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         with:
           ref: ${{ needs.resolve.outputs.sha }}
 
@@ -228,7 +228,7 @@ jobs:
       cancel-in-progress: false
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         with:
           ref: ${{ needs.build-test-pack.outputs.sha }}
           fetch-depth: 0
