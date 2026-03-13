@@ -48,10 +48,17 @@ resolve-version → build-and-test (matrix) → release (需 approve) → deploy
 
 ---
 
-## 4) 关于版本的两条规则（必读）
+## 4) 版本管理（必读）
 
-- 版本来自 `Directory.Build.props` 的 `VersionPrefix`，不需要也不能手填。
-- 如果要升级版本（例如 `0.1.0 -> 1.0.0`），先通过 PR 修改 `VersionPrefix` 并合并到 `main`，CI 自动基于新版本构建和发布。
+版本来自 `Directory.Build.props` 的 `VersionPrefix`，CI 自动追加 build number（如 `0.2.0.42`）。
+
+```bash
+./build.sh ShowVersion                           # 查看当前版本
+./build.sh UpdateVersion                         # patch 递增: 0.2.0 -> 0.2.1
+./build.sh UpdateVersion --VersionPrefix 1.0.0   # 精确设置
+```
+
+修改后提交到 `main`，CI 自动基于新版本构建和发布。
 
 ---
 

@@ -96,11 +96,19 @@ The pipeline runs automatically. When `build-and-test` completes, go to **Action
 
 Versions follow a simple rule:
 
-- **Edit `VersionPrefix`** in `Directory.Build.props` via PR (e.g., `0.2.0` -> `1.0.0`)
 - **CI appends the build number** on release: `0.2.0` becomes `0.2.0.42`
 - **Tags are created automatically**: `v0.2.0.42`
+- No manual tagging. No version input fields. The single source of truth is `VersionPrefix` in `Directory.Build.props`.
 
-No manual tagging. No version input fields. Just change the number in one file.
+### Version commands
+
+```bash
+./build.sh ShowVersion                           # show current version
+./build.sh UpdateVersion                         # patch increment: 0.2.0 -> 0.2.1
+./build.sh UpdateVersion --VersionPrefix 1.0.0   # set exact version
+```
+
+Then commit and push -- CI takes care of the rest.
 
 ---
 

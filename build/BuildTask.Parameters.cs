@@ -3,14 +3,6 @@ using Nuke.Common.IO;
 
 partial class BuildTask
 {
-    // Stable external build interface (allowed CLI parameters):
-    //   - Configuration
-    //   - VersionPrefix  (used only by UpdateVersion target)
-    //   - VersionSuffix  (prerelease suffix, e.g., "ci.158")
-    //   - Runtime
-    //   - SelfContained
-    // VersionPrefix is owned by Directory.Build.props (single source of truth).
-
     [Parameter("Configuration to build - Default is 'Debug' (local) or 'Release' (server)")]
     readonly Configuration Configuration = IsLocalBuild ? Configuration.Debug : Configuration.Release;
 
@@ -19,6 +11,7 @@ partial class BuildTask
 
     [Parameter("Version suffix for prerelease builds (e.g., ci.158)")]
     readonly string VersionSuffix = string.Empty;
+
 
     // Internal path conventions controlled by build tasks (not external parameters).
     readonly string BuildPath = "Dotnet.CI.Template.slnx";

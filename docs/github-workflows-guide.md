@@ -102,7 +102,14 @@ push / PR to main + weekly
 版本来自 `Directory.Build.props` 的 `VersionPrefix`。CI 不接受手动输入版本参数。
 
 ### Q2: 如何升级版本？
-通过 PR 修改 `VersionPrefix`（例如 `0.1.0 -> 0.2.0`），合并到 `main` 后 CI 自动基于新版本构建。
+
+```bash
+./build.sh ShowVersion                           # 查看当前版本
+./build.sh UpdateVersion                         # patch 递增: 0.2.0 -> 0.2.1
+./build.sh UpdateVersion --VersionPrefix 1.0.0   # 精确设置
+```
+
+修改后通过 PR 合并到 `main`，CI 自动基于新版本构建。
 
 ### Q3: 同一版本能否重新发布？
 每次 main push 都会生成唯一的四段式版本号（如 `0.2.0.42`），因此同一 push 不会冲突。如果需要发新版本（如 `0.3.0`），通过 PR 修改 `VersionPrefix`。
