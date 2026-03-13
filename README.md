@@ -151,6 +151,9 @@ To enable automatic documentation deployment to GitHub Pages:
 1. Add a `docs/docfx.json` configuration file
 2. Enable GitHub Pages in **Settings > Pages > Source: GitHub Actions**
 3. The `deploy-docs` job will automatically build and deploy after each release
+4. Expected docs URL: `https://<owner>.github.io/<repo>/` (for this repo: `https://agibuild.github.io/dotnet.CI.template/`)
+
+The `Resolve Version` job summary always shows this expected docs URL, even when docs deployment is skipped.
 
 ---
 

@@ -45,6 +45,7 @@ resolve-version → build-and-test (matrix) → release (需 approve) → deploy
 - 一个新的 GitHub Release
 - Release 附件里有各平台安装包 zip（`app-linux-x64.zip`、`app-win-x64.zip` 等）
 - NuGet.org 上有对应版本的包（如已配置 `NUGET_API_KEY`）
+- 如果已启用 Pages + DocFX：文档地址 `https://agibuild.github.io/dotnet.CI.template/`
 
 ---
 

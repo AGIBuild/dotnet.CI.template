@@ -90,6 +90,8 @@ push / PR to main + weekly
 如果使用 DocFX 文档部署：
 - Settings → Pages → Source 选择 GitHub Actions
 - environment `github-pages` 会自动创建
+- 预期文档地址：`https://<owner>.github.io/<repo>/`（本仓库为 `https://agibuild.github.io/dotnet.CI.template/`）
+- `Resolve Version` 的 Summary 会固定显示该地址，便于快速访问
 
 ### Secrets
 - `NUGET_API_KEY`：NuGet.org API key（在 repo 或 `release` environment 级别配置）

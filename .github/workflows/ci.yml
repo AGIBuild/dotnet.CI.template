@@ -108,6 +108,10 @@ jobs:
           fi
 
           MODE=$( [ "$IS_RELEASE" = "true" ] && echo "Release" || echo "CI" )
+          REPO="${{ github.repository }}"
+          OWNER="${REPO%%/*}"
+          REPO_NAME="${REPO##*/}"
+          DOCS_URL="https://${OWNER,,}.github.io/${REPO_NAME}/"
 
           {
             echo "## Version Info"
@@ -121,6 +125,8 @@ jobs:
             echo "| **Bump Type** | **$BUMP** |"
             echo "| **Mode** | $MODE |"
             echo "| **Commit** | \`${SHA::8}\` |"
+            echo "| **Expected Docs URL** | $DOCS_URL |"
+            echo "| **Docs Auto-Deploy** | Enable Pages (GitHub Actions) + add \`docs/docfx.json\` |"
           } >> "$GITHUB_STEP_SUMMARY"
 
       - name: Compute build matrix
