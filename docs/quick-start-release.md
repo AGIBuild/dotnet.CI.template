@@ -8,67 +8,67 @@
 ## 0) 前置条件（30 秒）
 
 - 你有仓库写权限
-- `main` 分支是最新、`CI` 通过
+- `main` 分支是最新、CI 通过
 - 如果要推 NuGet，仓库已配置 `NUGET_API_KEY` secret
+- GitHub 仓库已创建 `release` environment（Settings → Environments），并配置 required reviewers
 
 ---
 
-## 1) 标准发版（推荐）
+## 1) Release 流程概览
 
-在 GitHub Actions 里手动运行 `Release`：
+Release 集成在 `CI and Release` workflow 中，由 5 个 job 串联完成：
 
-- `publish_nuget`: `false`（首次建议先关闭）
+```text
+resolve-version → build-and-test (matrix) → release-packages (需 approve) → deploy-docs → create-release
+```
 
-然后点击 **Run workflow**。
+当代码 push 到 `main` 后：
+1. CI 自动构建、测试、打包（NuGet 包 + 安装包）
+2. `release-packages` job 等待 `release` environment 的 **reviewer approval**
+3. Approve 后自动完成：NuGet 推送 → 文档部署 → 创建 tag + GitHub Release
 
 ---
 
-## 2) 成功标准（30 秒检查）
+## 2) 如何触发 Release
+
+**自动触发**：合并 PR 到 `main` 后，CI 自动运行。构建完成后进入 approval 等待。前往 Actions 页面找到对应的 workflow run，点击 **Review deployments** 审批 `release` environment。
+
+**手动触发**：在 Actions 页面手动 **Run workflow**（选择 `main` 分支）。
+
+---
+
+## 3) 成功标准（30 秒检查）
 
 运行成功后应看到：
 
 - 新 tag（例如 `v0.1.0`）
 - 一个新的 GitHub Release
-- Release 附件里有 `.nupkg` / `.snupkg`
-
----
-
-## 3) 要发 NuGet 怎么做
-
-确认 `NUGET_API_KEY` 已配置后，在运行 `Release` 时直接设置：
-
-- `publish_nuget`: `true`
-
-> 当前 workflow 不支持使用已存在 tag 触发。  
-> 如果某个版本已发布且当时未推 NuGet，需要先提升 `VersionPrefix` 后再发下一个版本。
+- Release 附件里有 `.nupkg` / `.snupkg` 和各平台安装包 zip
+- NuGet.org 上有对应版本的包（如已配置 `NUGET_API_KEY`）
 
 ---
 
 ## 4) 关于版本的两条规则（必读）
 
-- 触发 `create_and_release` 时不需要也不能手填 `version`，版本来自 `Directory.Build.props` 的 `VersionPrefix`。
-- 触发 `Release` 时不需要也不能手填 `version` 或 `tag`，版本来自 `Directory.Build.props` 的 `VersionPrefix`。
-- 如果要升级主版本（例如 `0.x -> 1.0.0`），先通过 PR 修改 `VersionPrefix` 并合并到 `main`，再触发 `Release`。  
-  `Release` 不会自动修改仓库文件，它只基于现有提交打 tag 和发版。
+- 版本来自 `Directory.Build.props` 的 `VersionPrefix`，不需要也不能手填。
+- 如果要升级版本（例如 `0.1.0 -> 1.0.0`），先通过 PR 修改 `VersionPrefix` 并合并到 `main`，CI 自动基于新版本构建和发布。
 
 ---
 
 ## 5) 常见失败快速定位
 
 - `Tag already exists`: 版本已发过，先提升 `VersionPrefix` 再重试
-- `No .nupkg files found`: 打包阶段没有产物，先看 `Build/Test/Pack` 日志
-- `publish_nuget requested but NUGET_API_KEY...`: 未配置 NuGet secret
+- `No .nupkg files found`: 打包阶段没有产物，先看 Build/Test/Pack 日志
+- `Hash mismatch`: 构建产物在传递过程中损坏，重新触发 workflow
+- NuGet 推送失败: 确认 `NUGET_API_KEY` secret 已配置
 
 ---
 
 ## 6) CLI 触发（可选）
 
 ```bash
-# 创建并发布（不推 NuGet）
-gh workflow run release.yml --ref main -f publish_nuget=false
-
-# 创建并发布（推 NuGet）
-gh workflow run release.yml --ref main -f publish_nuget=true
+# 手动触发 CI and Release workflow
+gh workflow run ci.yml --ref main
 ```
 
 ---
