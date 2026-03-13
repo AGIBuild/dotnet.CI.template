@@ -39,7 +39,7 @@ partial class BuildTask
     AbsolutePath PackagesDirectory => ArtifactsDirectory / "packages";
     AbsolutePath PublishDirectory => ArtifactsDirectory / "publish";
 
-    AbsolutePath ReleaseManifestFile => ArtifactsDirectory / "release-manifest.json";
+    AbsolutePath ReleaseManifestFile => PackagesDirectory / "release-manifest.json";
     AbsolutePath BuildOutputsMarkerFile => ArtifactsDirectory / ".build-outputs" / "build-outputs.json";
     AbsolutePath ToolManifestFile => RootDirectory / ".config" / "dotnet-tools.json";
     AbsolutePath DirectoryBuildPropsFile => RootDirectory / "Directory.Build.props";

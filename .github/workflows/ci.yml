@@ -175,9 +175,7 @@ jobs:
         uses: actions/upload-artifact@v7
         with:
           name: packages
-          path: |
-            artifacts/packages/**
-            artifacts/release-manifest.json
+          path: artifacts/packages/**
           if-no-files-found: error
 
       - name: Upload app artifacts
