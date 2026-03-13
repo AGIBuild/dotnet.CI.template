@@ -52,7 +52,13 @@ partial class BuildTask
         var match = Regex.Match(content, @"<VersionPrefix>\s*([^<]+?)\s*</VersionPrefix>", RegexOptions.Singleline);
         if (!match.Success)
             throw new InvalidOperationException($"<VersionPrefix> not found in {DirectoryBuildPropsFile}");
-        return match.Groups[1].Value.Trim();
+        var version = match.Groups[1].Value.Trim();
+
+        var buildNumber = Environment.GetEnvironmentVariable("BuildNumber");
+        if (!string.IsNullOrWhiteSpace(buildNumber))
+            version = $"{version}.{buildNumber}";
+
+        return version;
     }
 
     static string GetGitHeadSha()

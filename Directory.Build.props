@@ -11,6 +11,7 @@
        Bump this value via PR when preparing a new release. -->
   <PropertyGroup>
     <VersionPrefix>0.2.0</VersionPrefix>
+    <VersionPrefix Condition="'$(BuildNumber)' != ''">$(VersionPrefix).$(BuildNumber)</VersionPrefix>
   </PropertyGroup>
 
   <!-- Local builds default to prerelease to avoid confusion with stable releases.

@@ -7,13 +7,6 @@ on:
     branches: [main]
   workflow_dispatch:
 
-run-name: >-
-  ${{
-    github.event_name == 'pull_request'
-      && format('PR #{0} · {1}', github.event.pull_request.number, github.head_ref)
-      || format('{0} #{1}', github.ref_name, github.run_number)
-  }}
-
 permissions:
   contents: read
 
@@ -35,6 +28,7 @@ jobs:
     timeout-minutes: 5
     outputs:
       version: ${{ steps.resolve.outputs.version }}
+      full_version: ${{ steps.resolve.outputs.full_version }}
       tag: ${{ steps.resolve.outputs.tag }}
       sha: ${{ steps.resolve.outputs.sha }}
       is_release: ${{ steps.resolve.outputs.is_release }}
@@ -62,7 +56,6 @@ jobs:
             exit 1
           fi
 
-          TAG="v$VERSION"
           SHA="$(git rev-parse HEAD)"
 
           IS_RELEASE="false"
@@ -70,18 +63,28 @@ jobs:
             IS_RELEASE="true"
           fi
 
+          if [ "$IS_RELEASE" = "true" ]; then
+            FULL_VERSION="${VERSION}.${{ github.run_number }}"
+          else
+            FULL_VERSION="$VERSION"
+          fi
+          TAG="v$FULL_VERSION"
+
           echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "full_version=$FULL_VERSION" >> "$GITHUB_OUTPUT"
           echo "tag=$TAG" >> "$GITHUB_OUTPUT"
           echo "sha=$SHA" >> "$GITHUB_OUTPUT"
           echo "is_release=$IS_RELEASE" >> "$GITHUB_OUTPUT"
-          echo "Resolved: version=$VERSION tag=$TAG sha=$SHA is_release=$IS_RELEASE"
+          echo "Resolved: version=$VERSION full_version=$FULL_VERSION tag=$TAG sha=$SHA is_release=$IS_RELEASE"
 
       - name: Version summary
         shell: bash
         run: |
           VERSION="${{ steps.resolve.outputs.version }}"
+          FULL_VERSION="${{ steps.resolve.outputs.full_version }}"
           IS_RELEASE="${{ steps.resolve.outputs.is_release }}"
           SHA="${{ steps.resolve.outputs.sha }}"
+          TAG="${{ steps.resolve.outputs.tag }}"
 
           IFS='.' read -r CUR_MAJOR CUR_MINOR CUR_PATCH <<< "$VERSION"
 
@@ -111,8 +114,9 @@ jobs:
             echo ""
             echo "| Property | Value |"
             echo "|----------|-------|"
-            echo "| **Version** | \`$VERSION\` |"
-            echo "| **Tag** | \`v$VERSION\` |"
+            echo "| **Version** | \`$FULL_VERSION\` |"
+            echo "| **Base Version** | \`$VERSION\` |"
+            echo "| **Tag** | \`$TAG\` |"
             echo "| **Previous Tag** | \`$PREV_TAG\` |"
             echo "| **Bump Type** | **$BUMP** |"
             echo "| **Mode** | $MODE |"
@@ -155,6 +159,8 @@ jobs:
     needs: resolve-version
     runs-on: ${{ matrix.os }}
     timeout-minutes: 30
+    env:
+      BuildNumber: ${{ needs.resolve-version.outputs.is_release == 'true' && github.run_number || '' }}
     strategy:
       fail-fast: false
       matrix: ${{ fromJSON(needs.resolve-version.outputs.build_matrix) }}
@@ -210,7 +216,7 @@ jobs:
         if: needs.resolve-version.outputs.is_release == 'true' && matrix.pack
         shell: bash
         run: |
-          EXPECTED_VERSION="${{ needs.resolve-version.outputs.version }}"
+          EXPECTED_VERSION="${{ needs.resolve-version.outputs.full_version }}"
 
           shopt -s nullglob
           FILES=(artifacts/packages/*.nupkg artifacts/packages/*.snupkg)
@@ -292,7 +298,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          EXPECTED_VERSION="${{ needs.resolve-version.outputs.version }}"
+          EXPECTED_VERSION="${{ needs.resolve-version.outputs.full_version }}"
           MANIFEST="packages/release-manifest.json"
 
           if [ ! -f "$MANIFEST" ]; then
@@ -305,7 +311,7 @@ jobs:
           from pathlib import Path
 
           manifest = json.loads(Path("packages/release-manifest.json").read_text())
-          expected = "${{ needs.resolve-version.outputs.version }}"
+          expected = "${{ needs.resolve-version.outputs.full_version }}"
 
           if manifest.get("version") != expected:
               print(f"::error::Version mismatch: manifest={manifest.get('version')} expected={expected}")
