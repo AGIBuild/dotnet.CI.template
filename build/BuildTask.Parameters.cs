@@ -38,6 +38,7 @@ partial class BuildTask
     AbsolutePath TestResultsDirectory => ArtifactsDirectory / "test-results";
     AbsolutePath PackagesDirectory => ArtifactsDirectory / "packages";
     AbsolutePath PublishDirectory => ArtifactsDirectory / "publish";
+    AbsolutePath InstallersDirectory => ArtifactsDirectory / "installers";
 
     AbsolutePath ReleaseManifestFile => PackagesDirectory / "release-manifest.json";
     AbsolutePath BuildOutputsMarkerFile => ArtifactsDirectory / ".build-outputs" / "build-outputs.json";

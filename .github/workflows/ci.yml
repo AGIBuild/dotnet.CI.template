@@ -244,6 +244,16 @@ jobs:
         shell: pwsh
         run: ./build.ps1 Publish --Runtime "${{ matrix.runtime }}"
 
+      - name: Package app
+        if: needs.resolve-version.outputs.is_release == 'true' && matrix.publish && runner.os != 'Windows'
+        shell: bash
+        run: ./build.sh PackageApp --Runtime "${{ matrix.runtime }}" --skip Publish
+
+      - name: Package app (Windows)
+        if: needs.resolve-version.outputs.is_release == 'true' && matrix.publish && runner.os == 'Windows'
+        shell: pwsh
+        run: ./build.ps1 PackageApp --Runtime "${{ matrix.runtime }}" --skip Publish
+
       - name: Upload test results
         if: always()
         uses: actions/upload-artifact@v7
@@ -260,21 +270,26 @@ jobs:
           path: artifacts/packages/**
           if-no-files-found: error
 
-      - name: Upload app artifacts
+      - name: Upload installer artifacts
         if: needs.resolve-version.outputs.is_release == 'true' && matrix.publish
         uses: actions/upload-artifact@v7
         with:
-          name: app-${{ matrix.runtime }}
-          path: artifacts/publish/${{ matrix.runtime }}/**
+          name: installer-${{ matrix.runtime }}
+          path: artifacts/installers/**
           if-no-files-found: error
 
-  release-packages:
-    name: Release Packages
+  release:
+    name: Release
     needs: [resolve-version, build-and-test]
     if: needs.resolve-version.outputs.is_release == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 15
     environment: release
+    permissions:
+      contents: write
+    concurrency:
+      group: release-tag-${{ needs.resolve-version.outputs.tag }}
+      cancel-in-progress: false
     env:
       HAS_NUGET_KEY: ${{ secrets.NUGET_API_KEY != '' }}
 
@@ -282,7 +297,7 @@ jobs:
       - uses: actions/checkout@v6
         with:
           ref: ${{ needs.resolve-version.outputs.sha }}
-          sparse-checkout: global.json
+          fetch-depth: 0
 
       - uses: actions/setup-dotnet@v5
         with:
@@ -294,11 +309,17 @@ jobs:
           name: packages
           path: packages
 
+      - name: Download installers
+        uses: actions/download-artifact@v8
+        with:
+          path: installers
+          pattern: installer-*
+          merge-multiple: true
+
       - name: Verify release manifest
         shell: bash
         run: |
           set -euo pipefail
-          EXPECTED_VERSION="${{ needs.resolve-version.outputs.full_version }}"
           MANIFEST="packages/release-manifest.json"
 
           if [ ! -f "$MANIFEST" ]; then
@@ -365,9 +386,54 @@ jobs:
         shell: bash
         run: echo "::warning::NUGET_API_KEY not configured. Skipping NuGet push."
 
+      - name: Create and push tag
+        shell: bash
+        run: |
+          TAG="${{ needs.resolve-version.outputs.tag }}"
+          SHA="${{ needs.resolve-version.outputs.sha }}"
+
+          git fetch --tags --force
+          if git rev-parse "$TAG" >/dev/null 2>&1; then
+            echo "::error::Tag $TAG already exists locally"
+            exit 1
+          fi
+          if git ls-remote --tags origin "refs/tags/$TAG" | grep -q "$TAG"; then
+            echo "::error::Tag $TAG already exists on remote"
+            exit 1
+          fi
+
+          git tag "$TAG" "$SHA"
+          git push origin "$TAG"
+          echo "Created and pushed tag $TAG at $SHA"
+
+      - name: Create GitHub Release
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          TAG="${{ needs.resolve-version.outputs.tag }}"
+          RELEASE_NAME="dotnet.CI.template $TAG"
+
+          shopt -s nullglob
+          RELEASE_FILES=(installers/*.zip)
+          if [ ${#RELEASE_FILES[@]} -eq 0 ]; then
+            echo "::error::No installer zip files found"
+            exit 1
+          fi
+
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            echo "::error::Release already exists for tag $TAG"
+            exit 1
+          fi
+
+          gh release create "$TAG" "${RELEASE_FILES[@]}" \
+            --title "$RELEASE_NAME" \
+            --generate-notes
+          echo "Created release $TAG with ${#RELEASE_FILES[@]} assets"
+
   deploy-docs:
     name: Deploy Documentation
-    needs: [resolve-version, release-packages]
+    needs: [resolve-version, release]
     if: needs.resolve-version.outputs.is_release == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 15
@@ -421,102 +487,3 @@ jobs:
         if: steps.check-docs.outputs.has_docs == 'true'
         id: deployment
         uses: actions/deploy-pages@v4
-
-  create-release:
-    name: Create Release
-    needs: [resolve-version, build-and-test, release-packages, deploy-docs]
-    if: |
-      always() &&
-      needs.release-packages.result == 'success' &&
-      (needs.deploy-docs.result == 'success' || needs.deploy-docs.result == 'skipped')
-    runs-on: ubuntu-latest
-    timeout-minutes: 15
-    permissions:
-      contents: write
-    concurrency:
-      group: release-tag-${{ needs.resolve-version.outputs.tag }}
-      cancel-in-progress: false
-
-    steps:
-      - uses: actions/checkout@v6
-        with:
-          ref: ${{ needs.resolve-version.outputs.sha }}
-          fetch-depth: 0
-
-      - name: Create and push tag
-        shell: bash
-        run: |
-          TAG="${{ needs.resolve-version.outputs.tag }}"
-          SHA="${{ needs.resolve-version.outputs.sha }}"
-
-          git fetch --tags --force
-          if git rev-parse "$TAG" >/dev/null 2>&1; then
-            echo "::error::Tag $TAG already exists locally"
-            exit 1
-          fi
-          if git ls-remote --tags origin "refs/tags/$TAG" | grep -q "$TAG"; then
-            echo "::error::Tag $TAG already exists on remote"
-            exit 1
-          fi
-
-          git tag "$TAG" "$SHA"
-          git push origin "$TAG"
-          echo "Created and pushed tag $TAG at $SHA"
-
-      - name: Download packages
-        uses: actions/download-artifact@v8
-        with:
-          name: packages
-          path: release-assets/packages
-
-      - name: Download app artifacts
-        uses: actions/download-artifact@v8
-        with:
-          path: release-assets/apps
-          pattern: app-*
-
-      - name: Prepare release assets
-        shell: bash
-        run: |
-          shopt -s nullglob
-          mkdir -p release-assets/final
-
-          for f in release-assets/packages/*.nupkg release-assets/packages/*.snupkg; do
-            [ -f "$f" ] && cp "$f" release-assets/final/
-          done
-
-          for dir in release-assets/apps/app-*/; do
-            if [ -d "$dir" ]; then
-              runtime="$(basename "$dir")"
-              (cd "$dir" && zip -r "../../final/${runtime}.zip" .)
-              echo "Zipped $runtime"
-            fi
-          done
-
-          echo "Release assets:"
-          ls -la release-assets/final/
-
-      - name: Create GitHub Release
-        shell: bash
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          TAG="${{ needs.resolve-version.outputs.tag }}"
-          RELEASE_NAME="dotnet.CI.template $TAG"
-
-          shopt -s nullglob
-          RELEASE_FILES=(release-assets/final/*)
-          if [ ${#RELEASE_FILES[@]} -eq 0 ]; then
-            echo "::error::No release files found"
-            exit 1
-          fi
-
-          if gh release view "$TAG" >/dev/null 2>&1; then
-            echo "::error::Release already exists for tag $TAG"
-            exit 1
-          fi
-
-          gh release create "$TAG" "${RELEASE_FILES[@]}" \
-            --title "$RELEASE_NAME" \
-            --generate-notes
-          echo "Created release $TAG with ${#RELEASE_FILES[@]} assets"
