@@ -10,9 +10,8 @@ push / PR to main
   └─ CI and Release
        ├─ resolve-version
        ├─ build-and-test (matrix: PR=linux, main=全平台)
-       ├─ release-packages (需 approval，推 NuGet)
-       ├─ deploy-docs (GitHub Pages)
-       └─ create-release (tag + GitHub Release)
+       ├─ release (需 approval，NuGet 推送 + tag + GitHub Release)
+       └─ deploy-docs (GitHub Pages)
 
 push / PR to main + weekly
   └─ CodeQL (security scan)
@@ -27,8 +26,8 @@ push / PR to main + weekly
 ### `CI and Release`
 - 触发：`push` 到 `main`、对 `main` 的 `pull_request`、手动 `workflow_dispatch`
 - PR 行为：只在 ubuntu 上运行 Build + Test（带 prerelease suffix）
-- main push 行为：全平台矩阵 Build + Test + Pack + Publish → approval → NuGet 推送 → 文档部署 → GitHub Release
-- 产物：测试结果、NuGet 包（含 release manifest）、各平台安装包
+- main push 行为：全平台矩阵 Build + Test + Pack + Publish + PackageApp → approval → NuGet 推送 + tag + GitHub Release → 文档部署
+- 产物：测试结果、NuGet 包（含 release manifest）、各平台安装包 zip
 
 ### `CodeQL`
 - 触发：`push`/`pull_request` 到 `main`，以及每周定时任务
@@ -49,22 +48,19 @@ push / PR to main + weekly
 - PR：带 `--VersionSuffix "ci.<run_number>"`
 - main push：无 suffix（固化 release 版本）
 - linux runner 额外执行 Pack + GenerateReleaseManifest（生成 SHA256 manifest）
-- 各平台执行 Publish 生成安装包
+- 各平台执行 Publish + PackageApp，生成安装包 zip（`app-{runtime}.zip`）
 
-### `release-packages`
+### `release`
 - 需要 `release` environment approval（唯一的审批入口）
 - 下载 NuGet 包，验证 release manifest SHA256 完整性
-- 推送 NuGet 包到 nuget.org
+- 推送 NuGet 包到 nuget.org（如未配置 `NUGET_API_KEY` 则跳过）
+- 创建 git tag 并推送到 remote
+- 创建 GitHub Release，附带各平台安装包 zip（不含 NuGet 包）
 
 ### `deploy-docs`
-- 依赖 `release-packages` 成功后自动运行
+- 依赖 `release` 成功后自动运行
 - 如果存在 `docs/docfx.json`，构建 DocFX 并部署到 GitHub Pages
 - 如果不存在则跳过
-
-### `create-release`
-- 依赖 `release-packages` 和 `deploy-docs` 完成
-- 创建 git tag 并推送到 remote
-- 创建 GitHub Release，附带所有产物（NuGet 包 + 安装包 zip）
 
 ---
 
@@ -77,8 +73,9 @@ push / PR to main + weekly
    审批 `release` environment。
 
 3. 去 Releases 页面确认：
-   - 已创建 tag（如 `v0.1.0`）
-   - 已生成 `.nupkg` / `.snupkg` + 安装包 zip
+   - 已创建 tag（如 `v0.2.0.42`）
+   - GitHub Release 中已生成各平台安装包 zip
+   - NuGet.org 上有对应版本的包（如已配置 `NUGET_API_KEY`）
 
 ---
 
@@ -108,7 +105,7 @@ push / PR to main + weekly
 通过 PR 修改 `VersionPrefix`（例如 `0.1.0 -> 0.2.0`），合并到 `main` 后 CI 自动基于新版本构建。
 
 ### Q3: 同一版本能否重新发布？
-不能。如果 tag 已存在，`create-release` 会直接失败。需要先提升 `VersionPrefix`。
+每次 main push 都会生成唯一的四段式版本号（如 `0.2.0.42`），因此同一 push 不会冲突。如果需要发新版本（如 `0.3.0`），通过 PR 修改 `VersionPrefix`。
 
 ### Q4: Release manifest 是什么？
 `release-manifest.json` 记录每个 NuGet 包的 SHA256 hash 和版本信息。发布阶段会验证包文件与 manifest 一致，防止产物在传递过程中被篡改或损坏。
