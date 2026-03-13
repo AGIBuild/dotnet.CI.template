@@ -7,6 +7,13 @@ on:
     branches: [main]
   workflow_dispatch:
 
+run-name: >-
+  ${{
+    github.event_name == 'pull_request'
+      && format('PR #{0} · {1}', github.event.pull_request.number, github.head_ref)
+      || format('{0} #{1}', github.ref_name, github.run_number)
+  }}
+
 permissions:
   contents: read
 
@@ -26,9 +33,6 @@ jobs:
     name: Resolve Version
     runs-on: ubuntu-latest
     timeout-minutes: 5
-    permissions:
-      actions: write
-      contents: read
     outputs:
       version: ${{ steps.resolve.outputs.version }}
       tag: ${{ steps.resolve.outputs.tag }}
@@ -74,8 +78,6 @@ jobs:
 
       - name: Version summary
         shell: bash
-        env:
-          GH_TOKEN: ${{ github.token }}
         run: |
           VERSION="${{ steps.resolve.outputs.version }}"
           IS_RELEASE="${{ steps.resolve.outputs.is_release }}"
@@ -101,15 +103,6 @@ jobs:
             PREV_TAG="(none)"
             BUMP="INITIAL"
           fi
-
-          if [ "$IS_RELEASE" = "true" ]; then
-            RUN_NAME="v${VERSION} (${BUMP}) #${{ github.run_number }}"
-          else
-            RUN_NAME="v${VERSION}-ci.${{ github.run_number }} (${BUMP}) PR"
-          fi
-
-          gh api -X PATCH "/repos/${{ github.repository }}/actions/runs/${{ github.run_id }}" \
-            -f "name=$RUN_NAME" || echo "::warning::Failed to update run name"
 
           MODE=$( [ "$IS_RELEASE" = "true" ] && echo "Release" || echo "CI" )
 
