@@ -193,6 +193,8 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     environment: release
+    env:
+      HAS_NUGET_KEY: ${{ secrets.NUGET_API_KEY != '' }}
 
     steps:
       - uses: actions/checkout@v6
@@ -255,7 +257,10 @@ jobs:
           PY
 
       - name: Push to NuGet.org
+        if: env.HAS_NUGET_KEY == 'true'
         shell: bash
+        env:
+          NUGET_API_KEY: ${{ secrets.NUGET_API_KEY }}
         run: |
           shopt -s nullglob
           PACKAGES=(packages/*.nupkg)
@@ -267,11 +272,16 @@ jobs:
           for pkg in "${PACKAGES[@]}"; do
             echo "Pushing $pkg"
             dotnet nuget push "$pkg" \
-              --api-key "${{ secrets.NUGET_API_KEY }}" \
+              --api-key "$NUGET_API_KEY" \
               --source https://api.nuget.org/v3/index.json \
               --skip-duplicate
           done
           echo "All packages pushed to NuGet.org"
+
+      - name: NuGet push skipped
+        if: env.HAS_NUGET_KEY != 'true'
+        shell: bash
+        run: echo "::warning::NUGET_API_KEY not configured. Skipping NuGet push."
 
   deploy-docs:
     name: Deploy Documentation
