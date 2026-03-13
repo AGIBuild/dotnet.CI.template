@@ -462,34 +462,48 @@ jobs:
       - name: Check for DocFX configuration
         id: check-docs
         shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
+          HAS_DOCS="false"
           if [ -f "docs/docfx.json" ]; then
-            echo "has_docs=true" >> "$GITHUB_OUTPUT"
+            HAS_DOCS="true"
           else
             echo "::notice::No docs/docfx.json found. Skipping documentation deployment."
-            echo "has_docs=false" >> "$GITHUB_OUTPUT"
+          fi
+
+          HAS_PAGES="$(gh api repos/${{ github.repository }} --jq '.has_pages' 2>/dev/null || echo "false")"
+          if [ "$HAS_PAGES" != "true" ]; then
+            echo "::notice::GitHub Pages is not enabled. Enable Settings > Pages > Source: GitHub Actions."
+            HAS_PAGES="false"
+          fi
+
+          if [ "$HAS_DOCS" = "true" ] && [ "$HAS_PAGES" = "true" ]; then
+            echo "should_deploy=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "should_deploy=false" >> "$GITHUB_OUTPUT"
           fi
 
       - uses: actions/setup-dotnet@v5
-        if: steps.check-docs.outputs.has_docs == 'true'
+        if: steps.check-docs.outputs.should_deploy == 'true'
         with:
           global-json-file: global.json
 
       - name: Restore .NET tools
-        if: steps.check-docs.outputs.has_docs == 'true'
+        if: steps.check-docs.outputs.should_deploy == 'true'
         run: dotnet tool restore
 
       - name: Build documentation
-        if: steps.check-docs.outputs.has_docs == 'true'
+        if: steps.check-docs.outputs.should_deploy == 'true'
         run: dotnet docfx docs/docfx.json
 
       - name: Upload pages artifact
-        if: steps.check-docs.outputs.has_docs == 'true'
+        if: steps.check-docs.outputs.should_deploy == 'true'
         uses: actions/upload-pages-artifact@v3
         with:
           path: docs/_site
 
       - name: Deploy to GitHub Pages
-        if: steps.check-docs.outputs.has_docs == 'true'
+        if: steps.check-docs.outputs.should_deploy == 'true'
         id: deployment
         uses: actions/deploy-pages@v4

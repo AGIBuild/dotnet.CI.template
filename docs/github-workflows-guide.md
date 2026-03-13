@@ -60,7 +60,7 @@ push / PR to main + weekly
 ### `deploy-docs`
 - 依赖 `release` 成功后自动运行
 - 如果存在 `docs/docfx.json`，构建 DocFX 并部署到 GitHub Pages
-- 如果不存在则跳过
+- 如果未启用 GitHub Pages 或缺少 DocFX 配置，则自动跳过并给出 notice，不会导致整条流水线失败
 
 ---
 

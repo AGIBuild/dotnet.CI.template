@@ -154,6 +154,7 @@ To enable automatic documentation deployment to GitHub Pages:
 4. Expected docs URL: `https://<owner>.github.io/<repo>/` (for this repo: `https://agibuild.github.io/dotnet.CI.template/`)
 
 The `Resolve Version` job summary always shows this expected docs URL, even when docs deployment is skipped.
+If Pages is not enabled, `deploy-docs` is skipped with a notice instead of failing the whole workflow.
 
 ---
 
