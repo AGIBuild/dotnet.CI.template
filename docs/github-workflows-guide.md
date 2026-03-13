@@ -87,7 +87,7 @@ push / PR to main + weekly
 - 可选：配置 wait timer、deployment branches（限制为 `main`）
 
 ### `github-pages` environment（可选）
-如果使用 DocFX 文档部署：
+仓库已内置 `docs/docfx.json`，如需启用文档发布：
 - Settings → Pages → Source 选择 GitHub Actions
 - environment `github-pages` 会自动创建
 - 预期文档地址：`https://<owner>.github.io/<repo>/`（本仓库为 `https://agibuild.github.io/dotnet.CI.template/`）

@@ -1,0 +1,34 @@
+{
+  "metadata": [],
+  "build": {
+    "content": [
+      {
+        "files": [
+          "index.md",
+          "quick-start-release.md",
+          "github-workflows-guide.md",
+          "toc.yml"
+        ]
+      }
+    ],
+    "resource": [
+      {
+        "files": [
+          "images/**"
+        ]
+      }
+    ],
+    "output": "_site",
+    "template": [
+      "default"
+    ],
+    "globalMetadata": {
+      "_appTitle": "dotnet.CI.template Docs",
+      "_appFooter": "dotnet.CI.template",
+      "_enableSearch": true
+    },
+    "sitemap": {
+      "baseUrl": "https://agibuild.github.io/dotnet.CI.template/"
+    }
+  }
+}
