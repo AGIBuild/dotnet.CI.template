@@ -22,7 +22,13 @@ var quotient = calculator.Divide(10, 2); // 5
 ## 作为模板使用
 
 1. 在 [GitHub 仓库](https://github.com/AGIBuild/dotnet.CI.template)点击 **Use this template**。
-2. 重命名解决方案、项目和命名空间以匹配你的产品。
+2. 运行初始化向导，自动重命名解决方案、项目和命名空间：
+
+```bash
+./init.sh              # Linux / macOS
+./init.ps1             # Windows (PowerShell)
+```
+
 3. 用你自己的代码替换示例 `Calculator` 类。
 4. 更新 `Directory.Build.props` 中的包元数据。
 5. 在 GitHub Settings 中配置 `release` environment（参见[发版指南](../contributing/releasing.md)）。

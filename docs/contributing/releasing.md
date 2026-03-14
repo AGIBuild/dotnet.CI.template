@@ -9,7 +9,7 @@ Goal: **Complete a standard Release quickly**.
 
 - You have write access to the repository
 - `main` branch is up to date and CI is passing
-- If publishing to NuGet, the `NUGET_API_KEY` secret is configured
+- If `ENABLE_NUGET` is `true`: the `NUGET_API_KEY` secret (or OIDC trust policy) is configured
 - A `release` environment is created in GitHub (Settings → Environments) with required reviewers
 
 ---
@@ -45,8 +45,8 @@ After a successful run, you should see:
 
 - A new tag (e.g., `v0.2.0`)
 - A new GitHub Release
-- Release assets including platform installer zips (`app-linux-x64.zip`, `app-win-x64.zip`, etc.) and the SBOM file
-- A corresponding package version on NuGet.org (if `NUGET_API_KEY` is configured)
+- Release assets: installer zips (if `ENABLE_INSTALLERS` is `true`) and the SBOM file
+- A corresponding package version on NuGet.org (if `ENABLE_NUGET` is `true`)
 - If Pages is enabled: documentation deployed automatically
 
 ---
@@ -70,7 +70,7 @@ After committing the change to `main`, CI automatically builds and publishes wit
 - `Tag already exists`: This version was already released; bump `VersionPrefix` and retry
 - `No .nupkg files found`: No artifacts from the packaging stage; check Build/Test/Pack logs
 - `Hash mismatch`: Build artifacts were corrupted during transfer; re-trigger the workflow
-- NuGet push failed: Verify that the `NUGET_API_KEY` secret is configured
+- NuGet push failed: Verify that `ENABLE_NUGET` is `true` and the credential (API key or OIDC) is configured correctly
 
 ---
 

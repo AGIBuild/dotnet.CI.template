@@ -54,12 +54,12 @@ push / PR to main + weekly
 
 ### `release`
 - 需要 `release` environment approval（唯一的审批入口）
-- 下载 NuGet 包，验证 release manifest SHA256 完整性
-- 推送 NuGet 包到 nuget.org（如未配置 `NUGET_API_KEY` 则跳过）
+- 若 `ENABLE_NUGET` 为 `true`：下载 NuGet 包，验证 release manifest SHA256 完整性，通过 API key 或 OIDC 推送到 nuget.org（由 `NUGET_USE_OIDC` 控制）
+- 若 `ENABLE_INSTALLERS` 为 `true`：下载各平台安装包 zip
 - 生成 SBOM（SPDX 格式，`anchore/sbom-action`）
-- 创建 Artifact Attestation（`actions/attest-build-provenance`，为 NuGet 包和安装包签署构建来源证明）
+- 创建 Artifact Attestation（为所有可用产物签署构建来源证明）
 - 创建 git tag 并推送到 remote
-- 创建 GitHub Release，附带各平台安装包 zip + SBOM 文件
+- 创建 GitHub Release，附带可用产物（安装包 zip 和/或 SBOM 文件）
 
 ### `build-docs`
 - 每次 push/PR 均运行，与 `build-and-test` 并行（前置检查）
@@ -87,8 +87,24 @@ push / PR to main + weekly
 - 预期文档地址：`https://<owner>.github.io/<repo>/`
 - `Resolve Version` 的 Summary 会固定显示该地址，便于快速访问
 
+### 功能开关
+
+所有开关位于 `ci.yml` 顶层 `env:` 块中，将值改为 `'true'` 或 `'false'` 即可启用/禁用对应功能。
+
+| 开关 | 默认值 | 作用 |
+|------|--------|------|
+| `ENABLE_NUGET` | `true` | NuGet 包生成（Pack）和发布到 nuget.org |
+| `NUGET_USE_OIDC` | `false` | `false` = 使用 `NUGET_API_KEY`；`true` = 使用 OIDC Trusted Publishing |
+| `ENABLE_INSTALLERS` | `true` | 平台安装包 zip（Publish + PackageApp） |
+| `ENABLE_ANDROID` | `false` | 构建矩阵中包含 Android workload |
+| `ENABLE_IOS` | `false` | 构建矩阵中包含 iOS workload |
+
+当 `ENABLE_NUGET` 为 `true` 时：
+- 若 `NUGET_USE_OIDC` 为 `false`，必须配置 `NUGET_API_KEY` secret，否则 release 会明确报错。
+- 若 `NUGET_USE_OIDC` 为 `true`，需要在 nuget.org 上为该仓库配置 Trusted Publishing 信任策略。
+
 ### Secrets
-- `NUGET_API_KEY`：NuGet.org API key（在 repo 或 `release` environment 级别配置）
+- `NUGET_API_KEY`：NuGet.org API key（当 `ENABLE_NUGET` 为 `true` 且 `NUGET_USE_OIDC` 为 `false` 时必须配置）
 
 ---
 

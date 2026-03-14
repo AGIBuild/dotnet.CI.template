@@ -54,12 +54,12 @@ For a quick release walkthrough, see: [Releasing](releasing.md).
 
 ### `release`
 - Requires `release` environment approval (single approval gate)
-- Downloads NuGet packages, verifies release manifest SHA256 integrity
-- Pushes NuGet packages to nuget.org (skipped if `NUGET_API_KEY` is not configured)
+- If `ENABLE_NUGET` is `true`: downloads NuGet packages, verifies release manifest SHA256 integrity, pushes to nuget.org via API key or OIDC (controlled by `NUGET_USE_OIDC`)
+- If `ENABLE_INSTALLERS` is `true`: downloads platform installer zips
 - Generates SBOM (SPDX format, `anchore/sbom-action`)
-- Creates Artifact Attestation (`actions/attest-build-provenance`, signs build provenance for NuGet packages and installer zips)
+- Creates Artifact Attestation for all available artifacts (NuGet packages and/or installer zips)
 - Creates a git tag and pushes to remote
-- Creates a GitHub Release with platform installer zips + SBOM file attached
+- Creates a GitHub Release with available assets (installer zips and/or SBOM)
 
 ### `build-docs`
 - Runs on every push/PR, in parallel with `build-and-test` (pre-check)
@@ -87,8 +87,24 @@ The repository includes built-in VitePress documentation support. To enable docu
 - Expected documentation URL: `https://<owner>.github.io/<repo>/`
 - The `Resolve Version` summary displays this URL for quick access
 
+### Feature Switches
+
+All switches live in `ci.yml` under the top-level `env:` block. Change their values to `'true'` or `'false'` to enable or disable pipeline features.
+
+| Switch | Default | Purpose |
+|--------|---------|---------|
+| `ENABLE_NUGET` | `true` | NuGet package generation (Pack) and publishing to nuget.org |
+| `NUGET_USE_OIDC` | `false` | `false` = push via `NUGET_API_KEY` secret; `true` = push via OIDC Trusted Publishing |
+| `ENABLE_INSTALLERS` | `true` | Platform installer zips (Publish + PackageApp) |
+| `ENABLE_ANDROID` | `false` | Include Android workload in the build matrix |
+| `ENABLE_IOS` | `false` | Include iOS workload in the build matrix |
+
+When `ENABLE_NUGET` is `true`:
+- If `NUGET_USE_OIDC` is `false`, the `NUGET_API_KEY` secret must be configured; otherwise the release fails with an explicit error.
+- If `NUGET_USE_OIDC` is `true`, a Trusted Publishing trust policy must be configured on nuget.org for the repository.
+
 ### Secrets
-- `NUGET_API_KEY`: NuGet.org API key (configure at the repo or `release` environment level)
+- `NUGET_API_KEY`: NuGet.org API key (required when `ENABLE_NUGET` is `true` and `NUGET_USE_OIDC` is `false`)
 
 ---
 

@@ -9,7 +9,7 @@
 
 - 你有仓库写权限
 - `main` 分支是最新、CI 通过
-- 如果要推 NuGet，仓库已配置 `NUGET_API_KEY` secret
+- 如果 `ENABLE_NUGET` 为 `true`：已配置 `NUGET_API_KEY` secret（或 OIDC 信任策略）
 - GitHub 仓库已创建 `release` environment（Settings → Environments），并配置 required reviewers
 
 ---
@@ -45,8 +45,8 @@ resolve-version─┤                                                   ├→ d
 
 - 新 tag（例如 `v0.2.0`）
 - 一个新的 GitHub Release
-- Release 附件里有各平台安装包 zip（`app-linux-x64.zip`、`app-win-x64.zip` 等）和 SBOM 文件
-- NuGet.org 上有对应版本的包（如已配置 `NUGET_API_KEY`）
+- Release 附件：安装包 zip（若 `ENABLE_INSTALLERS` 为 `true`）和 SBOM 文件
+- NuGet.org 上有对应版本的包（若 `ENABLE_NUGET` 为 `true`）
 - 如果已启用 Pages：文档自动部署
 
 ---
@@ -70,7 +70,7 @@ resolve-version─┤                                                   ├→ d
 - `Tag already exists`: 版本已发过，先提升 `VersionPrefix` 再重试
 - `No .nupkg files found`: 打包阶段没有产物，先看 Build/Test/Pack 日志
 - `Hash mismatch`: 构建产物在传递过程中损坏，重新触发 workflow
-- NuGet 推送失败: 确认 `NUGET_API_KEY` secret 已配置
+- NuGet 推送失败: 确认 `ENABLE_NUGET` 为 `true` 且凭据（API key 或 OIDC）已正确配置
 
 ---
 

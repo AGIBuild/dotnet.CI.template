@@ -31,6 +31,20 @@ Common targets:
 | `./build.sh Format` | Verify code formatting |
 | `./build.sh Pack` | Create NuGet packages |
 | `./build.sh ShowVersion` | Display current version |
+| `./build.sh Benchmark` | Run BenchmarkDotNet benchmarks (requires `benchmarks/` projects) |
+| `./build.sh MutationTest` | Run Stryker.NET mutation testing |
+
+## CI Feature Switches
+
+The CI pipeline behavior is controlled by boolean switches in `.github/workflows/ci.yml` under `env:`:
+
+| Switch | Default | Purpose |
+|--------|---------|---------|
+| `ENABLE_NUGET` | `true` | NuGet package generation and publishing |
+| `NUGET_USE_OIDC` | `false` | `false` = API key, `true` = Trusted Publishing (OIDC) |
+| `ENABLE_INSTALLERS` | `true` | Platform installer zips (Publish + PackageApp) |
+| `ENABLE_ANDROID` | `false` | Android workload in build matrix |
+| `ENABLE_IOS` | `false` | iOS workload in build matrix |
 
 ## Development Workflow
 

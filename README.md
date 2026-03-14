@@ -76,15 +76,32 @@ Product Code (src/) + Tests (tests/)
 
 ## Quick Start
 
-1. Create your repository from this template:  
+1. Create your repository from this template:
    [Use this template](https://github.com/AGIBuild/dotnet.CI.template/generate)
-2. Configure `release` environment in GitHub (`Settings` -> `Environments`)
-3. Optional: add `NUGET_API_KEY`
-4. Push to `main` and approve release deployment in Actions
+2. Run the init wizard to rename everything:
 
 ```bash
-git push origin main
+./init.sh              # interactive (Linux/macOS)
+./init.ps1             # interactive (Windows)
 ```
+
+3. Configure `release` environment in GitHub (`Settings` -> `Environments`)
+4. Add `NUGET_API_KEY` secret (if `ENABLE_NUGET` is `true`)
+5. Review [Feature Switches](#feature-switches), then push to `main`
+
+## Feature Switches
+
+All switches live in `.github/workflows/ci.yml` under the top-level `env:` block.
+
+| Switch | Default | Purpose |
+|---|---|---|
+| `ENABLE_NUGET` | `true` | NuGet package generation and publishing |
+| `NUGET_USE_OIDC` | `false` | `false` = API key, `true` = Trusted Publishing (OIDC) |
+| `ENABLE_INSTALLERS` | `true` | Platform installer zips (Publish + PackageApp) |
+| `ENABLE_ANDROID` | `false` | Android workload in build matrix |
+| `ENABLE_IOS` | `false` | iOS workload in build matrix |
+
+When `ENABLE_NUGET` is `true`, either `NUGET_API_KEY` secret or OIDC trust policy must be configured; otherwise the release will fail with a clear error.
 
 ## Key Commands
 
@@ -94,6 +111,8 @@ git push origin main
 ./build.sh UpdateVersion --VersionPrefix 1.0.0    # set exact version
 ./build.sh Test                                   # build + test
 ./build.sh Pack                                   # build + test + pack
+./build.sh Benchmark                              # run benchmarks (benchmarks/ projects)
+./build.sh MutationTest                           # run Stryker.NET mutation testing
 ```
 
 ## Documentation
