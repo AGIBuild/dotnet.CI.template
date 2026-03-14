@@ -35,7 +35,9 @@
         "Restore",
         "ShowVersion",
         "Test",
-        "UpdateVersion"
+        "UpdateVersion",
+        "ValidatePackageVersions",
+        "ValidateReleaseManifest"
       ]
     },
     "Verbosity": {
@@ -109,6 +111,11 @@
   "allOf": [
     {
       "properties": {
+        "BranchCoverageThreshold": {
+          "type": "integer",
+          "description": "Minimum branch coverage percentage (0-100). CoverageReport fails if below this threshold",
+          "format": "int32"
+        },
         "Configuration": {
           "type": "string",
           "description": "Configuration to build - Default is 'Debug' (local) or 'Release' (server)",
@@ -116,6 +123,11 @@
             "Debug",
             "Release"
           ]
+        },
+        "CoverageThreshold": {
+          "type": "integer",
+          "description": "Minimum line coverage percentage (0-100). CoverageReport fails if below this threshold",
+          "format": "int32"
         },
         "Runtime": {
           "type": "string",
