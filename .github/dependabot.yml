@@ -9,6 +9,15 @@ updates:
         patterns: ["*"]
     open-pull-requests-limit: 10
 
+  - package-ecosystem: npm
+    directory: "/docs"
+    schedule:
+      interval: weekly
+    groups:
+      docs-deps:
+        patterns: ["*"]
+    open-pull-requests-limit: 5
+
   - package-ecosystem: nuget
     directory: "/"
     schedule:

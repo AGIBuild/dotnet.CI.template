@@ -1,158 +1,158 @@
-# GitHub Workflows 使用指南
+# GitHub Workflows Guide
 
-这套 workflow 的目标很直接：  
-**提交就有质量反馈，发版不靠手工，产物可追溯，可重复。**
+The goal of these workflows is straightforward:
+**Every commit gets quality feedback, releases are automated, artifacts are traceable and reproducible.**
 
-如果你刚从这个模板创建仓库，可以把它当成一条标准流水线：
+If you just created a repository from this template, think of it as a standard pipeline:
 
 ```text
 push / PR to main
   └─ CI and Release
        ├─ resolve-version
-       ├─ build-and-test (matrix: PR=linux, main=全平台)
-       ├─ release (需 approval，NuGet 推送 + tag + GitHub Release)
+       ├─ build-and-test (matrix: PR=linux, main=all platforms)
+       ├─ release (requires approval, NuGet push + tag + GitHub Release)
        └─ deploy-docs (GitHub Pages)
 
 push / PR to main + weekly
   └─ CodeQL (security scan)
 ```
 
-快速发版可先看：`docs/quick-start-release.md`。
+For a quick release walkthrough, see: [Quick Start Release](quick-start-release.md).
 
 ---
 
-## 1) 先认识 2 条 workflow
+## 1) The Two Workflows
 
 ### `CI and Release`
-- 触发：`push` 到 `main`、对 `main` 的 `pull_request`、手动 `workflow_dispatch`
-- 并发：**默认并行**，多次 push 可同时运行（`run_number` 天然唯一，版本不冲突）
-  - 如需串行：Settings → Variables → 设置 `CI_SERIAL=true`（按分支排队）
-  - 如需取消旧 run：设置 `CI_CANCEL_IN_PROGRESS=true`
-- PR 行为：在 ubuntu 上运行 Format Check + Build + Test + Coverage Report（带 prerelease suffix）
-- main push 行为：全平台矩阵 Build + Test + Pack + Publish + PackageApp → approval → NuGet 推送 + SBOM + Attestation + tag + GitHub Release → 文档部署
-- 产物：测试结果（含 PR 内注解）、覆盖率报告、NuGet 包（含 release manifest）、各平台安装包 zip、SBOM
+- Triggers: `push` to `main`, `pull_request` targeting `main`, manual `workflow_dispatch`
+- Concurrency: **Parallel by default** — multiple pushes can run simultaneously (`run_number` is naturally unique, no version conflicts)
+  - For serial execution: Settings → Variables → set `CI_SERIAL=true` (queues by branch)
+  - To cancel older runs: set `CI_CANCEL_IN_PROGRESS=true`
+- PR behavior: Runs Format Check + Build + Test + Coverage Report on ubuntu (with prerelease suffix)
+- main push behavior: Full-platform matrix Build + Test + Pack + Publish + PackageApp → approval → NuGet push + SBOM + Attestation + tag + GitHub Release → documentation deployment
+- Artifacts: Test results (with PR annotations), coverage reports, NuGet packages (with release manifest), platform installer zips, SBOM
 
 ### `CodeQL`
-- 触发：`push`/`pull_request` 到 `main`，以及每周定时任务
-- 作用：安全分析（C#）
-- 特点：通过 `./build.sh Build` 走统一构建入口
+- Triggers: `push`/`pull_request` to `main`, plus weekly scheduled scan
+- Purpose: Security analysis (C#)
+- Note: Uses `./build.sh Build` for a unified build entry point
 
 ---
 
-## 2) Job 详解
+## 2) Job Details
 
 ### `resolve-version`
-- 从 `Directory.Build.props` 读取 `VersionPrefix`，验证 semver 格式
-- 判断是否为 release（main push = true，PR = false）
-- 计算构建矩阵：PR 仅 ubuntu，main push 包含 win/linux/osx
+- Reads `VersionPrefix` from `Directory.Build.props`, validates semver format
+- Determines if this is a release (main push = true, PR = false)
+- Computes the build matrix: PR uses ubuntu only, main push includes win/linux/osx
 
 ### `build-and-test`
-- 矩阵构建：各平台执行 Build + Test
-- linux runner 额外执行 Format Check（`dotnet format --verify-no-changes`）和 Coverage Report
-- PR：带 `--VersionSuffix "ci.<run_number>"`
-- main push：无 suffix（固化 release 版本）
-- linux runner 额外执行 Pack + GenerateReleaseManifest（生成 SHA256 manifest）
-- 各平台执行 Publish + PackageApp，生成安装包 zip（`app-{runtime}.zip`）
-- 测试结果通过 `dorny/test-reporter` 直接展示在 PR check 中
+- Matrix build: each platform runs Build + Test
+- Linux runner additionally runs Format Check (`dotnet format --verify-no-changes`) and Coverage Report
+- PR: uses `--VersionSuffix "ci.<run_number>"`
+- main push: no suffix (locks the release version)
+- Linux runner additionally runs Pack + GenerateReleaseManifest (generates SHA256 manifest)
+- All platforms run Publish + PackageApp, producing installer zips (`app-{runtime}.zip`)
+- Test results are displayed directly in PR checks via `dorny/test-reporter`
 
 ### `release`
-- 需要 `release` environment approval（唯一的审批入口）
-- 下载 NuGet 包，验证 release manifest SHA256 完整性
-- 推送 NuGet 包到 nuget.org（如未配置 `NUGET_API_KEY` 则跳过）
-- 生成 SBOM（SPDX 格式，`anchore/sbom-action`）
-- 创建 Artifact Attestation（`actions/attest-build-provenance`，为 NuGet 包和安装包签署构建来源证明）
-- 创建 git tag 并推送到 remote
-- 创建 GitHub Release，附带各平台安装包 zip + SBOM 文件
+- Requires `release` environment approval (single approval gate)
+- Downloads NuGet packages, verifies release manifest SHA256 integrity
+- Pushes NuGet packages to nuget.org (skipped if `NUGET_API_KEY` is not configured)
+- Generates SBOM (SPDX format, `anchore/sbom-action`)
+- Creates Artifact Attestation (`actions/attest-build-provenance`, signs build provenance for NuGet packages and installer zips)
+- Creates a git tag and pushes to remote
+- Creates a GitHub Release with platform installer zips + SBOM file attached
 
 ### `deploy-docs`
-- 依赖 `release` 成功后自动运行
-- 如果存在 `docs/docfx.json`，构建 DocFX 并部署到 GitHub Pages
-- 如果未启用 GitHub Pages 或缺少 DocFX 配置，则自动跳过并给出 notice，不会导致整条流水线失败
+- Runs automatically after a successful `release`
+- If `docs/package.json` exists, builds VitePress and deploys to GitHub Pages
+- If GitHub Pages is not enabled or documentation config is missing, it skips gracefully with a notice — it will not fail the pipeline
 
 ---
 
-## 3) 最快上手路径（推荐）
+## 3) Quickest Path to Get Started (Recommended)
 
-1. 提交一次代码到 `main`  
-   观察 `CI and Release` 和 `CodeQL` 是否都绿。
+1. Push a commit to `main`
+   Verify that both `CI and Release` and `CodeQL` are green.
 
-2. 前往 Actions → 找到对应的 workflow run → 点击 **Review deployments**  
-   审批 `release` environment。
+2. Go to Actions → find the workflow run → click **Review deployments**
+   Approve the `release` environment.
 
-3. 去 Releases 页面确认：
-   - 已创建 tag（如 `v0.2.0.42`）
-   - GitHub Release 中已生成各平台安装包 zip
-   - NuGet.org 上有对应版本的包（如已配置 `NUGET_API_KEY`）
+3. Check the Releases page:
+   - A tag was created (e.g., `v0.2.0.42`)
+   - The GitHub Release contains platform installer zips
+   - A corresponding package version exists on NuGet.org (if `NUGET_API_KEY` is configured)
 
 ---
 
-## 4) Environment 配置（必须）
+## 4) Environment Configuration (Required)
 
 ### `release` environment
-在 GitHub 仓库 Settings → Environments → 新建 `release`：
-- **Required reviewers**：至少添加一个 reviewer
-- 可选：配置 wait timer、deployment branches（限制为 `main`）
+In GitHub repository Settings → Environments → create `release`:
+- **Required reviewers**: Add at least one reviewer
+- Optional: Configure wait timer, deployment branches (restrict to `main`)
 
-### `github-pages` environment（可选）
-仓库已内置 `docs/docfx.json`，如需启用文档发布：
-- Settings → Pages → Source 选择 GitHub Actions
-- environment `github-pages` 会自动创建
-- 预期文档地址：`https://<owner>.github.io/<repo>/`（本仓库为 `https://agibuild.github.io/dotnet.CI.template/`）
-- `Resolve Version` 的 Summary 会固定显示该地址，便于快速访问
+### `github-pages` environment (Optional)
+The repository includes built-in VitePress documentation support. To enable documentation publishing:
+- Settings → Pages → Source: select GitHub Actions
+- The `github-pages` environment is created automatically
+- Expected documentation URL: `https://<owner>.github.io/<repo>/` (for this repo: `https://agibuild.github.io/dotnet.CI.template/`)
+- The `Resolve Version` summary displays this URL for quick access
 
 ### Secrets
-- `NUGET_API_KEY`：NuGet.org API key（在 repo 或 `release` environment 级别配置）
+- `NUGET_API_KEY`: NuGet.org API key (configure at the repo or `release` environment level)
 
 ---
 
-## 5) 版本机制 FAQ（重点）
+## 5) Version Mechanism FAQ (Important)
 
-### Q1: 版本从哪里来？
-版本来自 `Directory.Build.props` 的 `VersionPrefix`。CI 不接受手动输入版本参数。
+### Q1: Where does the version come from?
+The version comes from `VersionPrefix` in `Directory.Build.props`. CI does not accept manually input version parameters.
 
-### Q2: 如何升级版本？
+### Q2: How to upgrade the version?
 
 ```bash
-./build.sh ShowVersion                           # 查看当前版本
-./build.sh UpdateVersion                         # patch 递增: 0.2.0 -> 0.2.1
-./build.sh UpdateVersion --VersionPrefix 1.0.0   # 精确设置
+./build.sh ShowVersion                           # Show current version
+./build.sh UpdateVersion                         # Patch increment: 0.2.0 -> 0.2.1
+./build.sh UpdateVersion --VersionPrefix 1.0.0   # Set explicitly
 ```
 
-修改后通过 PR 合并到 `main`，CI 自动基于新版本构建。
+After making changes, merge to `main` via PR. CI automatically builds with the new version.
 
-### Q3: 同一版本能否重新发布？
-每次 main push 都会生成唯一的四段式版本号（如 `0.2.0.42`），因此同一 push 不会冲突。如果需要发新版本（如 `0.3.0`），通过 PR 修改 `VersionPrefix`。
+### Q3: Can the same version be re-published?
+Each main push generates a unique 4-segment version number (e.g., `0.2.0.42`), so the same push won't conflict. To publish a new version (e.g., `0.3.0`), modify `VersionPrefix` via PR.
 
-### Q4: Release manifest 是什么？
-`release-manifest.json` 记录每个 NuGet 包的 SHA256 hash 和版本信息。发布阶段会验证包文件与 manifest 一致，防止产物在传递过程中被篡改或损坏。
+### Q4: What is the release manifest?
+`release-manifest.json` records the SHA256 hash and version information for each NuGet package. During the release phase, package files are verified against the manifest to prevent tampering or corruption during artifact transfer.
 
 ---
 
-## 6) 用命令行触发（可选）
+## 6) CLI Trigger (Optional)
 
 ```bash
-# 手动触发 CI and Release
+# Manually trigger CI and Release
 gh workflow run ci.yml --ref main
 ```
 
 ---
 
-## 7) 常见问题排查（先看这里）
+## 7) Common Troubleshooting (Check Here First)
 
-- tag 已存在：说明同版本已发布；请先通过 PR 提升 `VersionPrefix`
-- NuGet 推送失败：确认仓库是否配置 `NUGET_API_KEY`
-- 包版本校验失败：检查 `Directory.Build.props` 的 `VersionPrefix` 是否正确
-- Hash mismatch：产物在 job 间传递时损坏，重新触发 workflow
-- Windows/Linux 行为不一致：确认 `.gitattributes` 已生效，特别是 `*.sh` 的 LF
-- 文档部署跳过：正常行为，需要先配置 `docs/docfx.json`
+- Tag already exists: This version was already published; bump `VersionPrefix` via PR
+- NuGet push failed: Verify that `NUGET_API_KEY` is configured
+- Package version validation failed: Check that `VersionPrefix` in `Directory.Build.props` is correct
+- Hash mismatch: Artifacts were corrupted during job-to-job transfer; re-trigger the workflow
+- Windows/Linux inconsistency: Ensure `.gitattributes` is in effect, especially `*.sh` with LF
+- Documentation deployment skipped: Expected behavior; configure `docs/package.json` first
 
 ---
 
-## 8) 团队协作建议
+## 8) Team Collaboration Tips
 
-- 日常开发只关注 CI 是否绿灯（Build + Test + CodeQL）
-- 发版通过 environment approval 统一管控，避免手工打包/手工传产物
-- 变更 workflow 逻辑时，优先扩展 NUKE 目标，再回到 workflow 编排
+- During daily development, just watch for green CI (Build + Test + CodeQL)
+- Release management is controlled through environment approval — no manual packaging or artifact transfer
+- When changing workflow logic, extend NUKE targets first, then update workflow orchestration
 
-这样团队会得到一个很稳定的体验：  
-**开发快、反馈快、发布稳。**
+This gives your team a stable experience:
+**Fast development, fast feedback, reliable releases.**

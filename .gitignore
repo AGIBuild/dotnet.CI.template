@@ -33,7 +33,8 @@ bld/
 [Oo]ut/
 [Ll]og/
 [Ll]ogs/
-docs/_site/
+docs/.vitepress/dist/
+docs/.vitepress/cache/
 
 # Build results on 'Bin' directories
 **/[Bb]in/*

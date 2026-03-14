@@ -26,7 +26,7 @@ build-and-test ─── Matrix build (linux / windows / macos)
 release ────────── [requires approval] NuGet push + Git tag + GitHub Release
   |
   v
-deploy-docs ────── DocFX to GitHub Pages (optional)
+deploy-docs ────── VitePress to GitHub Pages (optional, i18n)
 ```
 
 On **pull requests**, only a fast linux build + test runs. On **main**, the full multi-platform pipeline kicks in.
@@ -43,7 +43,7 @@ On **pull requests**, only a fast linux build + test runs. On **main**, the full
 | **Version from Code** | `VersionPrefix` in `Directory.Build.props` is the single source of truth |
 | **Four-Part Release Tags** | `v0.2.0.42` format ensures unique tags per build |
 | **CodeQL Security** | Automated vulnerability scanning on every push and weekly |
-| **Graceful Degradation** | Missing NuGet key? Skipped. No DocFX config? Skipped. Nothing breaks. |
+| **Graceful Degradation** | Missing NuGet key? Skipped. No docs config? Skipped. Nothing breaks. |
 
 ---
 
@@ -85,7 +85,7 @@ The pipeline runs automatically. When `build-and-test` completes, go to **Action
 │   └── _build.csproj
 ├── src/                    # Your application code
 ├── tests/                  # Your test projects
-├── docs/                   # Guides (add docfx.json for auto-deploy)
+├── docs/                   # VitePress documentation (English + 中文)
 ├── Directory.Build.props   # Version + shared build properties
 └── global.json             # SDK version pinning
 ```
@@ -159,9 +159,11 @@ To serialize runs on the same branch (only one active at a time), set repository
 
 ## Documentation Deployment
 
+Documentation is built with [VitePress](https://vitepress.dev/) and supports English (default) and Chinese.
+
 To enable automatic documentation deployment to GitHub Pages:
 
-1. `docs/docfx.json` is included by default in this template
+1. `docs/package.json` is included by default in this template
 2. Enable GitHub Pages in **Settings > Pages > Source: GitHub Actions**
 3. The `deploy-docs` job automatically builds and deploys after each release
 4. Expected docs URL: `https://<owner>.github.io/<repo>/` (for this repo: `https://agibuild.github.io/dotnet.CI.template/`)
