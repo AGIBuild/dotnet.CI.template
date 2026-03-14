@@ -1,14 +1,21 @@
-# dotnet.CI.template 文档首页
-
-这是一个开箱即用的 .NET CI/CD 模板，目标是把构建、测试、发布和文档部署标准化。
-
-## 你可以从这里开始
-
-- [快速发版](quick-start-release.md)
-- [GitHub Workflows 使用指南](github-workflows-guide.md)
-
-## 文档发布说明
-
-- 预期文档地址：`https://agibuild.github.io/dotnet.CI.template/`
-- 工作流会在 `deploy-docs` job 中构建 VitePress 并部署到 GitHub Pages
-- 若缺少 `docs/package.json` 或未启用 Pages，文档部署会被跳过
+---
+layout: home
+hero:
+  name: Dotnet.CI.Template
+  text: 生产就绪的 .NET 项目模板
+  tagline: 内置 CI/CD、版本管理和文档部署的项目起点。
+  actions:
+    - theme: brand
+      text: 快速开始
+      link: /zh-cn/guide/getting-started
+    - theme: alt
+      text: 开发贡献
+      link: /zh-cn/contributing/development
+features:
+  - title: 构建与测试
+    details: 基于 NUKE 的构建系统，支持全平台矩阵（Linux、Windows、macOS）。
+  - title: 自动化发版
+    details: 版本驱动的发布流水线 — NuGet 推送、GitHub Release、SBOM 和构建证明。
+  - title: 文档站点
+    details: 支持多语言的 VitePress 文档站点，自动构建和部署。
+---

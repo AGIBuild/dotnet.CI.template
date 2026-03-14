@@ -1,11 +1,11 @@
-# 快速发版：2 分钟搞定
+# 发版指南
 
-适用对象：第一次接手这个仓库的新同事。
+适用对象：需要发布新版本的团队成员。
 目标：**快速完成一次标准 Release**。
 
 ---
 
-## 0) 前置条件（30 秒）
+## 0) 前置条件
 
 - 你有仓库写权限
 - `main` 分支是最新、CI 通过
@@ -39,7 +39,7 @@ resolve-version─┤                                                   ├→ d
 
 ---
 
-## 3) 成功标准（30 秒检查）
+## 3) 成功标准
 
 运行成功后应看到：
 
@@ -47,7 +47,7 @@ resolve-version─┤                                                   ├→ d
 - 一个新的 GitHub Release
 - Release 附件里有各平台安装包 zip（`app-linux-x64.zip`、`app-win-x64.zip` 等）和 SBOM 文件
 - NuGet.org 上有对应版本的包（如已配置 `NUGET_API_KEY`）
-- 如果已启用 Pages：文档地址 `https://agibuild.github.io/dotnet.CI.template/`
+- 如果已启用 Pages：文档自动部署
 
 ---
 
@@ -83,4 +83,4 @@ gh workflow run ci.yml --ref main
 
 ---
 
-进阶说明见：[Workflows 指南](github-workflows-guide.md)。
+进阶说明见：[CI/CD 流程](ci-cd.md)。

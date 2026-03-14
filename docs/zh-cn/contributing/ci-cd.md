@@ -1,9 +1,7 @@
-# GitHub Workflows 使用指南
+# CI/CD 流程
 
-这套 workflow 的目标很直接：
+这套流水线的目标很直接：
 **提交就有质量反馈，发版不靠手工，产物可追溯，可重复。**
-
-如果你刚从这个模板创建仓库，可以把它当成一条标准流水线：
 
 ```text
 push / PR to main
@@ -18,7 +16,7 @@ push / PR to main + weekly
   └─ CodeQL (security scan)
 ```
 
-快速发版可先看：[快速发版](quick-start-release.md)。
+快速发版可先看：[发版指南](releasing.md)。
 
 ---
 
@@ -75,22 +73,7 @@ push / PR to main + weekly
 
 ---
 
-## 3) 最快上手路径（推荐）
-
-1. 提交一次代码到 `main`
-   观察 `CI and Release` 和 `CodeQL` 是否都绿。
-
-2. 前往 Actions → 找到对应的 workflow run → 点击 **Review deployments**
-   审批 `release` environment。
-
-3. 去 Releases 页面确认：
-   - 已创建 tag（如 `v0.2.0`）
-   - GitHub Release 中已生成各平台安装包 zip
-   - NuGet.org 上有对应版本的包（如已配置 `NUGET_API_KEY`）
-
----
-
-## 4) Environment 配置（必须）
+## 3) Environment 配置（必须）
 
 ### `release` environment
 在 GitHub 仓库 Settings → Environments → 新建 `release`：
@@ -101,7 +84,7 @@ push / PR to main + weekly
 仓库已内置 VitePress 文档支持，如需启用文档发布：
 - Settings → Pages → Source 选择 GitHub Actions
 - environment `github-pages` 会自动创建
-- 预期文档地址：`https://<owner>.github.io/<repo>/`（本仓库为 `https://agibuild.github.io/dotnet.CI.template/`）
+- 预期文档地址：`https://<owner>.github.io/<repo>/`
 - `Resolve Version` 的 Summary 会固定显示该地址，便于快速访问
 
 ### Secrets
@@ -109,7 +92,7 @@ push / PR to main + weekly
 
 ---
 
-## 5) 版本机制 FAQ（重点）
+## 4) 版本机制 FAQ（重点）
 
 ### Q1: 版本从哪里来？
 版本来自 `Directory.Build.props` 的 `VersionPrefix`。CI 不接受手动输入版本参数。
@@ -132,7 +115,7 @@ push / PR to main + weekly
 
 ---
 
-## 6) 用命令行触发（可选）
+## 5) 用命令行触发（可选）
 
 ```bash
 # 手动触发 CI and Release
@@ -141,7 +124,7 @@ gh workflow run ci.yml --ref main
 
 ---
 
-## 7) 常见问题排查（先看这里）
+## 6) 常见问题排查（先看这里）
 
 - tag 已存在：说明同版本已发布；请先通过 PR 提升 `VersionPrefix`
 - NuGet 推送失败：确认仓库是否配置 `NUGET_API_KEY`
@@ -152,7 +135,7 @@ gh workflow run ci.yml --ref main
 
 ---
 
-## 8) 团队协作建议
+## 7) 团队协作建议
 
 - 日常开发只关注 CI 是否绿灯（Build + Test + CodeQL）
 - 发版通过 environment approval 统一管控，避免手工打包/手工传产物

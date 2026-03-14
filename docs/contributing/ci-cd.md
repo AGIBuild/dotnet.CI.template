@@ -1,9 +1,7 @@
-# GitHub Workflows Guide
+# CI/CD Pipeline
 
-The goal of these workflows is straightforward:
+The goal of this pipeline is straightforward:
 **Every commit gets quality feedback, releases are automated, artifacts are traceable and reproducible.**
-
-If you just created a repository from this template, think of it as a standard pipeline:
 
 ```text
 push / PR to main
@@ -18,7 +16,7 @@ push / PR to main + weekly
   └─ CodeQL (security scan)
 ```
 
-For a quick release walkthrough, see: [Quick Start Release](quick-start-release.md).
+For a quick release walkthrough, see: [Releasing](releasing.md).
 
 ---
 
@@ -75,22 +73,7 @@ For a quick release walkthrough, see: [Quick Start Release](quick-start-release.
 
 ---
 
-## 3) Quickest Path to Get Started (Recommended)
-
-1. Push a commit to `main`
-   Verify that both `CI and Release` and `CodeQL` are green.
-
-2. Go to Actions → find the workflow run → click **Review deployments**
-   Approve the `release` environment.
-
-3. Check the Releases page:
-   - A tag was created (e.g., `v0.2.0`)
-   - The GitHub Release contains platform installer zips
-   - A corresponding package version exists on NuGet.org (if `NUGET_API_KEY` is configured)
-
----
-
-## 4) Environment Configuration (Required)
+## 3) Environment Configuration
 
 ### `release` environment
 In GitHub repository Settings → Environments → create `release`:
@@ -101,7 +84,7 @@ In GitHub repository Settings → Environments → create `release`:
 The repository includes built-in VitePress documentation support. To enable documentation publishing:
 - Settings → Pages → Source: select GitHub Actions
 - The `github-pages` environment is created automatically
-- Expected documentation URL: `https://<owner>.github.io/<repo>/` (for this repo: `https://agibuild.github.io/dotnet.CI.template/`)
+- Expected documentation URL: `https://<owner>.github.io/<repo>/`
 - The `Resolve Version` summary displays this URL for quick access
 
 ### Secrets
@@ -109,7 +92,7 @@ The repository includes built-in VitePress documentation support. To enable docu
 
 ---
 
-## 5) Version Mechanism FAQ (Important)
+## 4) Version Mechanism FAQ
 
 ### Q1: Where does the version come from?
 The version comes from `VersionPrefix` in `Directory.Build.props`. CI does not accept manually input version parameters.
@@ -132,7 +115,7 @@ No. Each version can only be released once. If the tag `v{version}` already exis
 
 ---
 
-## 6) CLI Trigger (Optional)
+## 5) CLI Trigger (Optional)
 
 ```bash
 # Manually trigger CI and Release
@@ -141,7 +124,7 @@ gh workflow run ci.yml --ref main
 
 ---
 
-## 7) Common Troubleshooting (Check Here First)
+## 6) Troubleshooting
 
 - Tag already exists: This version was already published; bump `VersionPrefix` via PR
 - NuGet push failed: Verify that `NUGET_API_KEY` is configured
@@ -152,7 +135,7 @@ gh workflow run ci.yml --ref main
 
 ---
 
-## 8) Team Collaboration Tips
+## 7) Team Collaboration Tips
 
 - During daily development, just watch for green CI (Build + Test + CodeQL)
 - Release management is controlled through environment approval — no manual packaging or artifact transfer

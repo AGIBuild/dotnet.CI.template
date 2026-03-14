@@ -1,14 +1,21 @@
-# dotnet.CI.template Documentation
-
-An out-of-the-box .NET CI/CD template that standardizes build, test, publish, and documentation deployment.
-
-## Getting Started
-
-- [Quick Start: Release in 2 Minutes](quick-start-release.md)
-- [GitHub Workflows Guide](github-workflows-guide.md)
-
-## Documentation Hosting
-
-- Expected URL: `https://agibuild.github.io/dotnet.CI.template/`
-- The workflow builds VitePress and deploys to GitHub Pages in the `deploy-docs` job
-- If `docs/package.json` is missing or Pages is not enabled, documentation deployment is skipped
+---
+layout: home
+hero:
+  name: Dotnet.CI.Template
+  text: Production-Ready .NET Starter
+  tagline: A project template with CI/CD, versioning, and documentation baked in.
+  actions:
+    - theme: brand
+      text: Get Started
+      link: /guide/getting-started
+    - theme: alt
+      text: Contributing
+      link: /contributing/development
+features:
+  - title: Build & Test
+    details: NUKE-based build system with multi-platform matrix (Linux, Windows, macOS).
+  - title: Automated Releases
+    details: Version-driven release pipeline — NuGet push, GitHub Release, SBOM, and attestation.
+  - title: Documentation
+    details: VitePress docs site with i18n support, built and deployed automatically.
+---

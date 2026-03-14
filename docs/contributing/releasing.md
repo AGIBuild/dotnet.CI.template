@@ -1,11 +1,11 @@
-# Quick Start: Release in 2 Minutes
+# Releasing
 
-Audience: New team members working with this repository for the first time.
+Audience: Team members shipping a new version.
 Goal: **Complete a standard Release quickly**.
 
 ---
 
-## 0) Prerequisites (30 seconds)
+## 0) Prerequisites
 
 - You have write access to the repository
 - `main` branch is up to date and CI is passing
@@ -39,7 +39,7 @@ After pushing to `main`:
 
 ---
 
-## 3) Success Criteria (30-second check)
+## 3) Success Criteria
 
 After a successful run, you should see:
 
@@ -47,11 +47,11 @@ After a successful run, you should see:
 - A new GitHub Release
 - Release assets including platform installer zips (`app-linux-x64.zip`, `app-win-x64.zip`, etc.) and the SBOM file
 - A corresponding package version on NuGet.org (if `NUGET_API_KEY` is configured)
-- If Pages is enabled: documentation at `https://agibuild.github.io/dotnet.CI.template/`
+- If Pages is enabled: documentation deployed automatically
 
 ---
 
-## 4) Version Management (Must Read)
+## 4) Version Management
 
 The version comes from `VersionPrefix` in `Directory.Build.props` — a pure 3-segment SemVer (e.g., `0.2.0`). A release is triggered only when this version differs from the latest git tag.
 
@@ -65,7 +65,7 @@ After committing the change to `main`, CI automatically builds and publishes wit
 
 ---
 
-## 5) Common Failure Troubleshooting
+## 5) Troubleshooting
 
 - `Tag already exists`: This version was already released; bump `VersionPrefix` and retry
 - `No .nupkg files found`: No artifacts from the packaging stage; check Build/Test/Pack logs
@@ -83,4 +83,4 @@ gh workflow run ci.yml --ref main
 
 ---
 
-For detailed information, see: [GitHub Workflows Guide](github-workflows-guide.md).
+For detailed pipeline information, see: [CI/CD Pipeline](ci-cd.md).
