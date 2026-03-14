@@ -28,9 +28,9 @@ push / PR to main + weekly
 - 并发：**默认并行**，多次 push 可同时运行（`run_number` 天然唯一，版本不冲突）
   - 如需串行：Settings → Variables → 设置 `CI_SERIAL=true`（按分支排队）
   - 如需取消旧 run：设置 `CI_CANCEL_IN_PROGRESS=true`
-- PR 行为：只在 ubuntu 上运行 Build + Test（带 prerelease suffix）
-- main push 行为：全平台矩阵 Build + Test + Pack + Publish + PackageApp → approval → NuGet 推送 + tag + GitHub Release → 文档部署
-- 产物：测试结果、NuGet 包（含 release manifest）、各平台安装包 zip
+- PR 行为：在 ubuntu 上运行 Format Check + Build + Test + Coverage Report（带 prerelease suffix）
+- main push 行为：全平台矩阵 Build + Test + Pack + Publish + PackageApp → approval → NuGet 推送 + SBOM + Attestation + tag + GitHub Release → 文档部署
+- 产物：测试结果（含 PR 内注解）、覆盖率报告、NuGet 包（含 release manifest）、各平台安装包 zip、SBOM
 
 ### `CodeQL`
 - 触发：`push`/`pull_request` 到 `main`，以及每周定时任务
@@ -48,17 +48,21 @@ push / PR to main + weekly
 
 ### `build-and-test`
 - 矩阵构建：各平台执行 Build + Test
+- linux runner 额外执行 Format Check（`dotnet format --verify-no-changes`）和 Coverage Report
 - PR：带 `--VersionSuffix "ci.<run_number>"`
 - main push：无 suffix（固化 release 版本）
 - linux runner 额外执行 Pack + GenerateReleaseManifest（生成 SHA256 manifest）
 - 各平台执行 Publish + PackageApp，生成安装包 zip（`app-{runtime}.zip`）
+- 测试结果通过 `dorny/test-reporter` 直接展示在 PR check 中
 
 ### `release`
 - 需要 `release` environment approval（唯一的审批入口）
 - 下载 NuGet 包，验证 release manifest SHA256 完整性
 - 推送 NuGet 包到 nuget.org（如未配置 `NUGET_API_KEY` 则跳过）
+- 生成 SBOM（SPDX 格式，`anchore/sbom-action`）
+- 创建 Artifact Attestation（`actions/attest-build-provenance`，为 NuGet 包和安装包签署构建来源证明）
 - 创建 git tag 并推送到 remote
-- 创建 GitHub Release，附带各平台安装包 zip（不含 NuGet 包）
+- 创建 GitHub Release，附带各平台安装包 zip + SBOM 文件
 
 ### `deploy-docs`
 - 依赖 `release` 成功后自动运行

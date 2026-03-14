@@ -9,6 +9,7 @@ on:
 
 permissions:
   contents: read
+  checks: write
 
 concurrency:
   group: ${{ vars.CI_SERIAL == 'true' && format('ci-release-{0}', github.ref) || format('ci-release-{0}', github.run_id) }}
@@ -183,25 +184,26 @@ jobs:
       - uses: actions/cache@v5
         with:
           path: ~/.nuget/packages
-          key: ${{ runner.os }}-nuget-${{ hashFiles('**/*.csproj', 'global.json', '.config/dotnet-tools.json') }}
+          key: ${{ runner.os }}-nuget-${{ hashFiles('**/*.csproj', 'Directory.Packages.props', 'global.json', '.config/dotnet-tools.json') }}
           restore-keys: ${{ runner.os }}-nuget-
 
       - name: Install .NET workloads
         if: matrix.workloads != ''
         run: dotnet workload install ${{ matrix.workloads }}
 
+      - name: Mark build script executable
+        if: runner.os != 'Windows'
+        run: chmod +x build.sh
+
       - name: Check code format
         if: matrix.runtime == 'linux-x64'
         shell: bash
-        run: |
-          chmod +x build.sh
-          ./build.sh Format
+        run: ./build.sh Format
 
       - name: Build and test
         if: runner.os != 'Windows'
         shell: bash
         run: |
-          chmod +x build.sh
           IS_RELEASE="${{ needs.resolve-version.outputs.is_release }}"
           if [ "$IS_RELEASE" = "true" ]; then
             ./build.sh Test
@@ -219,6 +221,11 @@ jobs:
           } else {
             ./build.ps1 Test --VersionSuffix "ci.${{ github.run_number }}"
           }
+
+      - name: Generate coverage report
+        if: matrix.runtime == 'linux-x64'
+        shell: bash
+        run: ./build.sh CoverageReport --skip Test
 
       - name: Pack and generate manifest
         if: needs.resolve-version.outputs.is_release == 'true' && matrix.pack
@@ -274,6 +281,14 @@ jobs:
           name: test-results-${{ matrix.runtime }}
           path: artifacts/test-results/**
           if-no-files-found: warn
+
+      - name: Report test results
+        if: always() && !cancelled()
+        uses: dorny/test-reporter@v1
+        with:
+          name: Tests (${{ matrix.runtime }})
+          path: artifacts/test-results/**/*.trx
+          reporter: dotnet-trx
 
       - name: Upload packages
         if: needs.resolve-version.outputs.is_release == 'true' && matrix.pack

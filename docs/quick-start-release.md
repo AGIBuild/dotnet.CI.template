@@ -25,7 +25,7 @@ resolve-version → build-and-test (matrix) → release (需 approve) → deploy
 当代码 push 到 `main` 后：
 1. CI 自动构建、测试、打包（NuGet 包 + 平台安装包 zip）
 2. `release` job 等待 `release` environment 的 **reviewer approval**
-3. Approve 后自动完成：NuGet 推送 → 创建 tag + GitHub Release（仅含安装包 zip） → 文档部署
+3. Approve 后自动完成：NuGet 推送 → SBOM 生成 + Artifact Attestation → 创建 tag + GitHub Release（安装包 zip + SBOM） → 文档部署
 
 ---
 
@@ -43,7 +43,7 @@ resolve-version → build-and-test (matrix) → release (需 approve) → deploy
 
 - 新 tag（例如 `v0.2.0.42`）
 - 一个新的 GitHub Release
-- Release 附件里有各平台安装包 zip（`app-linux-x64.zip`、`app-win-x64.zip` 等）
+- Release 附件里有各平台安装包 zip（`app-linux-x64.zip`、`app-win-x64.zip` 等）和 SBOM 文件
 - NuGet.org 上有对应版本的包（如已配置 `NUGET_API_KEY`）
 - 如果已启用 Pages + DocFX：文档地址 `https://agibuild.github.io/dotnet.CI.template/`
 

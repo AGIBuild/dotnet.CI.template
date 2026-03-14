@@ -4,10 +4,18 @@ updates:
     directory: "/"
     schedule:
       interval: weekly
+    groups:
+      github-actions:
+        patterns: ["*"]
     open-pull-requests-limit: 10
 
   - package-ecosystem: nuget
     directory: "/"
     schedule:
       interval: weekly
+    groups:
+      xunit:
+        patterns: ["xunit*"]
+      testing-infra:
+        patterns: ["coverlet*", "Microsoft.NET.Test.Sdk"]
     open-pull-requests-limit: 10
