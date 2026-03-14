@@ -3,6 +3,7 @@ import { defineConfig } from 'vitepress'
 export default defineConfig({
   title: 'dotnet.CI.template',
   description: 'Production-ready .NET CI/CD template',
+  base: '/dotnet.CI.template/',
 
   locales: {
     root: {
