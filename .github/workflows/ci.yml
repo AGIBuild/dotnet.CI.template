@@ -19,6 +19,7 @@ env:
   DOTNET_NOLOGO: true
   DOTNET_CLI_TELEMETRY_OPTOUT: true
   NUKE_TELEMETRY_OPTOUT: true
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
   ENABLE_ANDROID: 'false'
   ENABLE_IOS: 'false'
 
@@ -289,7 +290,7 @@ jobs:
 
       - name: Report test results
         if: always() && !cancelled()
-        uses: dorny/test-reporter@v1
+        uses: dorny/test-reporter@v2
         with:
           name: Tests (${{ matrix.runtime }})
           path: artifacts/test-results/**/*.trx
