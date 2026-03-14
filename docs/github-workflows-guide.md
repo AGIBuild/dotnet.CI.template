@@ -25,6 +25,9 @@ push / PR to main + weekly
 
 ### `CI and Release`
 - 触发：`push` 到 `main`、对 `main` 的 `pull_request`、手动 `workflow_dispatch`
+- 并发：**默认并行**，多次 push 可同时运行（`run_number` 天然唯一，版本不冲突）
+  - 如需串行：Settings → Variables → 设置 `CI_SERIAL=true`（按分支排队）
+  - 如需取消旧 run：设置 `CI_CANCEL_IN_PROGRESS=true`
 - PR 行为：只在 ubuntu 上运行 Build + Test（带 prerelease suffix）
 - main push 行为：全平台矩阵 Build + Test + Pack + Publish + PackageApp → approval → NuGet 推送 + tag + GitHub Release → 文档部署
 - 产物：测试结果、NuGet 包（含 release manifest）、各平台安装包 zip

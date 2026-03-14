@@ -11,8 +11,8 @@ permissions:
   contents: read
 
 concurrency:
-  group: ci-release-${{ github.ref }}
-  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+  group: ${{ vars.CI_SERIAL == 'true' && format('ci-release-{0}', github.ref) || format('ci-release-{0}', github.run_id) }}
+  cancel-in-progress: ${{ vars.CI_CANCEL_IN_PROGRESS == 'true' }}
 
 env:
   DOTNET_NOLOGO: true

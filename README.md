@@ -144,6 +144,19 @@ env:
 
 ---
 
+## Concurrency
+
+Multiple `CI and Release` runs execute **in parallel by default**. Each run gets a unique `run_number`, so versions never conflict.
+
+To serialize runs on the same branch (only one active at a time), set repository variables in **Settings > Secrets and variables > Actions > Variables**:
+
+| Variable | Default | Effect |
+|----------|---------|--------|
+| `CI_SERIAL` | _(unset / false)_ | Set to `true` to queue runs per branch instead of running in parallel |
+| `CI_CANCEL_IN_PROGRESS` | _(unset / false)_ | Set to `true` to cancel the running workflow when a newer one is queued |
+
+---
+
 ## Documentation Deployment
 
 To enable automatic documentation deployment to GitHub Pages:
