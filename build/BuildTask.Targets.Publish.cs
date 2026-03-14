@@ -11,20 +11,12 @@ partial class BuildTask
         {
             var outputDirectory = PublishDirectory / Runtime;
 
-            DotNetPublish(settings =>
-            {
-                settings = settings
+            DotNetPublish(settings => ApplyVersionSuffix(settings
                     .SetProject(PublishPath)
                     .SetConfiguration(Configuration)
                     .SetRuntime(Runtime)
                     .SetSelfContained(SelfContained)
                     .SetOutput(outputDirectory)
-                    .SetNoLogo(true);
-
-                if (!string.IsNullOrWhiteSpace(VersionSuffix))
-                    settings = settings.SetVersionSuffix(VersionSuffix);
-
-                return settings;
-            });
+                    .SetNoLogo(true)));
         });
 }

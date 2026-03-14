@@ -30,10 +30,12 @@
         "CoverageReport",
         "Format",
         "GenerateReleaseManifest",
+        "Init",
         "MutationTest",
         "Pack",
         "PackageApp",
         "Publish",
+        "RefreshLockFiles",
         "Restore",
         "ShowVersion",
         "Test",
@@ -113,6 +115,10 @@
   "allOf": [
     {
       "properties": {
+        "Author": {
+          "type": "string",
+          "description": "Author / organization for Init target"
+        },
         "BenchmarkFilter": {
           "type": "string",
           "description": "Filter expression for BenchmarkDotNet (e.g., '*Calculator*')"
@@ -134,6 +140,14 @@
           "type": "integer",
           "description": "Minimum line coverage percentage (0-100). CoverageReport fails if below this threshold",
           "format": "int32"
+        },
+        "ProjectName": {
+          "type": "string",
+          "description": "New project name for Init target (e.g. Acme.Payments)"
+        },
+        "ResetGit": {
+          "type": "boolean",
+          "description": "Reset git history to a fresh commit during Init"
         },
         "Runtime": {
           "type": "string",

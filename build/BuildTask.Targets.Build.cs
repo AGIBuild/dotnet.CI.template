@@ -8,19 +8,11 @@ partial class BuildTask
         .DependsOn(Restore)
         .Executes(() =>
         {
-            DotNetBuild(settings =>
-            {
-                settings = settings
+            DotNetBuild(settings => ApplyVersionSuffix(settings
                     .SetProjectFile(BuildPath)
                     .SetConfiguration(Configuration)
                     .EnableNoRestore()
-                    .SetNoLogo(true);
-
-                if (!string.IsNullOrWhiteSpace(VersionSuffix))
-                    settings = settings.SetVersionSuffix(VersionSuffix);
-
-                return settings;
-            });
+                    .SetNoLogo(true)));
 
             WriteBuildOutputsMarker();
         });

@@ -24,10 +24,7 @@ partial class BuildTask
                 if (CanSkipBuild(PackPath))
                     settings = settings.EnableNoBuild();
 
-                if (!string.IsNullOrWhiteSpace(VersionSuffix))
-                    settings = settings.SetVersionSuffix(VersionSuffix);
-
-                return settings;
+                return ApplyVersionSuffix(settings);
             });
         });
 }

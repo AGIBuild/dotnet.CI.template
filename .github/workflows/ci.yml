@@ -260,26 +260,12 @@ jobs:
       - name: Build and test
         if: runner.os != 'Windows'
         shell: bash
-        env:
-          VERSION_SUFFIX: ${{ needs.resolve-version.outputs.version_suffix }}
-        run: |
-          if [ -n "$VERSION_SUFFIX" ]; then
-            ./build.sh Test --VersionSuffix "$VERSION_SUFFIX"
-          else
-            ./build.sh Test
-          fi
+        run: ./build.sh Test --VersionSuffix "${{ needs.resolve-version.outputs.version_suffix }}"
 
       - name: Build and test (Windows)
         if: runner.os == 'Windows'
         shell: pwsh
-        env:
-          VERSION_SUFFIX: ${{ needs.resolve-version.outputs.version_suffix }}
-        run: |
-          if ($env:VERSION_SUFFIX) {
-            ./build.ps1 Test --VersionSuffix "$env:VERSION_SUFFIX"
-          } else {
-            ./build.ps1 Test
-          }
+        run: ./build.ps1 Test --VersionSuffix "${{ needs.resolve-version.outputs.version_suffix }}"
 
       - name: Generate coverage report
         if: matrix.runtime == 'linux-x64'
@@ -468,35 +454,14 @@ jobs:
         with:
           user: ${{ vars.NUGET_USER || github.repository_owner }}
 
-      - name: Push to NuGet.org (OIDC)
-        if: env.ENABLE_NUGET == 'true' && env.NUGET_USE_OIDC == 'true'
+      - name: Push to NuGet.org
+        if: env.ENABLE_NUGET == 'true'
         shell: bash
         env:
-          API_KEY: ${{ steps.nuget-login.outputs.NUGET_API_KEY }}
-        run: |
-          shopt -s nullglob
-          PACKAGES=(artifacts/packages/*.nupkg)
-          if [ ${#PACKAGES[@]} -eq 0 ]; then
-            echo "::error::No .nupkg files found"
-            exit 1
-          fi
-          for pkg in "${PACKAGES[@]}"; do
-            echo "Pushing $pkg"
-            dotnet nuget push "$pkg" \
-              --api-key "$API_KEY" \
-              --source https://api.nuget.org/v3/index.json \
-              --skip-duplicate
-          done
-          echo "All packages pushed to NuGet.org via Trusted Publishing"
-
-      - name: Push to NuGet.org (API key)
-        if: env.ENABLE_NUGET == 'true' && env.NUGET_USE_OIDC != 'true'
-        shell: bash
-        env:
-          API_KEY: ${{ secrets.NUGET_API_KEY }}
+          API_KEY: ${{ env.NUGET_USE_OIDC == 'true' && steps.nuget-login.outputs.NUGET_API_KEY || secrets.NUGET_API_KEY }}
         run: |
           if [ -z "$API_KEY" ]; then
-            echo "::error::ENABLE_NUGET is true but NUGET_API_KEY secret is not set. Either set the secret or change NUGET_USE_OIDC to true."
+            echo "::error::NUGET_API_KEY is not available. Set the secret or enable OIDC."
             exit 1
           fi
           shopt -s nullglob
@@ -512,12 +477,6 @@ jobs:
               --source https://api.nuget.org/v3/index.json \
               --skip-duplicate
           done
-          echo "All packages pushed to NuGet.org via API key"
-
-      - name: NuGet disabled
-        if: env.ENABLE_NUGET != 'true'
-        shell: bash
-        run: echo "::notice::NuGet is disabled (ENABLE_NUGET != true). Skipping NuGet push."
 
       - name: Generate SBOM
         uses: anchore/sbom-action@57aae528053a48a3f6235f2d9461b05fbcb7366d # v0.23.1

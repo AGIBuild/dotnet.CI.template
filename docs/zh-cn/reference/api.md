@@ -10,15 +10,14 @@
 
 | 方法 | 签名 | 说明 |
 |---|---|---|
-| `Add` | `int Add(int a, int b)` | 返回两个整数之和。 |
-| `Divide` | `int Divide(int a, int b)` | 返回整数商。当 `b` 为零时抛出 `DivideByZeroException`。 |
+| `Add` | `int Add(int left, int right)` | 返回两个整数之和。 |
+| `Divide` | `int Divide(int dividend, int divisor)` | 返回整数商。当 `divisor` 为零时抛出 `DivideByZeroException`。 |
 
 #### 示例
 
 ```csharp
-var calc = new Calculator();
-calc.Add(1, 2);      // 3
-calc.Divide(10, 3);  // 3
+Calculator.Add(1, 2);      // 3
+Calculator.Divide(10, 3);  // 3
 ```
 
 ---

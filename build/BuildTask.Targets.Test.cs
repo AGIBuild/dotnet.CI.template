@@ -23,8 +23,8 @@ partial class BuildTask
 
                 if (useNoBuild)
                     settings = settings.EnableNoBuild();
-                else if (!string.IsNullOrWhiteSpace(VersionSuffix))
-                    settings = settings.SetProperty("VersionSuffix", VersionSuffix);
+                else
+                    settings = ApplyVersionSuffix(settings);
 
                 return settings;
             });

@@ -32,6 +32,15 @@ partial class BuildTask
     [Parameter("Minimum branch coverage percentage (0-100). CoverageReport fails if below this threshold.")]
     readonly int BranchCoverageThreshold = 90;
 
+    [Parameter("New project name for Init target (e.g. Acme.Payments)")]
+    readonly string ProjectName = string.Empty;
+
+    [Parameter("Author / organization for Init target")]
+    readonly string Author = string.Empty;
+
+    [Parameter("Reset git history to a fresh commit during Init")]
+    readonly bool ResetGit;
+
     // Common output/input locations.
     AbsolutePath ArtifactsDirectory => RootDirectory / "artifacts";
     AbsolutePath TestResultsDirectory => ArtifactsDirectory / "test-results";

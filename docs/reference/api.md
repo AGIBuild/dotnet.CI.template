@@ -10,15 +10,14 @@ A simple arithmetic calculator.
 
 | Method | Signature | Description |
 |---|---|---|
-| `Add` | `int Add(int a, int b)` | Returns the sum of two integers. |
-| `Divide` | `int Divide(int a, int b)` | Returns the integer quotient. Throws `DivideByZeroException` when `b` is zero. |
+| `Add` | `int Add(int left, int right)` | Returns the sum of two integers. |
+| `Divide` | `int Divide(int dividend, int divisor)` | Returns the integer quotient. Throws `DivideByZeroException` when `divisor` is zero. |
 
 #### Example
 
 ```csharp
-var calc = new Calculator();
-calc.Add(1, 2);      // 3
-calc.Divide(10, 3);  // 3
+Calculator.Add(1, 2);      // 3
+Calculator.Divide(10, 3);  // 3
 ```
 
 ---

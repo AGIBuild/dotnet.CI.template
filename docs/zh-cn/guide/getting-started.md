@@ -13,10 +13,8 @@ dotnet add package Dotnet.CI.Template.Sample
 ```csharp
 using Dotnet.CI.Template.Sample;
 
-var calculator = new Calculator();
-
-var sum = calculator.Add(2, 3);       // 5
-var quotient = calculator.Divide(10, 2); // 5
+var sum = Calculator.Add(2, 3);       // 5
+var quotient = Calculator.Divide(10, 2); // 5
 ```
 
 ## 作为模板使用
