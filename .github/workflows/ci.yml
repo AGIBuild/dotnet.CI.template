@@ -41,6 +41,7 @@ env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
   ENABLE_NUGET: 'true'
   NUGET_USE_OIDC: 'false'
+  ENABLE_INSTALLERS: 'true'
   ENABLE_ANDROID: 'false'
   ENABLE_IOS: 'false'
 
@@ -187,11 +188,12 @@ jobs:
         run: |
           IS_RELEASE="${{ steps.resolve.outputs.is_release }}"
           PACK=$( [ "$ENABLE_NUGET" = "true" ] && echo "true" || echo "false" )
+          PUBLISH=$( [ "$ENABLE_INSTALLERS" = "true" ] && echo "true" || echo "false" )
 
           if [ "$IS_RELEASE" = "true" ]; then
-            ENTRIES="{\"os\":\"ubuntu-latest\",\"runtime\":\"linux-x64\",\"pack\":$PACK,\"publish\":true,\"workloads\":\"\"}"
-            ENTRIES+=",{\"os\":\"windows-latest\",\"runtime\":\"win-x64\",\"pack\":false,\"publish\":true,\"workloads\":\"\"}"
-            ENTRIES+=",{\"os\":\"macos-latest\",\"runtime\":\"osx-arm64\",\"pack\":false,\"publish\":true,\"workloads\":\"\"}"
+            ENTRIES="{\"os\":\"ubuntu-latest\",\"runtime\":\"linux-x64\",\"pack\":$PACK,\"publish\":$PUBLISH,\"workloads\":\"\"}"
+            ENTRIES+=",{\"os\":\"windows-latest\",\"runtime\":\"win-x64\",\"pack\":false,\"publish\":$PUBLISH,\"workloads\":\"\"}"
+            ENTRIES+=",{\"os\":\"macos-latest\",\"runtime\":\"osx-arm64\",\"pack\":false,\"publish\":$PUBLISH,\"workloads\":\"\"}"
 
             if [ "$ENABLE_ANDROID" = "true" ]; then
               ENTRIES+=',{"os":"ubuntu-latest","runtime":"android","pack":false,"publish":false,"workloads":"android"}'
@@ -444,6 +446,7 @@ jobs:
           path: artifacts/packages
 
       - name: Download installers
+        if: env.ENABLE_INSTALLERS == 'true'
         uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
         with:
           path: artifacts/installers
@@ -534,9 +537,11 @@ jobs:
               SUBJECTS+="$f"$'\n'
             done
           fi
-          for f in artifacts/installers/*.zip; do
-            SUBJECTS+="$f"$'\n'
-          done
+          if [ "$ENABLE_INSTALLERS" = "true" ]; then
+            for f in artifacts/installers/*.zip; do
+              SUBJECTS+="$f"$'\n'
+            done
+          fi
           SUBJECTS=$(echo "$SUBJECTS" | sed '/^$/d')
           echo "subjects<<EOF" >> "$GITHUB_OUTPUT"
           echo "$SUBJECTS" >> "$GITHUB_OUTPUT"
@@ -583,27 +588,26 @@ jobs:
           TAG="${{ needs.resolve-version.outputs.tag }}"
           RELEASE_NAME="dotnet.CI.template $TAG"
 
-          shopt -s nullglob
-          RELEASE_FILES=(artifacts/installers/*.zip)
-          if [ ${#RELEASE_FILES[@]} -eq 0 ]; then
-            echo "::error::No installer zip files found"
-            exit 1
-          fi
-
           if gh release view "$TAG" >/dev/null 2>&1; then
             echo "::error::Release already exists for tag $TAG"
             exit 1
           fi
 
-          SBOM_FILE=""
-          if [ -f "sbom-spdx.json" ]; then
-            SBOM_FILE="sbom-spdx.json"
+          shopt -s nullglob
+          RELEASE_ASSETS=()
+
+          if [ "$ENABLE_INSTALLERS" = "true" ]; then
+            RELEASE_ASSETS+=(artifacts/installers/*.zip)
           fi
 
-          gh release create "$TAG" "${RELEASE_FILES[@]}" $SBOM_FILE \
+          if [ -f "sbom-spdx.json" ]; then
+            RELEASE_ASSETS+=(sbom-spdx.json)
+          fi
+
+          gh release create "$TAG" "${RELEASE_ASSETS[@]}" \
             --title "$RELEASE_NAME" \
             --generate-notes
-          echo "Created release $TAG with ${#RELEASE_FILES[@]} assets"
+          echo "Created release $TAG with ${#RELEASE_ASSETS[@]} assets"
 
   deploy-docs:
     name: Deploy Documentation
