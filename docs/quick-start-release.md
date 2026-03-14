@@ -16,10 +16,12 @@ Goal: **Complete a standard Release quickly**.
 
 ## 1) Release Flow Overview
 
-Release is integrated into the `CI and Release` workflow, consisting of 4 sequential jobs:
+Release is integrated into the `CI and Release` workflow, consisting of 5 jobs:
 
 ```text
-resolve-version → build-and-test (matrix) → release (requires approval) → deploy-docs
+                ┌─ build-and-test (matrix) → release (requires approval) ─┐
+resolve-version─┤                                                         ├→ deploy-docs
+                └─ build-docs (pre-check) ────────────────────────────────┘
 ```
 
 After pushing to `main`:

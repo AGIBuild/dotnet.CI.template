@@ -10,8 +10,9 @@ push / PR to main
   └─ CI and Release
        ├─ resolve-version
        ├─ build-and-test (matrix: all platforms; release adds publish)
+       ├─ build-docs (VitePress build, pre-check on every push/PR)
        ├─ release (requires approval, NuGet push + tag + GitHub Release)
-       └─ deploy-docs (GitHub Pages)
+       └─ deploy-docs (deploys pre-built docs to GitHub Pages)
 
 push / PR to main + weekly
   └─ CodeQL (security scan)
@@ -25,7 +26,7 @@ For a quick release walkthrough, see: [Quick Start Release](quick-start-release.
 
 ### `CI and Release`
 - Triggers: `push` to `main`, `pull_request` targeting `main`, manual `workflow_dispatch`
-- Concurrency: Grouped by branch (`ci-${{ github.ref }}`), running workflows complete normally; only pending (queued) workflows are replaced by newer pushes
+- Concurrency: Grouped by branch (e.g. `ci-refs/heads/main`), running workflows complete normally; only pending (queued) workflows are replaced by newer pushes
 - PR behavior: Runs multi-platform Build + Test (Format Check + Coverage Report on linux only, Pack verification on linux) with prerelease suffix
 - main push behavior: If `VersionPrefix` has been bumped (tag doesn't exist yet), triggers full-platform matrix Build + Test + Pack + Publish + PackageApp → approval → NuGet push + SBOM + Attestation + tag + GitHub Release → documentation deployment. Otherwise, runs CI-only (multi-platform build + test + linux pack verification).
 - Artifacts: Test results (with PR annotations), coverage reports, NuGet packages (with release manifest), platform installer zips, SBOM
@@ -62,10 +63,15 @@ For a quick release walkthrough, see: [Quick Start Release](quick-start-release.
 - Creates a git tag and pushes to remote
 - Creates a GitHub Release with platform installer zips + SBOM file attached
 
+### `build-docs`
+- Runs on every push/PR, in parallel with `build-and-test` (pre-check)
+- If `docs/package.json` exists, installs dependencies and builds VitePress
+- Uploads the built site as an artifact (`docs-site`) for `deploy-docs` to consume
+- Catches documentation build errors early — before release
+
 ### `deploy-docs`
-- Runs automatically after a successful `release`
-- If `docs/package.json` exists, builds VitePress and deploys to GitHub Pages
-- If GitHub Pages is not enabled or documentation config is missing, it skips gracefully with a notice — it will not fail the pipeline
+- Runs automatically after a successful `release`, downloads the pre-built docs artifact from `build-docs`
+- If GitHub Pages is not enabled, it skips gracefully with a notice — it will not fail the pipeline
 
 ---
 

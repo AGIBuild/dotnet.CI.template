@@ -10,8 +10,9 @@ push / PR to main
   └─ CI and Release
        ├─ resolve-version
        ├─ build-and-test (matrix: 全平台; release 额外启用 publish)
+       ├─ build-docs (VitePress 构建，每次 push/PR 前置检查)
        ├─ release (需 approval，NuGet 推送 + tag + GitHub Release)
-       └─ deploy-docs (GitHub Pages)
+       └─ deploy-docs (部署预构建的文档到 GitHub Pages)
 
 push / PR to main + weekly
   └─ CodeQL (security scan)
@@ -25,7 +26,7 @@ push / PR to main + weekly
 
 ### `CI and Release`
 - 触发：`push` 到 `main`、对 `main` 的 `pull_request`、手动 `workflow_dispatch`
-- 并发：同一分支**串行排队**（`concurrency: { group: ci-${{ github.ref }}, cancel-in-progress: false }`），新 run 排队等待上一个完成
+- 并发：同一分支**串行排队**（按分支分组，如 `ci-refs/heads/main`，`cancel-in-progress: false`），新 run 排队等待上一个完成
 - PR 行为：全平台矩阵 Build + Test（Format Check + Coverage Report 仅 linux，Pack 验证仅 linux），带 prerelease suffix
 - main push 行为：全平台矩阵 Build + Test + Pack + Publish + PackageApp → approval → NuGet 推送 + SBOM + Attestation + tag + GitHub Release → 文档部署
 - 产物：测试结果（含 PR 内注解）、覆盖率报告、NuGet 包（含 release manifest）、各平台安装包 zip、SBOM
@@ -62,10 +63,15 @@ push / PR to main + weekly
 - 创建 git tag 并推送到 remote
 - 创建 GitHub Release，附带各平台安装包 zip + SBOM 文件
 
+### `build-docs`
+- 每次 push/PR 均运行，与 `build-and-test` 并行（前置检查）
+- 如果存在 `docs/package.json`，安装依赖并构建 VitePress
+- 上传构建产物（`docs-site`），供 `deploy-docs` 使用
+- 在 release 之前暴露文档构建错误
+
 ### `deploy-docs`
-- 依赖 `release` 成功后自动运行
-- 如果存在 `docs/package.json`，构建 VitePress 并部署到 GitHub Pages
-- 如果未启用 GitHub Pages 或缺少文档配置，则自动跳过并给出 notice，不会导致整条流水线失败
+- 依赖 `release` 和 `build-docs` 成功后自动运行，下载预构建的文档产物
+- 如果未启用 GitHub Pages，则自动跳过并给出 notice，不会导致整条流水线失败
 
 ---
 

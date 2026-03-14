@@ -16,10 +16,12 @@
 
 ## 1) Release 流程概览
 
-Release 集成在 `CI and Release` workflow 中，由 4 个 job 串联完成：
+Release 集成在 `CI and Release` workflow 中，由 5 个 job 组成：
 
 ```text
-resolve-version → build-and-test (matrix) → release (需 approve) → deploy-docs
+                ┌─ build-and-test (matrix) → release (需 approve) ─┐
+resolve-version─┤                                                   ├→ deploy-docs
+                └─ build-docs (前置检查) ──────────────────────────┘
 ```
 
 当代码 push 到 `main` 后：

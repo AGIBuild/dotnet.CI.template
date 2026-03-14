@@ -18,15 +18,16 @@ Push to main
   v
 resolve-version ── Reads VersionPrefix, computes matrix, outputs version info
   |
+  ├──────────────────────────────┐
+  v                              v
+build-and-test ─── Matrix build  build-docs ── VitePress build (pre-check)
+  |                (3 platforms)  |
+  v                              |
+release ────────── [approval]    |
+  |                NuGet + tag   |
+  ├──────────────────────────────┘
   v
-build-and-test ─── Matrix build (linux / windows / macos)
-  |                 + Pack NuGet + Publish + Package installers
-  |
-  v
-release ────────── [requires approval] NuGet push + Git tag + GitHub Release
-  |
-  v
-deploy-docs ────── VitePress to GitHub Pages (optional, i18n)
+deploy-docs ────── Deploy to GitHub Pages (optional, i18n)
 ```
 
 Both **pull requests** and **main pushes** run the full multi-platform matrix (linux / windows / macos) for Build + Test. On **releases** (version bumped), Publish + PackageApp are additionally enabled.
@@ -159,7 +160,7 @@ To enable automatic documentation deployment to GitHub Pages:
 
 1. `docs/package.json` is included by default in this template
 2. Enable GitHub Pages in **Settings > Pages > Source: GitHub Actions**
-3. The `deploy-docs` job automatically builds and deploys after each release
+3. The `build-docs` job builds VitePress on every push/PR (pre-check); `deploy-docs` deploys after each release
 4. Expected docs URL: `https://<owner>.github.io/<repo>/` (for this repo: `https://agibuild.github.io/dotnet.CI.template/`)
 
 The `Resolve Version` job summary always shows this expected docs URL, even when docs deployment is skipped.

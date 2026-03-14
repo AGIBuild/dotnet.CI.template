@@ -312,6 +312,53 @@ jobs:
           path: artifacts/installers/**
           if-no-files-found: error
 
+  build-docs:
+    name: Build Documentation
+    needs: resolve-version
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: ${{ needs.resolve-version.outputs.sha }}
+
+      - name: Check for documentation source
+        id: check
+        shell: bash
+        run: |
+          if [ -f "docs/package.json" ]; then
+            echo "has_docs=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "::notice::No docs/package.json found. Skipping documentation build."
+            echo "has_docs=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - uses: actions/setup-node@v6
+        if: steps.check.outputs.has_docs == 'true'
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: docs/package-lock.json
+
+      - name: Install dependencies
+        if: steps.check.outputs.has_docs == 'true'
+        run: npm ci
+        working-directory: docs
+
+      - name: Build documentation
+        if: steps.check.outputs.has_docs == 'true'
+        run: npx vitepress build
+        working-directory: docs
+
+      - name: Upload docs artifact
+        if: steps.check.outputs.has_docs == 'true'
+        uses: actions/upload-artifact@v7
+        with:
+          name: docs-site
+          path: docs/.vitepress/dist
+          if-no-files-found: error
+
   release:
     name: Release
     needs: [resolve-version, build-and-test]
@@ -488,10 +535,10 @@ jobs:
 
   deploy-docs:
     name: Deploy Documentation
-    needs: [resolve-version, release]
+    needs: [resolve-version, release, build-docs]
     if: needs.resolve-version.outputs.is_release == 'true'
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 10
     permissions:
       contents: read
       pages: write
@@ -504,59 +551,34 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
 
     steps:
-      - uses: actions/checkout@v6
-        with:
-          ref: ${{ needs.resolve-version.outputs.sha }}
-
-      - name: Check for documentation configuration
-        id: check-docs
+      - name: Check if deployment is possible
+        id: check
         shell: bash
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          HAS_DOCS="false"
-          if [ -f "docs/package.json" ]; then
-            HAS_DOCS="true"
-          else
-            echo "::notice::No docs/package.json found. Skipping documentation deployment."
-          fi
-
           HAS_PAGES="$(gh api repos/${{ github.repository }} --jq '.has_pages' 2>/dev/null || echo "false")"
           if [ "$HAS_PAGES" != "true" ]; then
             echo "::notice::GitHub Pages is not enabled. Enable Settings > Pages > Source: GitHub Actions."
-            HAS_PAGES="false"
-          fi
-
-          if [ "$HAS_DOCS" = "true" ] && [ "$HAS_PAGES" = "true" ]; then
-            echo "should_deploy=true" >> "$GITHUB_OUTPUT"
-          else
             echo "should_deploy=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "should_deploy=true" >> "$GITHUB_OUTPUT"
           fi
 
-      - uses: actions/setup-node@v6
-        if: steps.check-docs.outputs.should_deploy == 'true'
+      - name: Download docs artifact
+        if: steps.check.outputs.should_deploy == 'true'
+        uses: actions/download-artifact@v8
         with:
-          node-version: 22
-          cache: npm
-          cache-dependency-path: docs/package-lock.json
-
-      - name: Install dependencies
-        if: steps.check-docs.outputs.should_deploy == 'true'
-        run: npm ci
-        working-directory: docs
-
-      - name: Build documentation
-        if: steps.check-docs.outputs.should_deploy == 'true'
-        run: npx vitepress build
-        working-directory: docs
+          name: docs-site
+          path: docs-site
 
       - name: Upload pages artifact
-        if: steps.check-docs.outputs.should_deploy == 'true'
+        if: steps.check.outputs.should_deploy == 'true'
         uses: actions/upload-pages-artifact@v4
         with:
-          path: docs/.vitepress/dist
+          path: docs-site
 
       - name: Deploy to GitHub Pages
-        if: steps.check-docs.outputs.should_deploy == 'true'
+        if: steps.check.outputs.should_deploy == 'true'
         id: deployment
         uses: actions/deploy-pages@v4
