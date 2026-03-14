@@ -25,7 +25,7 @@ For a quick release walkthrough, see: [Quick Start Release](quick-start-release.
 
 ### `CI and Release`
 - Triggers: `push` to `main`, `pull_request` targeting `main`, manual `workflow_dispatch`
-- Concurrency: Grouped by branch (`ci-${{ github.ref }}`), newer pushes automatically cancel older in-progress runs
+- Concurrency: Grouped by branch (`ci-${{ github.ref }}`), running workflows complete normally; only pending (queued) workflows are replaced by newer pushes
 - PR behavior: Runs multi-platform Build + Test (Format Check + Coverage Report on linux only, Pack verification on linux) with prerelease suffix
 - main push behavior: If `VersionPrefix` has been bumped (tag doesn't exist yet), triggers full-platform matrix Build + Test + Pack + Publish + PackageApp → approval → NuGet push + SBOM + Attestation + tag + GitHub Release → documentation deployment. Otherwise, runs CI-only (multi-platform build + test + linux pack verification).
 - Artifacts: Test results (with PR annotations), coverage reports, NuGet packages (with release manifest), platform installer zips, SBOM
