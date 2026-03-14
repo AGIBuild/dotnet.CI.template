@@ -422,13 +422,6 @@ jobs:
     concurrency:
       group: release-tag-${{ needs.resolve-version.outputs.tag }}
       cancel-in-progress: false
-    env:
-      # Set repository variable NUGET_PUBLISH_METHOD to 'api-key' or 'oidc'.
-      # - api-key: requires NUGET_API_KEY secret
-      # - oidc:    requires a Trusted Publishing policy at nuget.org
-      # - unset:   NuGet push is skipped
-      NUGET_PUBLISH_METHOD: ${{ vars.NUGET_PUBLISH_METHOD }}
-
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
@@ -459,51 +452,12 @@ jobs:
         shell: bash
         run: ./build.sh ValidateReleaseManifest
 
-      - name: Validate NuGet publish configuration
-        if: env.NUGET_PUBLISH_METHOD != '' && env.NUGET_PUBLISH_METHOD != 'api-key' && env.NUGET_PUBLISH_METHOD != 'oidc'
-        shell: bash
-        run: |
-          echo "::error::Invalid NUGET_PUBLISH_METHOD '$NUGET_PUBLISH_METHOD'. Must be 'api-key', 'oidc', or unset."
-          exit 1
-
-      - name: NuGet login (Trusted Publishing / OIDC)
-        if: env.NUGET_PUBLISH_METHOD == 'oidc'
-        id: nuget-login
-        uses: NuGet/login@d22cc5f58ff5b88bf9bd452535b4335137e24544 # v1.1.0
-        with:
-          user: ${{ vars.NUGET_USER || github.repository_owner }}
-
-      - name: Push to NuGet.org (OIDC)
-        if: env.NUGET_PUBLISH_METHOD == 'oidc'
-        shell: bash
-        env:
-          API_KEY: ${{ steps.nuget-login.outputs.NUGET_API_KEY }}
-        run: |
-          shopt -s nullglob
-          PACKAGES=(artifacts/packages/*.nupkg)
-          if [ ${#PACKAGES[@]} -eq 0 ]; then
-            echo "::error::No .nupkg files found"
-            exit 1
-          fi
-          for pkg in "${PACKAGES[@]}"; do
-            echo "Pushing $pkg"
-            dotnet nuget push "$pkg" \
-              --api-key "$API_KEY" \
-              --source https://api.nuget.org/v3/index.json \
-              --skip-duplicate
-          done
-          echo "All packages pushed to NuGet.org via Trusted Publishing"
-
-      - name: Push to NuGet.org (API key)
-        if: env.NUGET_PUBLISH_METHOD == 'api-key'
+      - name: Push to NuGet.org
+        if: secrets.NUGET_API_KEY != ''
         shell: bash
         env:
           API_KEY: ${{ secrets.NUGET_API_KEY }}
         run: |
-          if [ -z "$API_KEY" ]; then
-            echo "::error::NUGET_PUBLISH_METHOD is 'api-key' but NUGET_API_KEY secret is not set."
-            exit 1
-          fi
           shopt -s nullglob
           PACKAGES=(artifacts/packages/*.nupkg)
           if [ ${#PACKAGES[@]} -eq 0 ]; then
@@ -517,12 +471,12 @@ jobs:
               --source https://api.nuget.org/v3/index.json \
               --skip-duplicate
           done
-          echo "All packages pushed to NuGet.org via API key"
+          echo "All packages pushed to NuGet.org"
 
       - name: NuGet push skipped
-        if: env.NUGET_PUBLISH_METHOD == ''
+        if: secrets.NUGET_API_KEY == ''
         shell: bash
-        run: echo "::notice::NUGET_PUBLISH_METHOD is not set. Skipping NuGet push. Set it to 'api-key' or 'oidc' in repository variables."
+        run: echo "::notice::NUGET_API_KEY secret is not configured. Skipping NuGet push."
 
       - name: Generate SBOM
         uses: anchore/sbom-action@57aae528053a48a3f6235f2d9461b05fbcb7366d # v0.23.1
