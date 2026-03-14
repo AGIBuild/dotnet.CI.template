@@ -284,7 +284,7 @@ jobs:
 
       - name: Report test results
         if: always() && !cancelled()
-        uses: dorny/test-reporter@v1
+        uses: dorny/test-reporter@v2
         with:
           name: Tests (${{ matrix.runtime }})
           path: artifacts/test-results/**/*.trx
@@ -424,7 +424,7 @@ jobs:
           format: spdx-json
 
       - name: Attest build provenance
-        uses: actions/attest-build-provenance@v2
+        uses: actions/attest-build-provenance@v4
         with:
           subject-path: |
             packages/*.nupkg
@@ -527,7 +527,7 @@ jobs:
             echo "should_deploy=false" >> "$GITHUB_OUTPUT"
           fi
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v6
         if: steps.check-docs.outputs.should_deploy == 'true'
         with:
           node-version: 22
@@ -546,7 +546,7 @@ jobs:
 
       - name: Upload pages artifact
         if: steps.check-docs.outputs.should_deploy == 'true'
-        uses: actions/upload-pages-artifact@v3
+        uses: actions/upload-pages-artifact@v4
         with:
           path: docs/.vitepress/dist
 
