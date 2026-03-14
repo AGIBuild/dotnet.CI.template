@@ -26,6 +26,8 @@
       "enum": [
         "Build",
         "Clean",
+        "CoverageReport",
+        "Format",
         "GenerateReleaseManifest",
         "Pack",
         "PackageApp",

@@ -16,7 +16,7 @@
        Bump this value via PR when preparing a new release.
        Release is triggered only when this version differs from the latest git tag. -->
   <PropertyGroup>
-    <VersionPrefix>0.2.0</VersionPrefix>
+    <VersionPrefix>0.2.1</VersionPrefix>
     <FileVersion Condition="'$(BuildNumber)' != ''">$(VersionPrefix).$(BuildNumber)</FileVersion>
   </PropertyGroup>
 
