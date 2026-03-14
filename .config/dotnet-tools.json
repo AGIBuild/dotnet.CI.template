@@ -12,7 +12,7 @@
     "dotnet-stryker": {
       "version": "4.13.0",
       "commands": [
-        "stryker"
+        "dotnet-stryker"
       ],
       "rollForward": false
     }
