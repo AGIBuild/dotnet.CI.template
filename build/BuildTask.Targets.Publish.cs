@@ -5,6 +5,7 @@ using static Nuke.Common.Tools.DotNet.DotNetTasks;
 partial class BuildTask
 {
     Target Publish => _ => _
+        .DependsOn(Restore)
         .Requires(() => !string.IsNullOrWhiteSpace(Runtime))
         .Executes(() =>
         {

@@ -183,12 +183,19 @@ jobs:
       - uses: actions/cache@v5
         with:
           path: ~/.nuget/packages
-          key: ${{ runner.os }}-nuget-${{ hashFiles('**/*.csproj', 'global.json', 'dotnet-tools.json') }}
+          key: ${{ runner.os }}-nuget-${{ hashFiles('**/*.csproj', 'global.json', '.config/dotnet-tools.json') }}
           restore-keys: ${{ runner.os }}-nuget-
 
       - name: Install .NET workloads
         if: matrix.workloads != ''
         run: dotnet workload install ${{ matrix.workloads }}
+
+      - name: Check code format
+        if: matrix.runtime == 'linux-x64'
+        shell: bash
+        run: |
+          chmod +x build.sh
+          ./build.sh Format
 
       - name: Build and test
         if: runner.os != 'Windows'
@@ -293,6 +300,8 @@ jobs:
     environment: release
     permissions:
       contents: write
+      attestations: write
+      id-token: write
     concurrency:
       group: release-tag-${{ needs.resolve-version.outputs.tag }}
       cancel-in-progress: false
@@ -392,6 +401,20 @@ jobs:
         shell: bash
         run: echo "::warning::NUGET_API_KEY not configured. Skipping NuGet push."
 
+      - name: Generate SBOM
+        uses: anchore/sbom-action@v0
+        with:
+          artifact-name: sbom-spdx.json
+          output-file: sbom-spdx.json
+          format: spdx-json
+
+      - name: Attest build provenance
+        uses: actions/attest-build-provenance@v2
+        with:
+          subject-path: |
+            packages/*.nupkg
+            installers/*.zip
+
       - name: Create and push tag
         shell: bash
         run: |
@@ -432,7 +455,12 @@ jobs:
             exit 1
           fi
 
-          gh release create "$TAG" "${RELEASE_FILES[@]}" \
+          SBOM_FILE=""
+          if [ -f "sbom-spdx.json" ]; then
+            SBOM_FILE="sbom-spdx.json"
+          fi
+
+          gh release create "$TAG" "${RELEASE_FILES[@]}" $SBOM_FILE \
             --title "$RELEASE_NAME" \
             --generate-notes
           echo "Created release $TAG with ${#RELEASE_FILES[@]} assets"

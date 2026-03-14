@@ -5,4 +5,16 @@
     <ContinuousIntegrationBuild>true</ContinuousIntegrationBuild>
   </PropertyGroup>
 
+  <!-- Generate XML documentation for packable projects only -->
+  <PropertyGroup Condition="'$(IsPackable)' != 'false'">
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+  </PropertyGroup>
+
+  <!-- Populate NuGet package metadata from GitHub environment variables -->
+  <PropertyGroup Condition="'$(GITHUB_REPOSITORY)' != '' AND '$(RepositoryUrl)' == ''">
+    <RepositoryUrl>https://github.com/$(GITHUB_REPOSITORY)</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <PackageProjectUrl>https://github.com/$(GITHUB_REPOSITORY)</PackageProjectUrl>
+  </PropertyGroup>
+
 </Project>

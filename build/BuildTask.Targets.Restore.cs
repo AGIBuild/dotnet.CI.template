@@ -32,8 +32,7 @@ partial class BuildTask
 
             if (File.Exists(ToolManifestFile))
             {
-                DotNetToolRestore(settings => settings
-                    .SetToolManifest(ToolManifestFile));
+                DotNetToolRestore();
             }
         });
 }
