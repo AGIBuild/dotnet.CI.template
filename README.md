@@ -41,7 +41,7 @@ On **pull requests**, only a fast linux build + test runs. On **main**, the full
 | **NuGet Publishing** | Auto-push to NuGet.org with SHA256 manifest verification |
 | **Installer Packages** | Platform-specific zip archives attached to GitHub Releases |
 | **Version from Code** | `VersionPrefix` in `Directory.Build.props` is the single source of truth |
-| **Four-Part Release Tags** | `v0.2.0.42` format ensures unique tags per build |
+| **SemVer Release Tags** | `v0.2.0` format — release triggers only when version is bumped |
 | **CodeQL Security** | Automated vulnerability scanning on every push and weekly |
 | **Graceful Degradation** | Missing NuGet key? Skipped. No docs config? Skipped. Nothing breaks. |
 
@@ -94,11 +94,12 @@ The pipeline runs automatically. When `build-and-test` completes, go to **Action
 
 ## Version Management
 
-Versions follow a simple rule:
+Versions follow SemVer (3-segment `Major.Minor.Patch`):
 
-- **CI appends the build number** on release: `0.2.0` becomes `0.2.0.42`
-- **Tags are created automatically**: `v0.2.0.42`
-- No manual tagging. No version input fields. The single source of truth is `VersionPrefix` in `Directory.Build.props`.
+- **`VersionPrefix` in `Directory.Build.props`** is the single source of truth (e.g., `0.2.0`)
+- **Tags are created automatically**: `v0.2.0` — release triggers only when the tag doesn't exist yet
+- **`FileVersion`** includes the CI build number for traceability (e.g., `0.2.0.42`), visible in DLL properties
+- No manual tagging. No version input fields. Bump `VersionPrefix` via PR to trigger a release.
 
 ### Version commands
 
@@ -146,7 +147,7 @@ env:
 
 ## Concurrency
 
-Multiple `CI and Release` runs execute **in parallel by default**. Each run gets a unique `run_number`, so versions never conflict.
+Multiple `CI and Release` runs execute **in parallel by default**.
 
 To serialize runs on the same branch (only one active at a time), set repository variables in **Settings > Secrets and variables > Actions > Variables**:
 

@@ -59,30 +59,29 @@ jobs:
 
           SHA="$(git rev-parse HEAD)"
 
+          TAG="v$VERSION"
+
           IS_RELEASE="false"
           if [ "${{ github.event_name }}" != "pull_request" ] && [ "${{ github.ref }}" = "refs/heads/main" ]; then
-            IS_RELEASE="true"
+            git fetch --tags --force
+            if git ls-remote --tags origin "refs/tags/$TAG" | grep -q "$TAG"; then
+              echo "::notice::Tag $TAG already exists. Version not bumped — skipping release."
+            else
+              IS_RELEASE="true"
+            fi
           fi
-
-          if [ "$IS_RELEASE" = "true" ]; then
-            FULL_VERSION="${VERSION}.${{ github.run_number }}"
-          else
-            FULL_VERSION="$VERSION"
-          fi
-          TAG="v$FULL_VERSION"
 
           echo "version=$VERSION" >> "$GITHUB_OUTPUT"
-          echo "full_version=$FULL_VERSION" >> "$GITHUB_OUTPUT"
+          echo "full_version=$VERSION" >> "$GITHUB_OUTPUT"
           echo "tag=$TAG" >> "$GITHUB_OUTPUT"
           echo "sha=$SHA" >> "$GITHUB_OUTPUT"
           echo "is_release=$IS_RELEASE" >> "$GITHUB_OUTPUT"
-          echo "Resolved: version=$VERSION full_version=$FULL_VERSION tag=$TAG sha=$SHA is_release=$IS_RELEASE"
+          echo "Resolved: version=$VERSION tag=$TAG sha=$SHA is_release=$IS_RELEASE"
 
       - name: Version summary
         shell: bash
         run: |
           VERSION="${{ steps.resolve.outputs.version }}"
-          FULL_VERSION="${{ steps.resolve.outputs.full_version }}"
           IS_RELEASE="${{ steps.resolve.outputs.is_release }}"
           SHA="${{ steps.resolve.outputs.sha }}"
           TAG="${{ steps.resolve.outputs.tag }}"
@@ -119,8 +118,7 @@ jobs:
             echo ""
             echo "| Property | Value |"
             echo "|----------|-------|"
-            echo "| **Version** | \`$FULL_VERSION\` |"
-            echo "| **Base Version** | \`$VERSION\` |"
+            echo "| **Version** | \`$VERSION\` |"
             echo "| **Tag** | \`$TAG\` |"
             echo "| **Previous Tag** | \`$PREV_TAG\` |"
             echo "| **Bump Type** | **$BUMP** |"
@@ -167,7 +165,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     timeout-minutes: 30
     env:
-      BuildNumber: ${{ needs.resolve-version.outputs.is_release == 'true' && github.run_number || '' }}
+      BuildNumber: ${{ github.event_name != 'pull_request' && github.run_number || '' }}
     strategy:
       fail-fast: false
       matrix: ${{ fromJSON(needs.resolve-version.outputs.build_matrix) }}

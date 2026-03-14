@@ -13,10 +13,11 @@
 
 
   <!-- Explicit version: single source of truth for the entire solution.
-       Bump this value via PR when preparing a new release. -->
+       Bump this value via PR when preparing a new release.
+       Release is triggered only when this version differs from the latest git tag. -->
   <PropertyGroup>
     <VersionPrefix>0.2.0</VersionPrefix>
-    <VersionPrefix Condition="'$(BuildNumber)' != ''">$(VersionPrefix).$(BuildNumber)</VersionPrefix>
+    <FileVersion Condition="'$(BuildNumber)' != ''">$(VersionPrefix).$(BuildNumber)</FileVersion>
   </PropertyGroup>
 
   <!-- Local builds default to prerelease to avoid confusion with stable releases.

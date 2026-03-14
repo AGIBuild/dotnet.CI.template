@@ -25,11 +25,11 @@ For a quick release walkthrough, see: [Quick Start Release](quick-start-release.
 
 ### `CI and Release`
 - Triggers: `push` to `main`, `pull_request` targeting `main`, manual `workflow_dispatch`
-- Concurrency: **Parallel by default** — multiple pushes can run simultaneously (`run_number` is naturally unique, no version conflicts)
+- Concurrency: **Parallel by default** — multiple pushes can run simultaneously
   - For serial execution: Settings → Variables → set `CI_SERIAL=true` (queues by branch)
   - To cancel older runs: set `CI_CANCEL_IN_PROGRESS=true`
 - PR behavior: Runs Format Check + Build + Test + Coverage Report on ubuntu (with prerelease suffix)
-- main push behavior: Full-platform matrix Build + Test + Pack + Publish + PackageApp → approval → NuGet push + SBOM + Attestation + tag + GitHub Release → documentation deployment
+- main push behavior: If `VersionPrefix` has been bumped (tag doesn't exist yet), triggers full-platform matrix Build + Test + Pack + Publish + PackageApp → approval → NuGet push + SBOM + Attestation + tag + GitHub Release → documentation deployment. Otherwise, runs CI-only (build + test).
 - Artifacts: Test results (with PR annotations), coverage reports, NuGet packages (with release manifest), platform installer zips, SBOM
 
 ### `CodeQL`
@@ -42,9 +42,9 @@ For a quick release walkthrough, see: [Quick Start Release](quick-start-release.
 ## 2) Job Details
 
 ### `resolve-version`
-- Reads `VersionPrefix` from `Directory.Build.props`, validates semver format
-- Determines if this is a release (main push = true, PR = false)
-- Computes the build matrix: PR uses ubuntu only, main push includes win/linux/osx
+- Reads `VersionPrefix` from `Directory.Build.props`, validates semver format (3-segment: `Major.Minor.Patch`)
+- Determines if this is a release: main push + tag `v{version}` does not exist yet = release; otherwise CI-only
+- Computes the build matrix: PR uses ubuntu only, release includes win/linux/osx
 
 ### `build-and-test`
 - Matrix build: each platform runs Build + Test
@@ -80,7 +80,7 @@ For a quick release walkthrough, see: [Quick Start Release](quick-start-release.
    Approve the `release` environment.
 
 3. Check the Releases page:
-   - A tag was created (e.g., `v0.2.0.42`)
+   - A tag was created (e.g., `v0.2.0`)
    - The GitHub Release contains platform installer zips
    - A corresponding package version exists on NuGet.org (if `NUGET_API_KEY` is configured)
 
@@ -121,7 +121,7 @@ The version comes from `VersionPrefix` in `Directory.Build.props`. CI does not a
 After making changes, merge to `main` via PR. CI automatically builds with the new version.
 
 ### Q3: Can the same version be re-published?
-Each main push generates a unique 4-segment version number (e.g., `0.2.0.42`), so the same push won't conflict. To publish a new version (e.g., `0.3.0`), modify `VersionPrefix` via PR.
+No. Each version can only be released once. If the tag `v{version}` already exists, the release is skipped and the run becomes CI-only. To publish a new version, bump `VersionPrefix` via PR (e.g., `0.2.0` → `0.3.0`).
 
 ### Q4: What is the release manifest?
 `release-manifest.json` records the SHA256 hash and version information for each NuGet package. During the release phase, package files are verified against the manifest to prevent tampering or corruption during artifact transfer.

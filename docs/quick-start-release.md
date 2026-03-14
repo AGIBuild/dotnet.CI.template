@@ -41,7 +41,7 @@ After pushing to `main`:
 
 After a successful run, you should see:
 
-- A new tag (e.g., `v0.2.0.42`)
+- A new tag (e.g., `v0.2.0`)
 - A new GitHub Release
 - Release assets including platform installer zips (`app-linux-x64.zip`, `app-win-x64.zip`, etc.) and the SBOM file
 - A corresponding package version on NuGet.org (if `NUGET_API_KEY` is configured)
@@ -51,7 +51,7 @@ After a successful run, you should see:
 
 ## 4) Version Management (Must Read)
 
-The version comes from `VersionPrefix` in `Directory.Build.props`. CI automatically appends the build number (e.g., `0.2.0.42`).
+The version comes from `VersionPrefix` in `Directory.Build.props` — a pure 3-segment SemVer (e.g., `0.2.0`). A release is triggered only when this version differs from the latest git tag.
 
 ```bash
 ./build.sh ShowVersion                           # Show current version
