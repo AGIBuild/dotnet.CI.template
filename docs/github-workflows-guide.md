@@ -9,7 +9,7 @@ If you just created a repository from this template, think of it as a standard p
 push / PR to main
   └─ CI and Release
        ├─ resolve-version
-       ├─ build-and-test (matrix: PR=linux, main=all platforms)
+       ├─ build-and-test (matrix: all platforms; release adds publish)
        ├─ release (requires approval, NuGet push + tag + GitHub Release)
        └─ deploy-docs (GitHub Pages)
 
@@ -50,7 +50,7 @@ For a quick release walkthrough, see: [Quick Start Release](quick-start-release.
 - PR: uses `--VersionSuffix "ci.<run_number>"`
 - main push: no suffix (locks the release version)
 - Linux runner additionally runs Pack (always, as a pre-release quality gate); GenerateReleaseManifest runs only for releases
-- All platforms run Publish + PackageApp, producing installer zips (`app-{runtime}.zip`)
+- For releases, all platforms with publish enabled run Publish + PackageApp, producing installer zips (`app-{runtime}.zip`)
 - Test results are displayed directly in PR checks via `dorny/test-reporter`
 
 ### `release`

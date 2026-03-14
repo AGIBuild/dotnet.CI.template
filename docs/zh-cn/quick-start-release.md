@@ -41,7 +41,7 @@ resolve-version → build-and-test (matrix) → release (需 approve) → deploy
 
 运行成功后应看到：
 
-- 新 tag（例如 `v0.2.0.42`）
+- 新 tag（例如 `v0.2.0`）
 - 一个新的 GitHub Release
 - Release 附件里有各平台安装包 zip（`app-linux-x64.zip`、`app-win-x64.zip` 等）和 SBOM 文件
 - NuGet.org 上有对应版本的包（如已配置 `NUGET_API_KEY`）
@@ -51,7 +51,7 @@ resolve-version → build-and-test (matrix) → release (需 approve) → deploy
 
 ## 4) 版本管理（必读）
 
-版本来自 `Directory.Build.props` 的 `VersionPrefix`，CI 自动追加 build number（如 `0.2.0.42`）。
+版本来自 `Directory.Build.props` 的 `VersionPrefix`——纯 3 段式 SemVer（如 `0.2.0`）。只有当该版本与最新 git tag 不同时才会触发 release。
 
 ```bash
 ./build.sh ShowVersion                           # 查看当前版本

@@ -9,7 +9,7 @@
 push / PR to main
   └─ CI and Release
        ├─ resolve-version
-       ├─ build-and-test (matrix: PR=linux, main=全平台)
+       ├─ build-and-test (matrix: 全平台; release 额外启用 publish)
        ├─ release (需 approval，NuGet 推送 + tag + GitHub Release)
        └─ deploy-docs (GitHub Pages)
 
@@ -25,10 +25,8 @@ push / PR to main + weekly
 
 ### `CI and Release`
 - 触发：`push` 到 `main`、对 `main` 的 `pull_request`、手动 `workflow_dispatch`
-- 并发：**默认并行**，多次 push 可同时运行（`run_number` 天然唯一，版本不冲突）
-  - 如需串行：Settings → Variables → 设置 `CI_SERIAL=true`（按分支排队）
-  - 如需取消旧 run：设置 `CI_CANCEL_IN_PROGRESS=true`
-- PR 行为：在 ubuntu 上运行 Format Check + Build + Test + Coverage Report（带 prerelease suffix）
+- 并发：同一分支**串行排队**（`concurrency: { group: ci-${{ github.ref }}, cancel-in-progress: false }`），新 run 排队等待上一个完成
+- PR 行为：全平台矩阵 Build + Test（Format Check + Coverage Report 仅 linux，Pack 验证仅 linux），带 prerelease suffix
 - main push 行为：全平台矩阵 Build + Test + Pack + Publish + PackageApp → approval → NuGet 推送 + SBOM + Attestation + tag + GitHub Release → 文档部署
 - 产物：测试结果（含 PR 内注解）、覆盖率报告、NuGet 包（含 release manifest）、各平台安装包 zip、SBOM
 
@@ -43,8 +41,8 @@ push / PR to main + weekly
 
 ### `resolve-version`
 - 从 `Directory.Build.props` 读取 `VersionPrefix`，验证 semver 格式
-- 判断是否为 release（main push = true，PR = false）
-- 计算构建矩阵：PR 仅 ubuntu，main push 包含 win/linux/osx
+- 判断是否为 release：main push + tag `v{version}` 不存在 = release；否则为 CI-only
+- 计算构建矩阵：所有模式均使用全平台（linux/win/osx）；release 额外启用 publish
 
 ### `build-and-test`
 - 矩阵构建：各平台执行 Build + Test
@@ -52,7 +50,7 @@ push / PR to main + weekly
 - PR：带 `--VersionSuffix "ci.<run_number>"`
 - main push：无 suffix（固化 release 版本）
 - linux runner 额外执行 Pack + GenerateReleaseManifest（生成 SHA256 manifest）
-- 各平台执行 Publish + PackageApp，生成安装包 zip（`app-{runtime}.zip`）
+- release 模式下，启用 publish 的平台执行 Publish + PackageApp，生成安装包 zip（`app-{runtime}.zip`）
 - 测试结果通过 `dorny/test-reporter` 直接展示在 PR check 中
 
 ### `release`
@@ -80,7 +78,7 @@ push / PR to main + weekly
    审批 `release` environment。
 
 3. 去 Releases 页面确认：
-   - 已创建 tag（如 `v0.2.0.42`）
+   - 已创建 tag（如 `v0.2.0`）
    - GitHub Release 中已生成各平台安装包 zip
    - NuGet.org 上有对应版本的包（如已配置 `NUGET_API_KEY`）
 
@@ -121,7 +119,7 @@ push / PR to main + weekly
 修改后通过 PR 合并到 `main`，CI 自动基于新版本构建。
 
 ### Q3: 同一版本能否重新发布？
-每次 main push 都会生成唯一的四段式版本号（如 `0.2.0.42`），因此同一 push 不会冲突。如果需要发新版本（如 `0.3.0`），通过 PR 修改 `VersionPrefix`。
+不能。每个版本只能发布一次。如果 tag `v{version}` 已存在，release 会被跳过，该次运行变为 CI-only。要发布新版本，请通过 PR 提升 `VersionPrefix`（如 `0.2.0` → `0.3.0`）。
 
 ### Q4: Release manifest 是什么？
 `release-manifest.json` 记录每个 NuGet 包的 SHA256 hash 和版本信息。发布阶段会验证包文件与 manifest 一致，防止产物在传递过程中被篡改或损坏。

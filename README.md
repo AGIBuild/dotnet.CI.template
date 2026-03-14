@@ -29,7 +29,7 @@ release ────────── [requires approval] NuGet push + Git tag 
 deploy-docs ────── VitePress to GitHub Pages (optional, i18n)
 ```
 
-On **pull requests**, only a fast linux build + test runs. On **main**, the full multi-platform pipeline kicks in.
+Both **pull requests** and **main pushes** run the full multi-platform matrix (linux / windows / macos) for Build + Test. On **releases** (version bumped), Publish + PackageApp are additionally enabled.
 
 ### Pipeline Highlights
 
@@ -147,14 +147,7 @@ env:
 
 ## Concurrency
 
-Multiple `CI and Release` runs execute **in parallel by default**.
-
-To serialize runs on the same branch (only one active at a time), set repository variables in **Settings > Secrets and variables > Actions > Variables**:
-
-| Variable | Default | Effect |
-|----------|---------|--------|
-| `CI_SERIAL` | _(unset / false)_ | Set to `true` to queue runs per branch instead of running in parallel |
-| `CI_CANCEL_IN_PROGRESS` | _(unset / false)_ | Set to `true` to cancel the running workflow when a newer one is queued |
+`CI and Release` runs are **serialized per branch** by default. The workflow uses a concurrency group (`ci-${{ github.ref }}`) with `cancel-in-progress: false`, meaning a new run on the same branch queues behind the running one instead of cancelling it.
 
 ---
 
