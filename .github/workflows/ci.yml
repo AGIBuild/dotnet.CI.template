@@ -6,6 +6,11 @@ on:
   pull_request:
     branches: [main]
   workflow_dispatch:
+    inputs:
+      prerelease_suffix:
+        description: 'Pre-release channel suffix (e.g. rc.1, beta.2). Leave empty for standard CI build.'
+        required: false
+        default: ''
 
 permissions:
   contents: read
@@ -31,19 +36,25 @@ jobs:
     outputs:
       version: ${{ steps.resolve.outputs.version }}
       full_version: ${{ steps.resolve.outputs.full_version }}
+      version_suffix: ${{ steps.resolve.outputs.version_suffix }}
       tag: ${{ steps.resolve.outputs.tag }}
       sha: ${{ steps.resolve.outputs.sha }}
       is_release: ${{ steps.resolve.outputs.is_release }}
       build_matrix: ${{ steps.matrix.outputs.build_matrix }}
 
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           fetch-tags: true
 
       - name: Resolve version and context
         id: resolve
         shell: bash
+        env:
+          PRERELEASE_SUFFIX: ${{ inputs.prerelease_suffix }}
+          EVENT_NAME: ${{ github.event_name }}
+          GIT_REF: ${{ github.ref }}
+          RUN_NUMBER: ${{ github.run_number }}
         run: |
           SEMVER_REGEX='^[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.-]+)?$'
 
@@ -63,7 +74,7 @@ jobs:
           TAG="v$VERSION"
 
           IS_RELEASE="false"
-          if [ "${{ github.event_name }}" != "pull_request" ] && [ "${{ github.ref }}" = "refs/heads/main" ]; then
+          if [ "$EVENT_NAME" != "pull_request" ] && [ "$GIT_REF" = "refs/heads/main" ]; then
             git fetch --tags --force
             if git ls-remote --tags origin "refs/tags/$TAG" | grep -q "$TAG"; then
               echo "::notice::Tag $TAG already exists. Version not bumped — skipping release."
@@ -72,24 +83,43 @@ jobs:
             fi
           fi
 
+          VERSION_SUFFIX=""
+          if [ -n "$PRERELEASE_SUFFIX" ]; then
+            if ! [[ "$PRERELEASE_SUFFIX" =~ ^[0-9A-Za-z.-]+$ ]]; then
+              echo "::error::Invalid prerelease_suffix: must match [0-9A-Za-z.-]+"
+              exit 1
+            fi
+            VERSION_SUFFIX="$PRERELEASE_SUFFIX"
+          elif [ "$IS_RELEASE" != "true" ]; then
+            VERSION_SUFFIX="ci.${RUN_NUMBER}"
+          fi
+
+          if [ -n "$VERSION_SUFFIX" ]; then
+            FULL_VERSION="${VERSION}-${VERSION_SUFFIX}"
+          else
+            FULL_VERSION="${VERSION}"
+          fi
+
           echo "version=$VERSION" >> "$GITHUB_OUTPUT"
-          echo "full_version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "full_version=$FULL_VERSION" >> "$GITHUB_OUTPUT"
+          echo "version_suffix=$VERSION_SUFFIX" >> "$GITHUB_OUTPUT"
           echo "tag=$TAG" >> "$GITHUB_OUTPUT"
           echo "sha=$SHA" >> "$GITHUB_OUTPUT"
           echo "is_release=$IS_RELEASE" >> "$GITHUB_OUTPUT"
-          echo "Resolved: version=$VERSION tag=$TAG sha=$SHA is_release=$IS_RELEASE"
+          echo "Resolved: version=$VERSION full_version=$FULL_VERSION tag=$TAG sha=$SHA is_release=$IS_RELEASE"
 
       - name: Version summary
         shell: bash
         run: |
           VERSION="${{ steps.resolve.outputs.version }}"
+          FULL_VERSION="${{ steps.resolve.outputs.full_version }}"
+          VERSION_SUFFIX="${{ steps.resolve.outputs.version_suffix }}"
           IS_RELEASE="${{ steps.resolve.outputs.is_release }}"
           SHA="${{ steps.resolve.outputs.sha }}"
           TAG="${{ steps.resolve.outputs.tag }}"
 
           IFS='.' read -r CUR_MAJOR CUR_MINOR CUR_PATCH <<< "$VERSION"
 
-          git fetch --tags --force
           PREV_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "")
           if [ -n "$PREV_TAG" ]; then
             PREV_VER="${PREV_TAG#v}"
@@ -109,6 +139,10 @@ jobs:
           fi
 
           MODE=$( [ "$IS_RELEASE" = "true" ] && echo "Release" || echo "CI" )
+          CHANNEL="stable"
+          if [ -n "$VERSION_SUFFIX" ]; then
+            CHANNEL="$VERSION_SUFFIX"
+          fi
           REPO="${{ github.repository }}"
           OWNER="${REPO%%/*}"
           REPO_NAME="${REPO##*/}"
@@ -120,6 +154,8 @@ jobs:
             echo "| Property | Value |"
             echo "|----------|-------|"
             echo "| **Version** | \`$VERSION\` |"
+            echo "| **Full Version** | \`$FULL_VERSION\` |"
+            echo "| **Channel** | \`$CHANNEL\` |"
             echo "| **Tag** | \`$TAG\` |"
             echo "| **Previous Tag** | \`$PREV_TAG\` |"
             echo "| **Bump Type** | **$BUMP** |"
@@ -174,15 +210,15 @@ jobs:
       matrix: ${{ fromJSON(needs.resolve-version.outputs.build_matrix) }}
 
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           ref: ${{ needs.resolve-version.outputs.sha }}
 
-      - uses: actions/setup-dotnet@v5
+      - uses: actions/setup-dotnet@c2fa09f4bde5ebb9d1777cf28262a3eb3db3ced7 # v5.2.0
         with:
           global-json-file: global.json
 
-      - uses: actions/cache@v5
+      - uses: actions/cache@cdf6c1fa76f9f475f3d7449005a359c84ca0f306 # v5.0.3
         with:
           path: ~/.nuget/packages
           key: ${{ runner.os }}-nuget-${{ hashFiles('**/*.csproj', 'Directory.Packages.props', 'global.json', '.config/dotnet-tools.json') }}
@@ -204,29 +240,39 @@ jobs:
       - name: Build and test
         if: runner.os != 'Windows'
         shell: bash
+        env:
+          VERSION_SUFFIX: ${{ needs.resolve-version.outputs.version_suffix }}
         run: |
-          IS_RELEASE="${{ needs.resolve-version.outputs.is_release }}"
-          if [ "$IS_RELEASE" = "true" ]; then
-            ./build.sh Test
+          if [ -n "$VERSION_SUFFIX" ]; then
+            ./build.sh Test --VersionSuffix "$VERSION_SUFFIX"
           else
-            ./build.sh Test --VersionSuffix "ci.${{ github.run_number }}"
+            ./build.sh Test
           fi
 
       - name: Build and test (Windows)
         if: runner.os == 'Windows'
         shell: pwsh
+        env:
+          VERSION_SUFFIX: ${{ needs.resolve-version.outputs.version_suffix }}
         run: |
-          $isRelease = "${{ needs.resolve-version.outputs.is_release }}"
-          if ($isRelease -eq "true") {
-            ./build.ps1 Test
+          if ($env:VERSION_SUFFIX) {
+            ./build.ps1 Test --VersionSuffix "$env:VERSION_SUFFIX"
           } else {
-            ./build.ps1 Test --VersionSuffix "ci.${{ github.run_number }}"
+            ./build.ps1 Test
           }
 
       - name: Generate coverage report
         if: matrix.runtime == 'linux-x64'
         shell: bash
         run: ./build.sh CoverageReport --skip Test
+
+      - name: Upload coverage report
+        if: matrix.runtime == 'linux-x64'
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
+        with:
+          name: coverage-report
+          path: artifacts/test-results/coverage-report/**
+          if-no-files-found: warn
 
       - name: Pack
         if: matrix.pack
@@ -241,24 +287,7 @@ jobs:
       - name: Validate package versions
         if: needs.resolve-version.outputs.is_release == 'true' && matrix.pack
         shell: bash
-        run: |
-          EXPECTED_VERSION="${{ needs.resolve-version.outputs.full_version }}"
-
-          shopt -s nullglob
-          FILES=(artifacts/packages/*.nupkg artifacts/packages/*.snupkg)
-          if [ ${#FILES[@]} -eq 0 ]; then
-            echo "::error::No package files found under artifacts/packages/"
-            exit 1
-          fi
-
-          for file in "${FILES[@]}"; do
-            name="$(basename "$file")"
-            if [[ "$name" != *".${EXPECTED_VERSION}.nupkg" && "$name" != *".${EXPECTED_VERSION}.snupkg" ]]; then
-              echo "::error::Package version mismatch. Expected $EXPECTED_VERSION, got $name"
-              exit 1
-            fi
-          done
-          echo "All packages match version: $EXPECTED_VERSION"
+        run: ./build.sh ValidatePackageVersions --skip Build Test Pack
 
       - name: Publish app
         if: needs.resolve-version.outputs.is_release == 'true' && matrix.publish && runner.os != 'Windows'
@@ -282,7 +311,7 @@ jobs:
 
       - name: Upload test results
         if: always()
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
         with:
           name: test-results-${{ matrix.runtime }}
           path: artifacts/test-results/**
@@ -290,7 +319,7 @@ jobs:
 
       - name: Report test results
         if: always() && !cancelled()
-        uses: dorny/test-reporter@v2
+        uses: dorny/test-reporter@3d76b34a4535afbd0600d347b09a6ee5deb3ed7f # v2.6.0
         with:
           name: Tests (${{ matrix.runtime }})
           path: artifacts/test-results/**/*.trx
@@ -298,7 +327,7 @@ jobs:
 
       - name: Upload packages
         if: needs.resolve-version.outputs.is_release == 'true' && matrix.pack
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
         with:
           name: packages
           path: artifacts/packages/**
@@ -306,7 +335,7 @@ jobs:
 
       - name: Upload installer artifacts
         if: needs.resolve-version.outputs.is_release == 'true' && matrix.publish
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
         with:
           name: installer-${{ matrix.runtime }}
           path: artifacts/installers/**
@@ -317,9 +346,11 @@ jobs:
     needs: resolve-version
     runs-on: ubuntu-latest
     timeout-minutes: 10
+    outputs:
+      has_docs: ${{ steps.check.outputs.has_docs }}
 
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           ref: ${{ needs.resolve-version.outputs.sha }}
 
@@ -328,13 +359,17 @@ jobs:
         shell: bash
         run: |
           if [ -f "docs/package.json" ]; then
+            if [ ! -f "docs/package-lock.json" ]; then
+              echo "::error::docs/package.json exists but docs/package-lock.json is missing. Run 'npm install' in docs/ and commit the lock file."
+              exit 1
+            fi
             echo "has_docs=true" >> "$GITHUB_OUTPUT"
           else
             echo "::notice::No docs/package.json found. Skipping documentation build."
             echo "has_docs=false" >> "$GITHUB_OUTPUT"
           fi
 
-      - uses: actions/setup-node@v6
+      - uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f # v6.3.0
         if: steps.check.outputs.has_docs == 'true'
         with:
           node-version: 22
@@ -353,7 +388,7 @@ jobs:
 
       - name: Upload docs artifact
         if: steps.check.outputs.has_docs == 'true'
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
         with:
           name: docs-site
           path: docs/.vitepress/dist
@@ -377,79 +412,54 @@ jobs:
       HAS_NUGET_KEY: ${{ secrets.NUGET_API_KEY != '' }}
 
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           ref: ${{ needs.resolve-version.outputs.sha }}
           fetch-depth: 0
 
-      - uses: actions/setup-dotnet@v5
+      - uses: actions/setup-dotnet@c2fa09f4bde5ebb9d1777cf28262a3eb3db3ced7 # v5.2.0
         with:
           global-json-file: global.json
 
       - name: Download packages
-        uses: actions/download-artifact@v8
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
         with:
           name: packages
-          path: packages
+          path: artifacts/packages
 
       - name: Download installers
-        uses: actions/download-artifact@v8
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
         with:
-          path: installers
+          path: artifacts/installers
           pattern: installer-*
           merge-multiple: true
 
+      - name: Mark build script executable
+        run: chmod +x build.sh
+
       - name: Verify release manifest
         shell: bash
-        run: |
-          set -euo pipefail
-          MANIFEST="packages/release-manifest.json"
+        run: ./build.sh ValidateReleaseManifest
 
-          if [ ! -f "$MANIFEST" ]; then
-            echo "::error::Release manifest not found: $MANIFEST"
-            exit 1
-          fi
-
-          python3 - <<'PY'
-          import hashlib, json, sys
-          from pathlib import Path
-
-          manifest = json.loads(Path("packages/release-manifest.json").read_text())
-          expected = "${{ needs.resolve-version.outputs.full_version }}"
-
-          if manifest.get("version") != expected:
-              print(f"::error::Version mismatch: manifest={manifest.get('version')} expected={expected}")
-              sys.exit(1)
-
-          errors = []
-          for pkg in manifest.get("packages", []):
-              path = Path("packages") / pkg["file"]
-              if not path.exists():
-                  errors.append(f"Missing: {path}")
-                  continue
-              h = hashlib.sha256()
-              with path.open("rb") as f:
-                  for chunk in iter(lambda: f.read(1024 * 1024), b""):
-                      h.update(chunk)
-              if h.hexdigest() != pkg["sha256"]:
-                  errors.append(f"Hash mismatch: {pkg['file']}")
-
-          if errors:
-              for e in errors:
-                  print(f"::error::{e}")
-              sys.exit(1)
-
-          print(f"Verified {len(manifest['packages'])} packages.")
-          PY
+      # NuGet Publishing: prefers Trusted Publishing (OIDC, no secrets) over API key.
+      # To use Trusted Publishing: configure a policy at nuget.org → Manage Packages → Trusted Publishers.
+      # Falls back to NUGET_API_KEY secret. If neither is configured, push is skipped.
+      - name: NuGet login (Trusted Publishing)
+        if: env.HAS_NUGET_KEY != 'true'
+        id: nuget-login
+        uses: NuGet/login@d22cc5f58ff5b88bf9bd452535b4335137e24544 # v1.1.0
+        with:
+          user: ${{ vars.NUGET_USER || github.repository_owner }}
+        continue-on-error: true
 
       - name: Push to NuGet.org
-        if: env.HAS_NUGET_KEY == 'true'
+        if: env.HAS_NUGET_KEY == 'true' || steps.nuget-login.outcome == 'success'
         shell: bash
         env:
-          NUGET_API_KEY: ${{ secrets.NUGET_API_KEY }}
+          API_KEY: ${{ env.HAS_NUGET_KEY == 'true' && secrets.NUGET_API_KEY || steps.nuget-login.outputs.NUGET_API_KEY }}
         run: |
           shopt -s nullglob
-          PACKAGES=(packages/*.nupkg)
+          PACKAGES=(artifacts/packages/*.nupkg)
           if [ ${#PACKAGES[@]} -eq 0 ]; then
             echo "::error::No .nupkg files found"
             exit 1
@@ -458,30 +468,39 @@ jobs:
           for pkg in "${PACKAGES[@]}"; do
             echo "Pushing $pkg"
             dotnet nuget push "$pkg" \
-              --api-key "$NUGET_API_KEY" \
+              --api-key "$API_KEY" \
               --source https://api.nuget.org/v3/index.json \
               --skip-duplicate
           done
           echo "All packages pushed to NuGet.org"
 
       - name: NuGet push skipped
-        if: env.HAS_NUGET_KEY != 'true'
+        if: env.HAS_NUGET_KEY != 'true' && steps.nuget-login.outcome != 'success'
         shell: bash
-        run: echo "::warning::NUGET_API_KEY not configured. Skipping NuGet push."
+        run: echo "::warning::No NUGET_API_KEY secret and Trusted Publishing not configured. Skipping NuGet push."
 
       - name: Generate SBOM
-        uses: anchore/sbom-action@v0
+        uses: anchore/sbom-action@57aae528053a48a3f6235f2d9461b05fbcb7366d # v0.23.1
         with:
           artifact-name: sbom-spdx.json
           output-file: sbom-spdx.json
           format: spdx-json
 
       - name: Attest build provenance
-        uses: actions/attest-build-provenance@v4
+        uses: actions/attest-build-provenance@a2bbfa25375fe432b6a289bc6b6cd05ecd0c4c32 # v4.1.0
         with:
           subject-path: |
-            packages/*.nupkg
-            installers/*.zip
+            artifacts/packages/*.nupkg
+            artifacts/installers/*.zip
+
+      - name: Attest SBOM
+        if: hashFiles('sbom-spdx.json') != ''
+        uses: actions/attest@59d89421af93a897026c735860bf21b6eb4f7b26 # v4.1.0
+        with:
+          subject-path: |
+            artifacts/packages/*.nupkg
+            artifacts/installers/*.zip
+          sbom-path: sbom-spdx.json
 
       - name: Create and push tag
         shell: bash
@@ -512,7 +531,7 @@ jobs:
           RELEASE_NAME="dotnet.CI.template $TAG"
 
           shopt -s nullglob
-          RELEASE_FILES=(installers/*.zip)
+          RELEASE_FILES=(artifacts/installers/*.zip)
           if [ ${#RELEASE_FILES[@]} -eq 0 ]; then
             echo "::error::No installer zip files found"
             exit 1
@@ -536,7 +555,7 @@ jobs:
   deploy-docs:
     name: Deploy Documentation
     needs: [resolve-version, release, build-docs]
-    if: needs.resolve-version.outputs.is_release == 'true'
+    if: needs.resolve-version.outputs.is_release == 'true' && needs.build-docs.outputs.has_docs == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 10
     permissions:
@@ -567,18 +586,18 @@ jobs:
 
       - name: Download docs artifact
         if: steps.check.outputs.should_deploy == 'true'
-        uses: actions/download-artifact@v8
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
         with:
           name: docs-site
           path: docs-site
 
       - name: Upload pages artifact
         if: steps.check.outputs.should_deploy == 'true'
-        uses: actions/upload-pages-artifact@v4
+        uses: actions/upload-pages-artifact@7b1f4a764d45c48632c6b24a0339c27f5614fb0b # v4.0.0
         with:
           path: docs-site
 
       - name: Deploy to GitHub Pages
         if: steps.check.outputs.should_deploy == 'true'
         id: deployment
-        uses: actions/deploy-pages@v4
+        uses: actions/deploy-pages@d6db90164ac5ed86f2b6aed7e0febac5b3c0c03e # v4.0.5

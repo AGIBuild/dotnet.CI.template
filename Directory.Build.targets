@@ -5,10 +5,18 @@
     <ContinuousIntegrationBuild>true</ContinuousIntegrationBuild>
   </PropertyGroup>
 
-  <!-- Generate XML documentation for packable projects only -->
+  <!-- Generate XML documentation and enable package validation for packable projects only -->
   <PropertyGroup Condition="'$(IsPackable)' != 'false'">
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <EnablePackageValidation>true</EnablePackageValidation>
+    <IsTrimmable>true</IsTrimmable>
+    <IsAotCompatible>true</IsAotCompatible>
   </PropertyGroup>
+
+  <!-- Track public API surface for packable projects -->
+  <ItemGroup Condition="'$(IsPackable)' != 'false'">
+    <PackageReference Include="Microsoft.CodeAnalysis.PublicApiAnalyzers" PrivateAssets="all" />
+  </ItemGroup>
 
   <!-- Populate NuGet package metadata from GitHub environment variables -->
   <PropertyGroup Condition="'$(GITHUB_REPOSITORY)' != '' AND '$(RepositoryUrl)' == ''">

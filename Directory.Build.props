@@ -7,14 +7,29 @@
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <AnalysisLevel>latest-recommended</AnalysisLevel>
     <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
+    <Company>$(Authors)</Company>
+    <Copyright>Copyright (c) $([System.DateTime]::UtcNow.Year) $(Authors)</Copyright>
     <PublishRepositoryUrl>true</PublishRepositoryUrl>
     <EmbedUntrackedSources>true</EmbedUntrackedSources>
+    <NuGetAudit>true</NuGetAudit>
+    <NuGetAuditMode>all</NuGetAuditMode>
+    <NuGetAuditLevel>moderate</NuGetAuditLevel>
+    <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
   </PropertyGroup>
 
 
   <!-- Explicit version: single source of truth for the entire solution.
        Bump this value via PR when preparing a new release.
-       Release is triggered only when this version differs from the latest git tag. -->
+       Release is triggered only when this version differs from the latest git tag.
+
+       Version channel model:
+         Channel   VersionSuffix         Trigger
+         local     local                 Developer machine (default)
+         ci        ci.{run_number}       PR / main push (non-release)
+         rc        rc.{N}                workflow_dispatch with prerelease_suffix
+         stable    (none)                main push when version is bumped
+
+       To publish an RC: trigger workflow_dispatch with prerelease_suffix=rc.1 -->
   <PropertyGroup>
     <VersionPrefix>0.2.3</VersionPrefix>
     <FileVersion Condition="'$(BuildNumber)' != ''">$(VersionPrefix).$(BuildNumber)</FileVersion>

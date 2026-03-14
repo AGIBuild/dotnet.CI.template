@@ -26,6 +26,12 @@ partial class BuildTask
     [Parameter("Publish self-contained output in Publish target")]
     readonly bool SelfContained;
 
+    [Parameter("Minimum line coverage percentage (0-100). CoverageReport fails if below this threshold.")]
+    readonly int CoverageThreshold = 90;
+
+    [Parameter("Minimum branch coverage percentage (0-100). CoverageReport fails if below this threshold.")]
+    readonly int BranchCoverageThreshold = 90;
+
     // Common output/input locations.
     AbsolutePath ArtifactsDirectory => RootDirectory / "artifacts";
     AbsolutePath TestResultsDirectory => ArtifactsDirectory / "test-results";

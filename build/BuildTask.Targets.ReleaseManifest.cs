@@ -5,7 +5,6 @@ using System.IO;
 using System.Linq;
 using System.Security.Cryptography;
 using System.Text.Json;
-using System.Text.RegularExpressions;
 using Nuke.Common;
 
 partial class BuildTask
@@ -23,7 +22,7 @@ partial class BuildTask
             if (packageFiles.Count == 0)
                 throw new InvalidOperationException($"No .nupkg/.snupkg files found in {PackagesDirectory}");
 
-            var version = ReadVersionPrefixFromProps();
+            var version = ReadCurrentVersionPrefix();
             var commitSha = GetGitHeadSha();
 
             var packages = packageFiles.Select(f => new Dictionary<string, string>
@@ -45,15 +44,6 @@ partial class BuildTask
             Console.WriteLine($"Release manifest written to {ReleaseManifestFile}");
             Console.WriteLine($"  version={version}  commitSha={commitSha}  packages={packages.Count}");
         });
-
-    string ReadVersionPrefixFromProps()
-    {
-        var content = File.ReadAllText(DirectoryBuildPropsFile);
-        var match = Regex.Match(content, @"<VersionPrefix>\s*([^<]+?)\s*</VersionPrefix>", RegexOptions.Singleline);
-        if (!match.Success)
-            throw new InvalidOperationException($"<VersionPrefix> not found in {DirectoryBuildPropsFile}");
-        return match.Groups[1].Value.Trim();
-    }
 
     static string GetGitHeadSha()
     {

@@ -23,6 +23,10 @@ updates:
     schedule:
       interval: weekly
     groups:
+      build-tooling:
+        patterns: ["Nuke*"]
+      analyzers:
+        patterns: ["Microsoft.CodeAnalysis.*"]
       xunit:
         patterns: ["xunit*"]
       testing-infra:
