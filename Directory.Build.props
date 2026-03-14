@@ -10,7 +10,8 @@
   <!-- Explicit version: single source of truth for the entire solution.
        Bump this value via PR when preparing a new release. -->
   <PropertyGroup>
-    <VersionPrefix>0.1.1</VersionPrefix>
+    <VersionPrefix>0.2.0</VersionPrefix>
+    <VersionPrefix Condition="'$(BuildNumber)' != ''">$(VersionPrefix).$(BuildNumber)</VersionPrefix>
   </PropertyGroup>
 
   <!-- Local builds default to prerelease to avoid confusion with stable releases.

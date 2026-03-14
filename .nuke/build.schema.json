@@ -26,9 +26,12 @@
       "enum": [
         "Build",
         "Clean",
+        "GenerateReleaseManifest",
         "Pack",
+        "PackageApp",
         "Publish",
         "Restore",
+        "ShowVersion",
         "Test",
         "UpdateVersion"
       ]

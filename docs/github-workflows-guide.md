@@ -6,125 +6,145 @@
 如果你刚从这个模板创建仓库，可以把它当成一条标准流水线：
 
 ```text
-push / PR
-  ├─ CI (build + test)
-  └─ CodeQL (security scan)
+push / PR to main
+  └─ CI and Release
+       ├─ resolve-version
+       ├─ build-and-test (matrix: PR=linux, main=全平台)
+       ├─ release (需 approval，NuGet 推送 + tag + GitHub Release)
+       └─ deploy-docs (GitHub Pages)
 
-manual dispatch
-  ├─ Release (resolve -> build/test/pack -> release -> optional nuget push)
-  └─ App Publish Artifacts (matrix publish by runtime)
+push / PR to main + weekly
+  └─ CodeQL (security scan)
 ```
 
 快速发版可先看：`docs/quick-start-release.md`。
 
 ---
 
-## 1) 先认识 4 条主 workflow
+## 1) 先认识 2 条 workflow
 
-### `CI`
-- 触发：`push` 到 `main`，或对 `main` 的 `pull_request`
-- 作用：执行 `./build.sh Test`（模板里走 NUKE 目标）
-- 产物：测试结果（`artifacts/test-results/**`）
-
-### `Release`
-- 触发：手动 `workflow_dispatch`
-- 作用：解析版本 -> build/test/pack -> 创建新 tag 与 GitHub Release -> 可选推送 NuGet
-- 特点：带版本一致性校验，避免 tag 与包版本漂移
-
-### `App Publish Artifacts`
-- 触发：手动 `workflow_dispatch`
-- 作用：按 RID 矩阵发布应用产物（`win-x64` / `linux-x64` / `osx-arm64` 等）
-- 场景：你要发布“可运行应用”而不是 NuGet 包时
+### `CI and Release`
+- 触发：`push` 到 `main`、对 `main` 的 `pull_request`、手动 `workflow_dispatch`
+- PR 行为：只在 ubuntu 上运行 Build + Test（带 prerelease suffix）
+- main push 行为：全平台矩阵 Build + Test + Pack + Publish + PackageApp → approval → NuGet 推送 + tag + GitHub Release → 文档部署
+- 产物：测试结果、NuGet 包（含 release manifest）、各平台安装包 zip
 
 ### `CodeQL`
-- 触发：`push`/`pull_request` 到 `main`，以及定时任务
+- 触发：`push`/`pull_request` 到 `main`，以及每周定时任务
 - 作用：安全分析（C#）
-- 特点：同样通过 `./build.sh Build` 走统一构建入口
+- 特点：通过 `./build.sh Build` 走统一构建入口
 
 ---
 
-## 2) 最快上手路径（推荐）
+## 2) Job 详解
+
+### `resolve-version`
+- 从 `Directory.Build.props` 读取 `VersionPrefix`，验证 semver 格式
+- 判断是否为 release（main push = true，PR = false）
+- 计算构建矩阵：PR 仅 ubuntu，main push 包含 win/linux/osx
+
+### `build-and-test`
+- 矩阵构建：各平台执行 Build + Test
+- PR：带 `--VersionSuffix "ci.<run_number>"`
+- main push：无 suffix（固化 release 版本）
+- linux runner 额外执行 Pack + GenerateReleaseManifest（生成 SHA256 manifest）
+- 各平台执行 Publish + PackageApp，生成安装包 zip（`app-{runtime}.zip`）
+
+### `release`
+- 需要 `release` environment approval（唯一的审批入口）
+- 下载 NuGet 包，验证 release manifest SHA256 完整性
+- 推送 NuGet 包到 nuget.org（如未配置 `NUGET_API_KEY` 则跳过）
+- 创建 git tag 并推送到 remote
+- 创建 GitHub Release，附带各平台安装包 zip（不含 NuGet 包）
+
+### `deploy-docs`
+- 依赖 `release` 成功后自动运行
+- 如果存在 `docs/docfx.json`，构建 DocFX 并部署到 GitHub Pages
+- 如果未启用 GitHub Pages 或缺少 DocFX 配置，则自动跳过并给出 notice，不会导致整条流水线失败
+
+---
+
+## 3) 最快上手路径（推荐）
 
 1. 提交一次代码到 `main`  
-   观察 `CI` 和 `CodeQL` 是否都绿。
+   观察 `CI and Release` 和 `CodeQL` 是否都绿。
 
-2. 手动触发一次 `Release`
-   - `publish_nuget=false`（先做演练）
+2. 前往 Actions → 找到对应的 workflow run → 点击 **Review deployments**  
+   审批 `release` environment。
 
-3. 去 Releases 页面确认
-   - 已创建 tag（如 `v0.1.0`）
-   - 已生成 `.nupkg` / `.snupkg` 资产
-
----
-
-## 3) Release 输入参数怎么选
-
-### 版本输入（说明）
-- 当前 workflow 不接受 `version` 或 `tag` 输入。
-- 每次触发都会从 `Directory.Build.props` 的 `VersionPrefix` 读取版本，并尝试创建**新的** `v<semver>` tag。
-- 若该 tag 已存在，运行会直接失败（不支持基于已有 tag 触发）。
-
-### `publish_nuget`
-- `true`：若仓库配置了 `NUGET_API_KEY`，会执行 NuGet 推送
-- `false`：只创建 GitHub Release，不推送 NuGet
+3. 去 Releases 页面确认：
+   - 已创建 tag（如 `v0.2.0.42`）
+   - GitHub Release 中已生成各平台安装包 zip
+   - NuGet.org 上有对应版本的包（如已配置 `NUGET_API_KEY`）
 
 ---
 
-## 4) 版本机制 FAQ（重点）
+## 4) Environment 配置（必须）
 
-### Q1: 触发 `Release` 时“未指定版本”会怎样？
-- 当前 workflow 没有 `version` 输入参数。
-- `Release` 会从 `Directory.Build.props` 读取 `VersionPrefix` 作为版本。
-- 如果对应 tag 已存在（例如 `VersionPrefix=0.1.0` 且 `v0.1.0` 已存在），运行会失败并报 `Tag already exists`。
-- 当前 workflow 不支持“使用已有 tag”触发发布。
+### `release` environment
+在 GitHub 仓库 Settings → Environments → 新建 `release`：
+- **Required reviewers**：至少添加一个 reviewer
+- 可选：配置 wait timer、deployment branches（限制为 `main`）
 
-### Q2: Release 时如果要改主版本，怎么反映到最新代码？
-- 正确方式是先改代码：通过 PR 修改 `Directory.Build.props` 里的 `VersionPrefix`（例如 `0.1.0 -> 1.0.0`），并合并到 `main`。
-- 再触发 `Release`，它会基于当前 `main` 的最新提交打 tag 并发布。
-- 也就是说，**版本变更通过代码提交生效**；`Release` 本身不会回写或修改仓库文件。
+### `github-pages` environment（可选）
+仓库已内置 `docs/docfx.json`，如需启用文档发布：
+- Settings → Pages → Source 选择 GitHub Actions
+- environment `github-pages` 会自动创建
+- 预期文档地址：`https://<owner>.github.io/<repo>/`（本仓库为 `https://agibuild.github.io/dotnet.CI.template/`）
+- `Resolve Version` 的 Summary 会固定显示该地址，便于快速访问
+
+### Secrets
+- `NUGET_API_KEY`：NuGet.org API key（在 repo 或 `release` environment 级别配置）
 
 ---
 
-## 5) App Publish Artifacts 典型用法
+## 5) 版本机制 FAQ（重点）
 
-常见输入建议：
-- `configuration`: `Release`
-- `run_tests`: `true`
-- `self_contained`: `false`（框架依赖，更轻）
-- `runtimes`: `win-x64,linux-x64,osx-arm64`
+### Q1: 版本从哪里来？
+版本来自 `Directory.Build.props` 的 `VersionPrefix`。CI 不接受手动输入版本参数。
 
-如果你要离线分发单文件部署，可把 `self_contained` 设为 `true`，并按需精简 `runtimes`。
+### Q2: 如何升级版本？
+
+```bash
+./build.sh ShowVersion                           # 查看当前版本
+./build.sh UpdateVersion                         # patch 递增: 0.2.0 -> 0.2.1
+./build.sh UpdateVersion --VersionPrefix 1.0.0   # 精确设置
+```
+
+修改后通过 PR 合并到 `main`，CI 自动基于新版本构建。
+
+### Q3: 同一版本能否重新发布？
+每次 main push 都会生成唯一的四段式版本号（如 `0.2.0.42`），因此同一 push 不会冲突。如果需要发新版本（如 `0.3.0`），通过 PR 修改 `VersionPrefix`。
+
+### Q4: Release manifest 是什么？
+`release-manifest.json` 记录每个 NuGet 包的 SHA256 hash 和版本信息。发布阶段会验证包文件与 manifest 一致，防止产物在传递过程中被篡改或损坏。
 
 ---
 
 ## 6) 用命令行触发（可选）
 
 ```bash
-# 触发 release（自动创建 tag + release，不推 NuGet）
-gh workflow run release.yml --ref main -f publish_nuget=false
-
-# 触发 release 并推送 NuGet（要求 NUGET_API_KEY 已配置）
-gh workflow run release.yml --ref main -f publish_nuget=true
-
-# 触发应用产物发布
-gh workflow run app-publish-artifacts.yml --ref main -f configuration=Release -f run_tests=true -f self_contained=false -f runtimes=win-x64,linux-x64
+# 手动触发 CI and Release
+gh workflow run ci.yml --ref main
 ```
 
 ---
 
 ## 7) 常见问题排查（先看这里）
 
-- `Release` 报 tag 已存在：说明同版本已发布；请先通过 PR 提升 `VersionPrefix`
-- `publish_nuget=true` 但未推送：确认仓库是否配置 `NUGET_API_KEY`
-- 包版本校验失败：检查 `Directory.Build.props` 的 `VersionPrefix` 与目标 tag 是否一致
+- tag 已存在：说明同版本已发布；请先通过 PR 提升 `VersionPrefix`
+- NuGet 推送失败：确认仓库是否配置 `NUGET_API_KEY`
+- 包版本校验失败：检查 `Directory.Build.props` 的 `VersionPrefix` 是否正确
+- Hash mismatch：产物在 job 间传递时损坏，重新触发 workflow
 - Windows/Linux 行为不一致：确认 `.gitattributes` 已生效，特别是 `*.sh` 的 LF
+- 文档部署跳过：正常行为，需要先配置 `docs/docfx.json`
 
 ---
 
 ## 8) 团队协作建议
 
-- 日常开发只关注：`CI`、`CodeQL`
-- 发版动作统一从 `Release` 入口走，避免手工打包/手工传产物
+- 日常开发只关注 CI 是否绿灯（Build + Test + CodeQL）
+- 发版通过 environment approval 统一管控，避免手工打包/手工传产物
 - 变更 workflow 逻辑时，优先扩展 NUKE 目标，再回到 workflow 编排
 
 这样团队会得到一个很稳定的体验：  

@@ -1,25 +1,180 @@
-name: CI
+name: CI and Release
 
 on:
   push:
     branches: [main]
   pull_request:
     branches: [main]
+  workflow_dispatch:
 
 permissions:
   contents: read
 
 concurrency:
-  group: ci-${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
+  group: ci-release-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+env:
+  DOTNET_NOLOGO: true
+  DOTNET_CLI_TELEMETRY_OPTOUT: true
+  NUKE_TELEMETRY_OPTOUT: true
+  ENABLE_ANDROID: 'false'
+  ENABLE_IOS: 'false'
 
 jobs:
-  build-test:
+  resolve-version:
+    name: Resolve Version
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 5
+    outputs:
+      version: ${{ steps.resolve.outputs.version }}
+      full_version: ${{ steps.resolve.outputs.full_version }}
+      tag: ${{ steps.resolve.outputs.tag }}
+      sha: ${{ steps.resolve.outputs.sha }}
+      is_release: ${{ steps.resolve.outputs.is_release }}
+      build_matrix: ${{ steps.matrix.outputs.build_matrix }}
 
     steps:
       - uses: actions/checkout@v6
+        with:
+          fetch-tags: true
+
+      - name: Resolve version and context
+        id: resolve
+        shell: bash
+        run: |
+          SEMVER_REGEX='^[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.-]+)?$'
+
+          VERSION=$(perl -0777 -ne 'if (m{<VersionPrefix>\s*([^<]+?)\s*</VersionPrefix>}s) { print $1 }' Directory.Build.props | head -n1 | xargs)
+          if [ -z "$VERSION" ]; then
+            echo "::error::VersionPrefix not found in Directory.Build.props"
+            exit 1
+          fi
+
+          if ! [[ "$VERSION" =~ $SEMVER_REGEX ]]; then
+            echo "::error::Invalid VersionPrefix: $VERSION"
+            exit 1
+          fi
+
+          SHA="$(git rev-parse HEAD)"
+
+          IS_RELEASE="false"
+          if [ "${{ github.event_name }}" != "pull_request" ] && [ "${{ github.ref }}" = "refs/heads/main" ]; then
+            IS_RELEASE="true"
+          fi
+
+          if [ "$IS_RELEASE" = "true" ]; then
+            FULL_VERSION="${VERSION}.${{ github.run_number }}"
+          else
+            FULL_VERSION="$VERSION"
+          fi
+          TAG="v$FULL_VERSION"
+
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "full_version=$FULL_VERSION" >> "$GITHUB_OUTPUT"
+          echo "tag=$TAG" >> "$GITHUB_OUTPUT"
+          echo "sha=$SHA" >> "$GITHUB_OUTPUT"
+          echo "is_release=$IS_RELEASE" >> "$GITHUB_OUTPUT"
+          echo "Resolved: version=$VERSION full_version=$FULL_VERSION tag=$TAG sha=$SHA is_release=$IS_RELEASE"
+
+      - name: Version summary
+        shell: bash
+        run: |
+          VERSION="${{ steps.resolve.outputs.version }}"
+          FULL_VERSION="${{ steps.resolve.outputs.full_version }}"
+          IS_RELEASE="${{ steps.resolve.outputs.is_release }}"
+          SHA="${{ steps.resolve.outputs.sha }}"
+          TAG="${{ steps.resolve.outputs.tag }}"
+
+          IFS='.' read -r CUR_MAJOR CUR_MINOR CUR_PATCH <<< "$VERSION"
+
+          git fetch --tags --force
+          PREV_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "")
+          if [ -n "$PREV_TAG" ]; then
+            PREV_VER="${PREV_TAG#v}"
+            IFS='.' read -r PRE_MAJOR PRE_MINOR PRE_PATCH <<< "$PREV_VER"
+            if [ "$CUR_MAJOR" != "$PRE_MAJOR" ]; then
+              BUMP="MAJOR"
+            elif [ "$CUR_MINOR" != "$PRE_MINOR" ]; then
+              BUMP="MINOR"
+            elif [ "$CUR_PATCH" != "$PRE_PATCH" ]; then
+              BUMP="PATCH"
+            else
+              BUMP="NONE (same as $PREV_TAG)"
+            fi
+          else
+            PREV_TAG="(none)"
+            BUMP="INITIAL"
+          fi
+
+          MODE=$( [ "$IS_RELEASE" = "true" ] && echo "Release" || echo "CI" )
+          REPO="${{ github.repository }}"
+          OWNER="${REPO%%/*}"
+          REPO_NAME="${REPO##*/}"
+          DOCS_URL="https://${OWNER,,}.github.io/${REPO_NAME}/"
+
+          {
+            echo "## Version Info"
+            echo ""
+            echo "| Property | Value |"
+            echo "|----------|-------|"
+            echo "| **Version** | \`$FULL_VERSION\` |"
+            echo "| **Base Version** | \`$VERSION\` |"
+            echo "| **Tag** | \`$TAG\` |"
+            echo "| **Previous Tag** | \`$PREV_TAG\` |"
+            echo "| **Bump Type** | **$BUMP** |"
+            echo "| **Mode** | $MODE |"
+            echo "| **Commit** | \`${SHA::8}\` |"
+            echo "| **Expected Docs URL** | $DOCS_URL |"
+            echo "| **Docs Auto-Deploy** | Enable Pages (GitHub Actions) + add \`docs/docfx.json\` |"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Compute build matrix
+        id: matrix
+        shell: bash
+        run: |
+          IS_RELEASE="${{ steps.resolve.outputs.is_release }}"
+          if [ "$IS_RELEASE" = "true" ]; then
+            ENTRIES='{"os":"ubuntu-latest","runtime":"linux-x64","pack":true,"publish":true,"workloads":""}'
+            ENTRIES+=',{"os":"windows-latest","runtime":"win-x64","pack":false,"publish":true,"workloads":""}'
+            ENTRIES+=',{"os":"macos-latest","runtime":"osx-arm64","pack":false,"publish":true,"workloads":""}'
+
+            if [ "$ENABLE_ANDROID" = "true" ]; then
+              ENTRIES+=',{"os":"ubuntu-latest","runtime":"android","pack":false,"publish":false,"workloads":"android"}'
+            fi
+            if [ "$ENABLE_IOS" = "true" ]; then
+              ENTRIES+=',{"os":"macos-latest","runtime":"ios","pack":false,"publish":false,"workloads":"ios"}'
+            fi
+          else
+            ENTRIES='{"os":"ubuntu-latest","runtime":"linux-x64","pack":false,"publish":false,"workloads":""}'
+
+            if [ "$ENABLE_ANDROID" = "true" ]; then
+              ENTRIES+=',{"os":"ubuntu-latest","runtime":"android","pack":false,"publish":false,"workloads":"android"}'
+            fi
+            if [ "$ENABLE_IOS" = "true" ]; then
+              ENTRIES+=',{"os":"macos-latest","runtime":"ios","pack":false,"publish":false,"workloads":"ios"}'
+            fi
+          fi
+
+          MATRIX="{\"include\":[$ENTRIES]}"
+          echo "build_matrix=$MATRIX" >> "$GITHUB_OUTPUT"
+          echo "Matrix: $MATRIX"
+
+  build-and-test:
+    name: Build and Test (${{ matrix.runtime }})
+    needs: resolve-version
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 30
+    env:
+      BuildNumber: ${{ needs.resolve-version.outputs.is_release == 'true' && github.run_number || '' }}
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJSON(needs.resolve-version.outputs.build_matrix) }}
+
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: ${{ needs.resolve-version.outputs.sha }}
 
       - uses: actions/setup-dotnet@v5
         with:
@@ -28,19 +183,327 @@ jobs:
       - uses: actions/cache@v5
         with:
           path: ~/.nuget/packages
-          key: ${{ runner.os }}-nuget-${{ hashFiles('**/*.csproj', 'global.json', '.config/dotnet-tools.json') }}
+          key: ${{ runner.os }}-nuget-${{ hashFiles('**/*.csproj', 'global.json', 'dotnet-tools.json') }}
           restore-keys: ${{ runner.os }}-nuget-
 
+      - name: Install .NET workloads
+        if: matrix.workloads != ''
+        run: dotnet workload install ${{ matrix.workloads }}
+
       - name: Build and test
+        if: runner.os != 'Windows'
         shell: bash
         run: |
           chmod +x build.sh
-          ./build.sh Test --VersionSuffix "ci.${{ github.run_number }}"
+          IS_RELEASE="${{ needs.resolve-version.outputs.is_release }}"
+          if [ "$IS_RELEASE" = "true" ]; then
+            ./build.sh Test
+          else
+            ./build.sh Test --VersionSuffix "ci.${{ github.run_number }}"
+          fi
 
-      - name: Upload test artifacts
+      - name: Build and test (Windows)
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          $isRelease = "${{ needs.resolve-version.outputs.is_release }}"
+          if ($isRelease -eq "true") {
+            ./build.ps1 Test
+          } else {
+            ./build.ps1 Test --VersionSuffix "ci.${{ github.run_number }}"
+          }
+
+      - name: Pack and generate manifest
+        if: needs.resolve-version.outputs.is_release == 'true' && matrix.pack
+        shell: bash
+        run: ./build.sh Pack GenerateReleaseManifest --skip Build Test
+
+      - name: Validate package versions
+        if: needs.resolve-version.outputs.is_release == 'true' && matrix.pack
+        shell: bash
+        run: |
+          EXPECTED_VERSION="${{ needs.resolve-version.outputs.full_version }}"
+
+          shopt -s nullglob
+          FILES=(artifacts/packages/*.nupkg artifacts/packages/*.snupkg)
+          if [ ${#FILES[@]} -eq 0 ]; then
+            echo "::error::No package files found under artifacts/packages/"
+            exit 1
+          fi
+
+          for file in "${FILES[@]}"; do
+            name="$(basename "$file")"
+            if [[ "$name" != *".${EXPECTED_VERSION}.nupkg" && "$name" != *".${EXPECTED_VERSION}.snupkg" ]]; then
+              echo "::error::Package version mismatch. Expected $EXPECTED_VERSION, got $name"
+              exit 1
+            fi
+          done
+          echo "All packages match version: $EXPECTED_VERSION"
+
+      - name: Publish app
+        if: needs.resolve-version.outputs.is_release == 'true' && matrix.publish && runner.os != 'Windows'
+        shell: bash
+        run: ./build.sh Publish --Runtime "${{ matrix.runtime }}"
+
+      - name: Publish app (Windows)
+        if: needs.resolve-version.outputs.is_release == 'true' && matrix.publish && runner.os == 'Windows'
+        shell: pwsh
+        run: ./build.ps1 Publish --Runtime "${{ matrix.runtime }}"
+
+      - name: Package app
+        if: needs.resolve-version.outputs.is_release == 'true' && matrix.publish && runner.os != 'Windows'
+        shell: bash
+        run: ./build.sh PackageApp --Runtime "${{ matrix.runtime }}" --skip Publish
+
+      - name: Package app (Windows)
+        if: needs.resolve-version.outputs.is_release == 'true' && matrix.publish && runner.os == 'Windows'
+        shell: pwsh
+        run: ./build.ps1 PackageApp --Runtime "${{ matrix.runtime }}" --skip Publish
+
+      - name: Upload test results
         if: always()
         uses: actions/upload-artifact@v7
         with:
-          name: test-results
+          name: test-results-${{ matrix.runtime }}
           path: artifacts/test-results/**
           if-no-files-found: warn
+
+      - name: Upload packages
+        if: needs.resolve-version.outputs.is_release == 'true' && matrix.pack
+        uses: actions/upload-artifact@v7
+        with:
+          name: packages
+          path: artifacts/packages/**
+          if-no-files-found: error
+
+      - name: Upload installer artifacts
+        if: needs.resolve-version.outputs.is_release == 'true' && matrix.publish
+        uses: actions/upload-artifact@v7
+        with:
+          name: installer-${{ matrix.runtime }}
+          path: artifacts/installers/**
+          if-no-files-found: error
+
+  release:
+    name: Release
+    needs: [resolve-version, build-and-test]
+    if: needs.resolve-version.outputs.is_release == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    environment: release
+    permissions:
+      contents: write
+    concurrency:
+      group: release-tag-${{ needs.resolve-version.outputs.tag }}
+      cancel-in-progress: false
+    env:
+      HAS_NUGET_KEY: ${{ secrets.NUGET_API_KEY != '' }}
+
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: ${{ needs.resolve-version.outputs.sha }}
+          fetch-depth: 0
+
+      - uses: actions/setup-dotnet@v5
+        with:
+          global-json-file: global.json
+
+      - name: Download packages
+        uses: actions/download-artifact@v8
+        with:
+          name: packages
+          path: packages
+
+      - name: Download installers
+        uses: actions/download-artifact@v8
+        with:
+          path: installers
+          pattern: installer-*
+          merge-multiple: true
+
+      - name: Verify release manifest
+        shell: bash
+        run: |
+          set -euo pipefail
+          MANIFEST="packages/release-manifest.json"
+
+          if [ ! -f "$MANIFEST" ]; then
+            echo "::error::Release manifest not found: $MANIFEST"
+            exit 1
+          fi
+
+          python3 - <<'PY'
+          import hashlib, json, sys
+          from pathlib import Path
+
+          manifest = json.loads(Path("packages/release-manifest.json").read_text())
+          expected = "${{ needs.resolve-version.outputs.full_version }}"
+
+          if manifest.get("version") != expected:
+              print(f"::error::Version mismatch: manifest={manifest.get('version')} expected={expected}")
+              sys.exit(1)
+
+          errors = []
+          for pkg in manifest.get("packages", []):
+              path = Path("packages") / pkg["file"]
+              if not path.exists():
+                  errors.append(f"Missing: {path}")
+                  continue
+              h = hashlib.sha256()
+              with path.open("rb") as f:
+                  for chunk in iter(lambda: f.read(1024 * 1024), b""):
+                      h.update(chunk)
+              if h.hexdigest() != pkg["sha256"]:
+                  errors.append(f"Hash mismatch: {pkg['file']}")
+
+          if errors:
+              for e in errors:
+                  print(f"::error::{e}")
+              sys.exit(1)
+
+          print(f"Verified {len(manifest['packages'])} packages.")
+          PY
+
+      - name: Push to NuGet.org
+        if: env.HAS_NUGET_KEY == 'true'
+        shell: bash
+        env:
+          NUGET_API_KEY: ${{ secrets.NUGET_API_KEY }}
+        run: |
+          shopt -s nullglob
+          PACKAGES=(packages/*.nupkg)
+          if [ ${#PACKAGES[@]} -eq 0 ]; then
+            echo "::error::No .nupkg files found"
+            exit 1
+          fi
+
+          for pkg in "${PACKAGES[@]}"; do
+            echo "Pushing $pkg"
+            dotnet nuget push "$pkg" \
+              --api-key "$NUGET_API_KEY" \
+              --source https://api.nuget.org/v3/index.json \
+              --skip-duplicate
+          done
+          echo "All packages pushed to NuGet.org"
+
+      - name: NuGet push skipped
+        if: env.HAS_NUGET_KEY != 'true'
+        shell: bash
+        run: echo "::warning::NUGET_API_KEY not configured. Skipping NuGet push."
+
+      - name: Create and push tag
+        shell: bash
+        run: |
+          TAG="${{ needs.resolve-version.outputs.tag }}"
+          SHA="${{ needs.resolve-version.outputs.sha }}"
+
+          git fetch --tags --force
+          if git rev-parse "$TAG" >/dev/null 2>&1; then
+            echo "::error::Tag $TAG already exists locally"
+            exit 1
+          fi
+          if git ls-remote --tags origin "refs/tags/$TAG" | grep -q "$TAG"; then
+            echo "::error::Tag $TAG already exists on remote"
+            exit 1
+          fi
+
+          git tag "$TAG" "$SHA"
+          git push origin "$TAG"
+          echo "Created and pushed tag $TAG at $SHA"
+
+      - name: Create GitHub Release
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          TAG="${{ needs.resolve-version.outputs.tag }}"
+          RELEASE_NAME="dotnet.CI.template $TAG"
+
+          shopt -s nullglob
+          RELEASE_FILES=(installers/*.zip)
+          if [ ${#RELEASE_FILES[@]} -eq 0 ]; then
+            echo "::error::No installer zip files found"
+            exit 1
+          fi
+
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            echo "::error::Release already exists for tag $TAG"
+            exit 1
+          fi
+
+          gh release create "$TAG" "${RELEASE_FILES[@]}" \
+            --title "$RELEASE_NAME" \
+            --generate-notes
+          echo "Created release $TAG with ${#RELEASE_FILES[@]} assets"
+
+  deploy-docs:
+    name: Deploy Documentation
+    needs: [resolve-version, release]
+    if: needs.resolve-version.outputs.is_release == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    concurrency:
+      group: pages
+      cancel-in-progress: false
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: ${{ needs.resolve-version.outputs.sha }}
+
+      - name: Check for DocFX configuration
+        id: check-docs
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          HAS_DOCS="false"
+          if [ -f "docs/docfx.json" ]; then
+            HAS_DOCS="true"
+          else
+            echo "::notice::No docs/docfx.json found. Skipping documentation deployment."
+          fi
+
+          HAS_PAGES="$(gh api repos/${{ github.repository }} --jq '.has_pages' 2>/dev/null || echo "false")"
+          if [ "$HAS_PAGES" != "true" ]; then
+            echo "::notice::GitHub Pages is not enabled. Enable Settings > Pages > Source: GitHub Actions."
+            HAS_PAGES="false"
+          fi
+
+          if [ "$HAS_DOCS" = "true" ] && [ "$HAS_PAGES" = "true" ]; then
+            echo "should_deploy=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "should_deploy=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - uses: actions/setup-dotnet@v5
+        if: steps.check-docs.outputs.should_deploy == 'true'
+        with:
+          global-json-file: global.json
+
+      - name: Restore .NET tools
+        if: steps.check-docs.outputs.should_deploy == 'true'
+        run: dotnet tool restore
+
+      - name: Build documentation
+        if: steps.check-docs.outputs.should_deploy == 'true'
+        run: dotnet docfx docs/docfx.json
+
+      - name: Upload pages artifact
+        if: steps.check-docs.outputs.should_deploy == 'true'
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: docs/_site
+
+      - name: Deploy to GitHub Pages
+        if: steps.check-docs.outputs.should_deploy == 'true'
+        id: deployment
+        uses: actions/deploy-pages@v4
