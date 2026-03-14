@@ -1,172 +1,108 @@
-# dotnet.CI.template
+# Dotnet.CI.Template
 
 [![CI and Release](https://github.com/AGIBuild/dotnet.CI.template/actions/workflows/ci.yml/badge.svg)](https://github.com/AGIBuild/dotnet.CI.template/actions/workflows/ci.yml)
 [![CodeQL](https://github.com/AGIBuild/dotnet.CI.template/actions/workflows/codeql.yml/badge.svg)](https://github.com/AGIBuild/dotnet.CI.template/actions/workflows/codeql.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
-**Stop wiring CI from scratch.** Start with a production-grade pipeline that builds, tests, packages, and releases your .NET projects across platforms -- with a single approval click.
+Build your .NET product on top of a complete engineering foundation, not from a blank folder.
 
----
+This repository is a **productized starter** that gives you:
+- a real project structure (`src/`, `tests/`, `docs/`)
+- a typed build system (NUKE)
+- release-ready delivery (NuGet, GitHub Releases, SBOM, attestation)
+- multilingual documentation (English + Chinese)
 
-## What You Get
+CI/CD is here, but it is not the protagonist; your product is.
 
-Use this template and you instantly have:
+![Dotnet.CI.Template Home](.github/assets/readme/docs-home-hero.png)
 
+## Why This Repo Exists
+
+Most new projects lose momentum in the first week to repetitive setup:
+- wiring build scripts
+- writing CI pipelines
+- standardizing versioning
+- bolting on documentation later
+
+`Dotnet.CI.Template` removes that tax. You start with a working product baseline and focus on business features from day one.
+
+## Product Capabilities
+
+| Capability | What You Get | Why It Matters |
+|---|---|---|
+| Product-ready structure | `src`, `tests`, `docs`, centralized build properties | Clear boundaries from the beginning |
+| Build system | NUKE targets in `build/BuildTask.*.cs` | Build logic in C#, not YAML sprawl |
+| Version model | `VersionPrefix` as single source of truth | Reproducible, auditable releases |
+| Delivery pipeline | Build, test, pack, publish, package, release | One flow from code to artifacts |
+| Supply-chain trust | SBOM + artifact attestation | Better compliance and traceability |
+| Documentation portal | VitePress with i18n and auto deployment | Docs evolve with code, not after it |
+
+## Experience Snapshot
+
+### Product-first docs experience
+
+![Guide Page](.github/assets/readme/docs-guide-page.png)
+
+### CI/CD as one module in Contributing
+
+![CI/CD Page](.github/assets/readme/docs-cicd-page.png)
+
+## What Makes It Better Than Starting Empty
+
+| Comparison | Blank Repo | Dotnet.CI.Template |
+|---|---|---|
+| First successful release | days of setup | built-in path |
+| Build orchestration | mixed shell + YAML | NUKE targets |
+| Version governance | manual and error-prone | semantic, code-owned |
+| Documentation | added later (often stale) | integrated from day one |
+| Artifact provenance | optional / inconsistent | standardized |
+
+## Architecture At A Glance
+
+```text
+Product Code (src/) + Tests (tests/)
+          |
+          v
+    NUKE Build Targets (build/)
+          |
+          v
+ CI and Release Workflow (.github/workflows/ci.yml)
+          |
+          +--> Packages (.nupkg/.snupkg)
+          +--> Installers (app-{runtime}.zip)
+          +--> SBOM + Attestation
+          +--> Docs Site (GitHub Pages)
 ```
-Push to main
-  |
-  v
-resolve-version ── Reads VersionPrefix, computes matrix, outputs version info
-  |
-  ├──────────────────────────────┐
-  v                              v
-build-and-test ─── Matrix build  build-docs ── VitePress build (pre-check)
-  |                (3 platforms)  |
-  v                              |
-release ────────── [approval]    |
-  |                NuGet + tag   |
-  ├──────────────────────────────┘
-  v
-deploy-docs ────── Deploy to GitHub Pages (optional, i18n)
-```
-
-Both **pull requests** and **main pushes** run the full multi-platform matrix (linux / windows / macos) for Build + Test. On **releases** (version bumped), Publish + PackageApp are additionally enabled.
-
-### Pipeline Highlights
-
-| Feature | Details |
-|---------|---------|
-| **NUKE Build** | All build logic lives in C# targets -- no scattered shell scripts in YAML |
-| **Single Approval** | One `release` environment gate controls the entire release flow |
-| **Multi-Platform Matrix** | linux-x64, win-x64, osx-arm64 (+ optional Android/iOS) |
-| **NuGet Publishing** | Auto-push to NuGet.org with SHA256 manifest verification |
-| **Installer Packages** | Platform-specific zip archives attached to GitHub Releases |
-| **Version from Code** | `VersionPrefix` in `Directory.Build.props` is the single source of truth |
-| **SemVer Release Tags** | `v0.2.0` format — release triggers only when version is bumped |
-| **CodeQL Security** | Automated vulnerability scanning on every push and weekly |
-| **Graceful Degradation** | Missing NuGet key? Skipped. No docs config? Skipped. Nothing breaks. |
-
----
 
 ## Quick Start
 
-### 1. Create your repo from this template
-
-Click **[Use this template](https://github.com/AGIBuild/dotnet.CI.template/generate)** on GitHub.
-
-### 2. Configure environments
-
-Go to **Settings > Environments** and create a `release` environment with at least one required reviewer.
-
-### 3. Set secrets (optional)
-
-| Secret | Purpose |
-|--------|---------|
-| `NUGET_API_KEY` | Push packages to NuGet.org |
-
-### 4. Push code and watch it go
+1. Create your repository from this template:  
+   [Use this template](https://github.com/AGIBuild/dotnet.CI.template/generate)
+2. Configure `release` environment in GitHub (`Settings` -> `Environments`)
+3. Optional: add `NUGET_API_KEY`
+4. Push to `main` and approve release deployment in Actions
 
 ```bash
 git push origin main
 ```
 
-The pipeline runs automatically. When `build-and-test` completes, go to **Actions > Review deployments** to approve the release.
-
----
-
-## Project Structure
-
-```
-.
-├── .github/workflows/
-│   ├── ci.yml              # CI + Release pipeline
-│   └── codeql.yml          # Security analysis
-├── build/
-│   ├── BuildTask.*.cs      # NUKE targets (Build, Test, Pack, Publish, PackageApp, ...)
-│   └── _build.csproj
-├── src/                    # Your application code
-├── tests/                  # Your test projects
-├── docs/                   # VitePress documentation (English + 中文)
-├── Directory.Build.props   # Version + shared build properties
-└── global.json             # SDK version pinning
-```
-
----
-
-## Version Management
-
-Versions follow SemVer (3-segment `Major.Minor.Patch`):
-
-- **`VersionPrefix` in `Directory.Build.props`** is the single source of truth (e.g., `0.2.0`)
-- **Tags are created automatically**: `v0.2.0` — release triggers only when the tag doesn't exist yet
-- **`FileVersion`** includes the CI build number for traceability (e.g., `0.2.0.42`), visible in DLL properties
-- No manual tagging. No version input fields. Bump `VersionPrefix` via PR to trigger a release.
-
-### Version commands
+## Key Commands
 
 ```bash
-./build.sh ShowVersion                           # show current version
-./build.sh UpdateVersion                         # patch increment: 0.2.0 -> 0.2.1
-./build.sh UpdateVersion --VersionPrefix 1.0.0   # set exact version
+./build.sh ShowVersion                            # show current version
+./build.sh UpdateVersion                          # patch increment
+./build.sh UpdateVersion --VersionPrefix 1.0.0    # set exact version
+./build.sh Test                                   # build + test
+./build.sh Pack                                   # build + test + pack
 ```
 
-Then commit and push -- CI takes care of the rest.
+## Documentation
 
----
-
-## Extending the Build
-
-Build logic is in `build/BuildTask.*.cs` using [NUKE](https://nuke.build). Add new targets in C# and call them from workflows:
-
-```csharp
-Target MyTarget => _ => _
-    .DependsOn(Build)
-    .Executes(() =>
-    {
-        // your build logic here
-    });
-```
-
-```yaml
-# in ci.yml
-- run: ./build.sh MyTarget
-```
-
----
-
-## Mobile Platform Support
-
-Android and iOS builds are supported but disabled by default. Toggle them in `ci.yml`:
-
-```yaml
-env:
-  ENABLE_ANDROID: 'true'
-  ENABLE_IOS: 'true'
-```
-
----
-
-## Concurrency
-
-`CI and Release` runs are **serialized per branch** by default. The workflow uses a concurrency group (`ci-${{ github.ref }}`) with `cancel-in-progress: false`, meaning a new run on the same branch queues behind the running one instead of cancelling it.
-
----
-
-## Documentation Deployment
-
-Documentation is built with [VitePress](https://vitepress.dev/) and supports English (default) and Chinese.
-
-To enable automatic documentation deployment to GitHub Pages:
-
-1. `docs/package.json` is included by default in this template
-2. Enable GitHub Pages in **Settings > Pages > Source: GitHub Actions**
-3. The `build-docs` job builds VitePress on every push/PR (pre-check); `deploy-docs` deploys after each release
-4. Expected docs URL: `https://<owner>.github.io/<repo>/` (for this repo: `https://agibuild.github.io/dotnet.CI.template/`)
-
-The `Resolve Version` job summary always shows this expected docs URL, even when docs deployment is skipped.
-If Pages is not enabled, `deploy-docs` is skipped with a notice instead of failing the whole workflow.
-
----
+- Live docs: `https://agibuild.github.io/dotnet.CI.template/`
+- Product docs are organized as:
+  - `guide/` (product understanding and onboarding)
+  - `reference/` (API/reference content)
+  - `contributing/` (development, CI/CD, releasing)
 
 ## License
 
