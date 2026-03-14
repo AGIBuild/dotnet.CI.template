@@ -12,8 +12,8 @@ permissions:
   checks: write
 
 concurrency:
-  group: ${{ vars.CI_SERIAL == 'true' && format('ci-release-{0}', github.ref) || format('ci-release-{0}', github.run_id) }}
-  cancel-in-progress: ${{ vars.CI_CANCEL_IN_PROGRESS == 'true' }}
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
 
 env:
   DOTNET_NOLOGO: true
@@ -145,7 +145,9 @@ jobs:
               ENTRIES+=',{"os":"macos-latest","runtime":"ios","pack":false,"publish":false,"workloads":"ios"}'
             fi
           else
-            ENTRIES='{"os":"ubuntu-latest","runtime":"linux-x64","pack":false,"publish":false,"workloads":""}'
+            ENTRIES='{"os":"ubuntu-latest","runtime":"linux-x64","pack":true,"publish":false,"workloads":""}'
+            ENTRIES+=',{"os":"windows-latest","runtime":"win-x64","pack":false,"publish":false,"workloads":""}'
+            ENTRIES+=',{"os":"macos-latest","runtime":"osx-arm64","pack":false,"publish":false,"workloads":""}'
 
             if [ "$ENABLE_ANDROID" = "true" ]; then
               ENTRIES+=',{"os":"ubuntu-latest","runtime":"android","pack":false,"publish":false,"workloads":"android"}'
@@ -225,10 +227,15 @@ jobs:
         shell: bash
         run: ./build.sh CoverageReport --skip Test
 
-      - name: Pack and generate manifest
+      - name: Pack
+        if: matrix.pack
+        shell: bash
+        run: ./build.sh Pack --skip Build Test
+
+      - name: Generate release manifest
         if: needs.resolve-version.outputs.is_release == 'true' && matrix.pack
         shell: bash
-        run: ./build.sh Pack GenerateReleaseManifest --skip Build Test
+        run: ./build.sh GenerateReleaseManifest --skip Build Test Pack
 
       - name: Validate package versions
         if: needs.resolve-version.outputs.is_release == 'true' && matrix.pack

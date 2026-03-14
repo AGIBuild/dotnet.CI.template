@@ -25,11 +25,9 @@ For a quick release walkthrough, see: [Quick Start Release](quick-start-release.
 
 ### `CI and Release`
 - Triggers: `push` to `main`, `pull_request` targeting `main`, manual `workflow_dispatch`
-- Concurrency: **Parallel by default** — multiple pushes can run simultaneously
-  - For serial execution: Settings → Variables → set `CI_SERIAL=true` (queues by branch)
-  - To cancel older runs: set `CI_CANCEL_IN_PROGRESS=true`
-- PR behavior: Runs Format Check + Build + Test + Coverage Report on ubuntu (with prerelease suffix)
-- main push behavior: If `VersionPrefix` has been bumped (tag doesn't exist yet), triggers full-platform matrix Build + Test + Pack + Publish + PackageApp → approval → NuGet push + SBOM + Attestation + tag + GitHub Release → documentation deployment. Otherwise, runs CI-only (build + test).
+- Concurrency: Grouped by branch (`ci-${{ github.ref }}`), newer pushes automatically cancel older in-progress runs
+- PR behavior: Runs multi-platform Build + Test (Format Check + Coverage Report on linux only, Pack verification on linux) with prerelease suffix
+- main push behavior: If `VersionPrefix` has been bumped (tag doesn't exist yet), triggers full-platform matrix Build + Test + Pack + Publish + PackageApp → approval → NuGet push + SBOM + Attestation + tag + GitHub Release → documentation deployment. Otherwise, runs CI-only (multi-platform build + test + linux pack verification).
 - Artifacts: Test results (with PR annotations), coverage reports, NuGet packages (with release manifest), platform installer zips, SBOM
 
 ### `CodeQL`
@@ -44,14 +42,14 @@ For a quick release walkthrough, see: [Quick Start Release](quick-start-release.
 ### `resolve-version`
 - Reads `VersionPrefix` from `Directory.Build.props`, validates semver format (3-segment: `Major.Minor.Patch`)
 - Determines if this is a release: main push + tag `v{version}` does not exist yet = release; otherwise CI-only
-- Computes the build matrix: PR uses ubuntu only, release includes win/linux/osx
+- Computes the build matrix: all modes use multi-platform (linux/win/osx); release additionally enables publish
 
 ### `build-and-test`
 - Matrix build: each platform runs Build + Test
 - Linux runner additionally runs Format Check (`dotnet format --verify-no-changes`) and Coverage Report
 - PR: uses `--VersionSuffix "ci.<run_number>"`
 - main push: no suffix (locks the release version)
-- Linux runner additionally runs Pack + GenerateReleaseManifest (generates SHA256 manifest)
+- Linux runner additionally runs Pack (always, as a pre-release quality gate); GenerateReleaseManifest runs only for releases
 - All platforms run Publish + PackageApp, producing installer zips (`app-{runtime}.zip`)
 - Test results are displayed directly in PR checks via `dorny/test-reporter`
 
