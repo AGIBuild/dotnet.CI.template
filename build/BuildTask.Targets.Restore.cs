@@ -27,8 +27,8 @@ partial class BuildTask
     Target Restore => _ => _
         .Executes(() =>
         {
-            DotNetRestore(settings => settings
-                .SetProjectFile(BuildPath));
+            var lockedMode = IsServerBuild ? " --locked-mode" : "";
+            DotNet($"restore {BuildPath}{lockedMode}", workingDirectory: RootDirectory);
 
             if (File.Exists(ToolManifestFile))
             {
