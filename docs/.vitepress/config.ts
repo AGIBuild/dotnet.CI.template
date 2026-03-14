@@ -5,6 +5,21 @@ export default defineConfig({
   description: 'A production-ready .NET project template with built-in CI/CD',
   base: '/dotnet.CI.template/',
 
+  sitemap: {
+    hostname: 'https://agibuild.github.io/dotnet.CI.template'
+  },
+
+  head: [
+    ['meta', { name: 'theme-color', content: '#512bd4' }],
+    ['meta', { property: 'og:type', content: 'website' }],
+    ['meta', { property: 'og:title', content: 'Dotnet.CI.Template' }],
+    ['meta', { property: 'og:description', content: 'A production-ready .NET project template with built-in CI/CD' }],
+    ['meta', { property: 'og:url', content: 'https://agibuild.github.io/dotnet.CI.template/' }],
+    ['meta', { name: 'twitter:card', content: 'summary' }],
+    ['meta', { name: 'twitter:title', content: 'Dotnet.CI.Template' }],
+    ['meta', { name: 'twitter:description', content: 'A production-ready .NET project template with built-in CI/CD' }]
+  ],
+
   locales: {
     root: {
       label: 'English',

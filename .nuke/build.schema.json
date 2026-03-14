@@ -24,11 +24,13 @@
     "ExecutableTarget": {
       "type": "string",
       "enum": [
+        "Benchmark",
         "Build",
         "Clean",
         "CoverageReport",
         "Format",
         "GenerateReleaseManifest",
+        "MutationTest",
         "Pack",
         "PackageApp",
         "Publish",
@@ -111,6 +113,10 @@
   "allOf": [
     {
       "properties": {
+        "BenchmarkFilter": {
+          "type": "string",
+          "description": "Filter expression for BenchmarkDotNet (e.g., '*Calculator*')"
+        },
         "BranchCoverageThreshold": {
           "type": "integer",
           "description": "Minimum branch coverage percentage (0-100). CoverageReport fails if below this threshold",

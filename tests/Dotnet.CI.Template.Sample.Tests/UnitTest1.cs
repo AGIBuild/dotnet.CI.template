@@ -1,3 +1,5 @@
+using Shouldly;
+
 namespace Dotnet.CI.Template.Sample.Tests;
 
 public class CalculatorTests
@@ -6,19 +8,19 @@ public class CalculatorTests
     public void Add_ShouldReturnSum()
     {
         int result = Calculator.Add(2, 3);
-        Assert.Equal(5, result);
+        result.ShouldBe(5);
     }
 
     [Fact]
     public void Divide_ShouldReturnQuotient()
     {
         int result = Calculator.Divide(10, 2);
-        Assert.Equal(5, result);
+        result.ShouldBe(5);
     }
 
     [Fact]
     public void Divide_ByZero_ShouldThrow()
     {
-        Assert.Throws<DivideByZeroException>(() => Calculator.Divide(10, 0));
+        Should.Throw<DivideByZeroException>(() => Calculator.Divide(10, 0));
     }
 }
