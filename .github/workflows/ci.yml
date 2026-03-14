@@ -39,6 +39,8 @@ env:
   DOTNET_CLI_TELEMETRY_OPTOUT: true
   NUKE_TELEMETRY_OPTOUT: true
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+  ENABLE_NUGET: 'true'
+  NUGET_USE_OIDC: 'false'
   ENABLE_ANDROID: 'false'
   ENABLE_IOS: 'false'
 
@@ -184,10 +186,12 @@ jobs:
         shell: bash
         run: |
           IS_RELEASE="${{ steps.resolve.outputs.is_release }}"
+          PACK=$( [ "$ENABLE_NUGET" = "true" ] && echo "true" || echo "false" )
+
           if [ "$IS_RELEASE" = "true" ]; then
-            ENTRIES='{"os":"ubuntu-latest","runtime":"linux-x64","pack":true,"publish":true,"workloads":""}'
-            ENTRIES+=',{"os":"windows-latest","runtime":"win-x64","pack":false,"publish":true,"workloads":""}'
-            ENTRIES+=',{"os":"macos-latest","runtime":"osx-arm64","pack":false,"publish":true,"workloads":""}'
+            ENTRIES="{\"os\":\"ubuntu-latest\",\"runtime\":\"linux-x64\",\"pack\":$PACK,\"publish\":true,\"workloads\":\"\"}"
+            ENTRIES+=",{\"os\":\"windows-latest\",\"runtime\":\"win-x64\",\"pack\":false,\"publish\":true,\"workloads\":\"\"}"
+            ENTRIES+=",{\"os\":\"macos-latest\",\"runtime\":\"osx-arm64\",\"pack\":false,\"publish\":true,\"workloads\":\"\"}"
 
             if [ "$ENABLE_ANDROID" = "true" ]; then
               ENTRIES+=',{"os":"ubuntu-latest","runtime":"android","pack":false,"publish":false,"workloads":"android"}'
@@ -196,9 +200,9 @@ jobs:
               ENTRIES+=',{"os":"macos-latest","runtime":"ios","pack":false,"publish":false,"workloads":"ios"}'
             fi
           else
-            ENTRIES='{"os":"ubuntu-latest","runtime":"linux-x64","pack":true,"publish":false,"workloads":""}'
-            ENTRIES+=',{"os":"windows-latest","runtime":"win-x64","pack":false,"publish":false,"workloads":""}'
-            ENTRIES+=',{"os":"macos-latest","runtime":"osx-arm64","pack":false,"publish":false,"workloads":""}'
+            ENTRIES="{\"os\":\"ubuntu-latest\",\"runtime\":\"linux-x64\",\"pack\":$PACK,\"publish\":false,\"workloads\":\"\"}"
+            ENTRIES+=",{\"os\":\"windows-latest\",\"runtime\":\"win-x64\",\"pack\":false,\"publish\":false,\"workloads\":\"\"}"
+            ENTRIES+=",{\"os\":\"macos-latest\",\"runtime\":\"osx-arm64\",\"pack\":false,\"publish\":false,\"workloads\":\"\"}"
 
             if [ "$ENABLE_ANDROID" = "true" ]; then
               ENTRIES+=',{"os":"ubuntu-latest","runtime":"android","pack":false,"publish":false,"workloads":"android"}'
@@ -433,6 +437,7 @@ jobs:
           global-json-file: global.json
 
       - name: Download packages
+        if: env.ENABLE_NUGET == 'true'
         uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
         with:
           name: packages
@@ -449,14 +454,22 @@ jobs:
         run: chmod +x build.sh
 
       - name: Verify release manifest
+        if: env.ENABLE_NUGET == 'true'
         shell: bash
         run: ./build.sh ValidateReleaseManifest
 
-      - name: Push to NuGet.org
-        if: secrets.NUGET_API_KEY != ''
+      - name: NuGet login (Trusted Publishing / OIDC)
+        if: env.ENABLE_NUGET == 'true' && env.NUGET_USE_OIDC == 'true'
+        id: nuget-login
+        uses: NuGet/login@d22cc5f58ff5b88bf9bd452535b4335137e24544 # v1.1.0
+        with:
+          user: ${{ vars.NUGET_USER || github.repository_owner }}
+
+      - name: Push to NuGet.org (OIDC)
+        if: env.ENABLE_NUGET == 'true' && env.NUGET_USE_OIDC == 'true'
         shell: bash
         env:
-          API_KEY: ${{ secrets.NUGET_API_KEY }}
+          API_KEY: ${{ steps.nuget-login.outputs.NUGET_API_KEY }}
         run: |
           shopt -s nullglob
           PACKAGES=(artifacts/packages/*.nupkg)
@@ -471,12 +484,37 @@ jobs:
               --source https://api.nuget.org/v3/index.json \
               --skip-duplicate
           done
-          echo "All packages pushed to NuGet.org"
+          echo "All packages pushed to NuGet.org via Trusted Publishing"
 
-      - name: NuGet push skipped
-        if: secrets.NUGET_API_KEY == ''
+      - name: Push to NuGet.org (API key)
+        if: env.ENABLE_NUGET == 'true' && env.NUGET_USE_OIDC != 'true'
         shell: bash
-        run: echo "::notice::NUGET_API_KEY secret is not configured. Skipping NuGet push."
+        env:
+          API_KEY: ${{ secrets.NUGET_API_KEY }}
+        run: |
+          if [ -z "$API_KEY" ]; then
+            echo "::error::ENABLE_NUGET is true but NUGET_API_KEY secret is not set. Either set the secret or change NUGET_USE_OIDC to true."
+            exit 1
+          fi
+          shopt -s nullglob
+          PACKAGES=(artifacts/packages/*.nupkg)
+          if [ ${#PACKAGES[@]} -eq 0 ]; then
+            echo "::error::No .nupkg files found"
+            exit 1
+          fi
+          for pkg in "${PACKAGES[@]}"; do
+            echo "Pushing $pkg"
+            dotnet nuget push "$pkg" \
+              --api-key "$API_KEY" \
+              --source https://api.nuget.org/v3/index.json \
+              --skip-duplicate
+          done
+          echo "All packages pushed to NuGet.org via API key"
+
+      - name: NuGet disabled
+        if: env.ENABLE_NUGET != 'true'
+        shell: bash
+        run: echo "::notice::NuGet is disabled (ENABLE_NUGET != true). Skipping NuGet push."
 
       - name: Generate SBOM
         uses: anchore/sbom-action@57aae528053a48a3f6235f2d9461b05fbcb7366d # v0.23.1
@@ -485,20 +523,36 @@ jobs:
           output-file: sbom-spdx.json
           format: spdx-json
 
+      - name: Collect attestation subjects
+        id: attest-subjects
+        shell: bash
+        run: |
+          shopt -s nullglob
+          SUBJECTS=""
+          if [ "$ENABLE_NUGET" = "true" ]; then
+            for f in artifacts/packages/*.nupkg; do
+              SUBJECTS+="$f"$'\n'
+            done
+          fi
+          for f in artifacts/installers/*.zip; do
+            SUBJECTS+="$f"$'\n'
+          done
+          SUBJECTS=$(echo "$SUBJECTS" | sed '/^$/d')
+          echo "subjects<<EOF" >> "$GITHUB_OUTPUT"
+          echo "$SUBJECTS" >> "$GITHUB_OUTPUT"
+          echo "EOF" >> "$GITHUB_OUTPUT"
+
       - name: Attest build provenance
+        if: steps.attest-subjects.outputs.subjects != ''
         uses: actions/attest-build-provenance@a2bbfa25375fe432b6a289bc6b6cd05ecd0c4c32 # v4.1.0
         with:
-          subject-path: |
-            artifacts/packages/*.nupkg
-            artifacts/installers/*.zip
+          subject-path: ${{ steps.attest-subjects.outputs.subjects }}
 
       - name: Attest SBOM
-        if: hashFiles('sbom-spdx.json') != ''
+        if: steps.attest-subjects.outputs.subjects != '' && hashFiles('sbom-spdx.json') != ''
         uses: actions/attest@59d89421af93a897026c735860bf21b6eb4f7b26 # v4.1.0
         with:
-          subject-path: |
-            artifacts/packages/*.nupkg
-            artifacts/installers/*.zip
+          subject-path: ${{ steps.attest-subjects.outputs.subjects }}
           sbom-path: sbom-spdx.json
 
       - name: Create and push tag
