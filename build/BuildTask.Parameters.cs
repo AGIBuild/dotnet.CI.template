@@ -26,6 +26,9 @@ partial class BuildTask
     [Parameter("Publish self-contained output in Publish target")]
     readonly bool SelfContained;
 
+    [Parameter("NuGet API key for PushNuGetPackages target. Defaults to NUGET_API_KEY environment variable.")]
+    readonly string NuGetApiKey = string.Empty;
+
     [Parameter("Minimum line coverage percentage (0-100). CoverageReport fails if below this threshold.")]
     readonly int CoverageThreshold = 90;
 
