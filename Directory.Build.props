@@ -31,7 +31,7 @@
 
        To publish an RC: trigger workflow_dispatch with prerelease_suffix=rc.1 -->
   <PropertyGroup>
-    <VersionPrefix>0.2.8</VersionPrefix>
+    <VersionPrefix>0.2.9</VersionPrefix>
     <FileVersion Condition="'$(BuildNumber)' != ''">$(VersionPrefix).$(BuildNumber)</FileVersion>
   </PropertyGroup>
 

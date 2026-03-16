@@ -35,6 +35,7 @@
         "Pack",
         "PackageApp",
         "Publish",
+        "PushNuGetPackages",
         "RefreshLockFiles",
         "Restore",
         "ShowVersion",
@@ -140,6 +141,10 @@
           "type": "integer",
           "description": "Minimum line coverage percentage (0-100). CoverageReport fails if below this threshold",
           "format": "int32"
+        },
+        "NuGetApiKey": {
+          "type": "string",
+          "description": "NuGet API key for PushNuGetPackages target. Defaults to NUGET_API_KEY environment variable"
         },
         "ProjectName": {
           "type": "string",
