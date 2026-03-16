@@ -557,88 +557,8 @@ jobs:
         shell: bash
         run: ./build.sh PushNuGetPackages
 
-  release-attest:
-    name: Release Attest
-    needs: [resolve-version, build-and-test, release-gate]
-    if: needs.resolve-version.outputs.is_release == 'true'
-    runs-on: ubuntu-latest
-    timeout-minutes: 15
-    permissions:
-      contents: read
-      attestations: write
-      id-token: write
-    steps:
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
-        with:
-          ref: ${{ needs.resolve-version.outputs.sha }}
-
-      - name: Download packages
-        if: env.ENABLE_NUGET == 'true'
-        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
-        with:
-          name: packages
-          path: artifacts/packages
-
-      - name: Download installers
-        if: env.ENABLE_INSTALLERS == 'true'
-        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
-        with:
-          path: artifacts/installers
-          pattern: installer-*
-          merge-multiple: true
-
-      - name: Generate SBOM
-        uses: anchore/sbom-action@57aae528053a48a3f6235f2d9461b05fbcb7366d # v0.23.1
-        with:
-          artifact-name: sbom-spdx.json
-          output-file: sbom-spdx.json
-          format: spdx-json
-
-      - name: Collect attestation subjects
-        id: attest-subjects
-        shell: bash
-        run: |
-          set -euo pipefail
-          shopt -s nullglob
-          SUBJECTS=""
-          if [ "$ENABLE_NUGET" = "true" ]; then
-            for f in artifacts/packages/*.nupkg; do
-              SUBJECTS+="$f"$'\n'
-            done
-          fi
-          if [ "$ENABLE_INSTALLERS" = "true" ]; then
-            for f in artifacts/installers/*.zip; do
-              SUBJECTS+="$f"$'\n'
-            done
-          fi
-          SUBJECTS=$(echo "$SUBJECTS" | sed '/^$/d')
-          echo "subjects<<EOF" >> "$GITHUB_OUTPUT"
-          echo "$SUBJECTS" >> "$GITHUB_OUTPUT"
-          echo "EOF" >> "$GITHUB_OUTPUT"
-
-      - name: Attest build provenance
-        if: steps.attest-subjects.outputs.subjects != ''
-        uses: actions/attest-build-provenance@a2bbfa25375fe432b6a289bc6b6cd05ecd0c4c32 # v4.1.0
-        with:
-          subject-path: ${{ steps.attest-subjects.outputs.subjects }}
-
-      - name: Attest SBOM
-        if: steps.attest-subjects.outputs.subjects != '' && hashFiles('sbom-spdx.json') != ''
-        uses: actions/attest@59d89421af93a897026c735860bf21b6eb4f7b26 # v4.1.0
-        with:
-          subject-path: ${{ steps.attest-subjects.outputs.subjects }}
-          sbom-path: sbom-spdx.json
-
-      - name: Upload SBOM artifact
-        if: hashFiles('sbom-spdx.json') != ''
-        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
-        with:
-          name: sbom
-          path: sbom-spdx.json
-          if-no-files-found: error
-
-  release-tag:
-    name: Release Tag
+  create-release:
+    name: Create Release
     needs: [resolve-version, release-gate, release-nuget]
     if: needs.resolve-version.outputs.is_release == 'true' && (needs.release-nuget.result == 'success' || needs.release-nuget.result == 'skipped')
     runs-on: ubuntu-latest
@@ -653,6 +573,14 @@ jobs:
         with:
           ref: ${{ needs.resolve-version.outputs.sha }}
           fetch-depth: 0
+
+      - name: Download installers
+        if: env.ENABLE_INSTALLERS == 'true'
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          path: artifacts/installers
+          pattern: installer-*
+          merge-multiple: true
 
       - name: Create and push tag (idempotent)
         shell: bash
@@ -691,30 +619,6 @@ jobs:
           git push origin "$TAG"
           echo "Created and pushed tag $TAG at $SHA"
 
-  release-github:
-    name: Release GitHub
-    needs: [resolve-version, release-tag, release-attest]
-    if: needs.resolve-version.outputs.is_release == 'true'
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
-    permissions:
-      contents: write
-    steps:
-      - name: Download installers
-        if: env.ENABLE_INSTALLERS == 'true'
-        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
-        with:
-          path: artifacts/installers
-          pattern: installer-*
-          merge-multiple: true
-
-      - name: Download SBOM artifact
-        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
-        continue-on-error: true
-        with:
-          name: sbom
-          path: .
-
       - name: Create or update GitHub Release
         shell: bash
         env:
@@ -729,10 +633,6 @@ jobs:
 
           if [ "$ENABLE_INSTALLERS" = "true" ]; then
             RELEASE_ASSETS+=(artifacts/installers/*.zip)
-          fi
-
-          if [ -f "sbom-spdx.json" ]; then
-            RELEASE_ASSETS+=(sbom-spdx.json)
           fi
 
           if gh release view "$TAG" >/dev/null 2>&1; then
@@ -756,7 +656,7 @@ jobs:
 
   deploy-docs:
     name: Deploy Documentation
-    needs: [resolve-version, release-github, build-docs]
+    needs: [resolve-version, create-release, build-docs]
     if: needs.resolve-version.outputs.is_release == 'true' && needs.build-docs.outputs.has_docs == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 10
