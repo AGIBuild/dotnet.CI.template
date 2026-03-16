@@ -58,6 +58,7 @@ jobs:
       sha: ${{ steps.resolve.outputs.sha }}
       is_release: ${{ steps.resolve.outputs.is_release }}
       build_matrix: ${{ steps.matrix.outputs.build_matrix }}
+      enable_nuget: ${{ steps.matrix.outputs.enable_nuget }}
 
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
@@ -189,6 +190,7 @@ jobs:
           IS_RELEASE="${{ steps.resolve.outputs.is_release }}"
           PACK=$( [ "$ENABLE_NUGET" = "true" ] && echo "true" || echo "false" )
           PUBLISH=$( [ "$ENABLE_INSTALLERS" = "true" ] && echo "true" || echo "false" )
+          echo "enable_nuget=$PACK" >> "$GITHUB_OUTPUT"
 
           if [ "$IS_RELEASE" = "true" ]; then
             ENTRIES="{\"os\":\"ubuntu-latest\",\"runtime\":\"linux-x64\",\"pack\":$PACK,\"publish\":$PUBLISH,\"workloads\":\"\"}"
@@ -496,7 +498,7 @@ jobs:
   release-nuget:
     name: Release NuGet
     needs: [resolve-version, build-and-test, release-gate]
-    if: needs.resolve-version.outputs.is_release == 'true' && env.ENABLE_NUGET == 'true'
+    if: needs.resolve-version.outputs.is_release == 'true' && needs.resolve-version.outputs.enable_nuget == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 15
     permissions:
