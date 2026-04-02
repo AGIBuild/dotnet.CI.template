@@ -35,6 +35,7 @@ bld/
 [Ll]ogs/
 docs/.vitepress/dist/
 docs/.vitepress/cache/
+.nuke/temp/
 
 # Build results on 'Bin' directories
 **/[Bb]in/*
