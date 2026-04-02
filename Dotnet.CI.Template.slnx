@@ -5,4 +5,5 @@
   <Folder Name="/tests/">
     <Project Path="tests/Dotnet.CI.Template.Sample.Tests/Dotnet.CI.Template.Sample.Tests.csproj" />
   </Folder>
+  <Project Path="build/_build.csproj" />
 </Solution>
