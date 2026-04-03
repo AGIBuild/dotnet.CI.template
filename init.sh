@@ -33,8 +33,8 @@ validate_name() {
 
 if [ "$FORCE" = false ]; then
   echo ""
-  echo "  dotnet.CI.template - Project Setup"
-  echo "  ==================================="
+  echo "  ChengYuan - Project Setup"
+  echo "  ========================="
   echo ""
   echo "  This wizard will customize the template for your project."
   echo ""

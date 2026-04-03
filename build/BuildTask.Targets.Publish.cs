@@ -7,9 +7,10 @@ partial class BuildTask
     Target Publish => _ => _
         .DependsOn(Restore)
         .Requires(() => !string.IsNullOrWhiteSpace(Runtime))
+        .Requires(() => !string.IsNullOrWhiteSpace(PublishPath))
         .Executes(() =>
         {
-            var outputDirectory = PublishDirectory / Runtime;
+            var outputDirectory = PublishDirectory / NormalizedHost / Runtime;
 
             DotNetPublish(settings => ApplyVersionSuffix(settings
                     .SetProject(PublishPath)

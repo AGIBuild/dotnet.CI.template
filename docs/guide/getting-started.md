@@ -1,35 +1,34 @@
 # Getting Started
 
-## Installation
+## Validate the Current Skeleton
 
-Add the NuGet package to your project:
+Restore, build, and test the solution:
 
 ```bash
-dotnet add package Dotnet.CI.Template.Sample
+dotnet restore ChengYuan.slnx
+dotnet build ChengYuan.slnx
+dotnet test --solution ChengYuan.slnx
 ```
 
-## Usage
+## Run the Hosts
 
-```csharp
-using Dotnet.CI.Template.Sample;
+Start the thin composition hosts to verify the current module graph:
 
-var sum = Calculator.Add(2, 3);       // 5
-var quotient = Calculator.Divide(10, 2); // 5
+```bash
+dotnet run --project src/Hosts/ChengYuan.WebHost
+dotnet run --project src/Hosts/ChengYuan.CliHost
 ```
 
-## Using as a Template
+The web host exposes `/health`, and the CLI host prints the loaded module list and correlation information.
+
+## Extend the Template
 
 1. Click **Use this template** on the [GitHub repository](https://github.com/AGIBuild/dotnet.CI.template).
-2. Run the init wizard to rename solution, projects, and namespaces:
-
-```bash
-./init.sh              # Linux / macOS
-./init.ps1             # Windows (PowerShell)
-```
-
-3. Replace the sample `Calculator` class with your own code.
-4. Update `Directory.Build.props` with your package metadata.
-5. Configure the `release` environment in GitHub Settings (see [Releasing](../contributing/releasing.md)).
+2. Keep solution and project names aligned to the `ChengYuan.*` baseline until the module family stabilizes.
+3. Add new modules under `src/Framework` or `src/Applications` based on the architecture rules.
+4. Wire modules into `ChengYuan.WebHost` or `ChengYuan.CliHost` only when a transport is required.
+5. Update `Directory.Build.props` with your package metadata.
+6. Configure the `release` environment in GitHub Settings (see [Releasing](../contributing/releasing.md)).
 
 ## Next Steps
 

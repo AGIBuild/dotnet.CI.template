@@ -1,0 +1,15 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\ChengYuan.Outbox.Abstractions\ChengYuan.Outbox.Abstractions.csproj" />
+    <ProjectReference Include="..\..\ChengYuan.Core\ChengYuan.Core\ChengYuan.Core.csproj" />
+    <ProjectReference Include="..\..\ChengYuan.ExecutionContext\ChengYuan.ExecutionContext.Runtime\ChengYuan.ExecutionContext.Runtime.csproj" />
+    <ProjectReference Include="..\..\ChengYuan.Core\ChengYuan.Core.Runtime\ChengYuan.Core.Runtime.csproj" />
+    <ProjectReference Include="..\..\ChengYuan.MultiTenancy\ChengYuan.MultiTenancy.Runtime\ChengYuan.MultiTenancy.Runtime.csproj" />
+  </ItemGroup>
+
+</Project>

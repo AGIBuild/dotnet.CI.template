@@ -1,0 +1,12 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\ChengYuan.Core\ChengYuan.Core.Json\ChengYuan.Core.Json.csproj" />
+    <ProjectReference Include="..\..\ChengYuan.Core\ChengYuan.Core.Runtime\ChengYuan.Core.Runtime.csproj" />
+  </ItemGroup>
+
+</Project>

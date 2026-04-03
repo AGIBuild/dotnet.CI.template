@@ -11,7 +11,7 @@ Thank you for your interest in contributing to this project!
 
 ```bash
 git clone <repo-url>
-cd dotnet.CI.template
+cd <repo-folder>
 dotnet restore
 dotnet build
 dotnet test

@@ -1,4 +1,0 @@
-#nullable enable
-Dotnet.CI.Template.Sample.Calculator
-static Dotnet.CI.Template.Sample.Calculator.Add(int left, int right) -> int
-static Dotnet.CI.Template.Sample.Calculator.Divide(int dividend, int divisor) -> int

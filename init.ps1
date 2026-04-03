@@ -25,8 +25,8 @@ $ScriptDir = $PSScriptRoot
 
 if (-not $Force) {
     Write-Host ""
-    Write-Host "  dotnet.CI.template - Project Setup" -ForegroundColor Cyan
-    Write-Host "  ===================================" -ForegroundColor Cyan
+    Write-Host "  ChengYuan - Project Setup" -ForegroundColor Cyan
+    Write-Host "  =========================" -ForegroundColor Cyan
     Write-Host ""
     Write-Host "  This wizard will customize the template for your project."
     Write-Host ""

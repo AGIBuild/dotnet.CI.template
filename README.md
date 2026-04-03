@@ -1,4 +1,4 @@
-# Dotnet.CI.Template
+# ChengYuan
 
 [![CI and Release](https://github.com/AGIBuild/dotnet.CI.template/actions/workflows/ci.yml/badge.svg)](https://github.com/AGIBuild/dotnet.CI.template/actions/workflows/ci.yml)
 [![CodeQL](https://github.com/AGIBuild/dotnet.CI.template/actions/workflows/codeql.yml/badge.svg)](https://github.com/AGIBuild/dotnet.CI.template/actions/workflows/codeql.yml)
@@ -14,7 +14,7 @@ This repository is a **productized starter** that gives you:
 
 CI/CD is here, but it is not the protagonist; your product is.
 
-![Dotnet.CI.Template Home](.github/assets/readme/docs-home-hero.png)
+![ChengYuan Home](.github/assets/readme/docs-home-hero.png)
 
 ## Why This Repo Exists
 
@@ -24,7 +24,7 @@ Most new projects lose momentum in the first week to repetitive setup:
 - standardizing versioning
 - bolting on documentation later
 
-`Dotnet.CI.Template` removes that tax. You start with a working product baseline and focus on business features from day one.
+`ChengYuan` removes that tax. You start with a working product baseline and focus on business features from day one.
 
 ## Product Capabilities
 
@@ -49,7 +49,7 @@ Most new projects lose momentum in the first week to repetitive setup:
 
 ## What Makes It Better Than Starting Empty
 
-| Comparison | Blank Repo | Dotnet.CI.Template |
+| Comparison | Blank Repo | ChengYuan |
 |---|---|---|
 | First successful release | days of setup | built-in path |
 | Build orchestration | mixed shell + YAML | NUKE targets |
@@ -77,17 +77,25 @@ Product Code (src/) + Tests (tests/)
 ## Quick Start
 
 1. Create your repository from this template:
-   [Use this template](https://github.com/AGIBuild/dotnet.CI.template/generate)
-2. Run the init wizard to rename everything:
+  [Use this template](https://github.com/AGIBuild/dotnet.CI.template/generate)
+2. Restore, build, and validate the current skeleton:
 
 ```bash
-./init.sh              # interactive (Linux/macOS)
-./init.ps1             # interactive (Windows)
+dotnet restore ChengYuan.slnx
+dotnet build ChengYuan.slnx
+dotnet test --solution ChengYuan.slnx
 ```
 
-3. Configure `release` environment in GitHub (`Settings` -> `Environments`)
-4. Add `NUGET_API_KEY` secret (if `ENABLE_NUGET` is `true`)
-5. Review [Feature Switches](#feature-switches), then push to `main`
+3. Run one of the thin hosts to verify composition:
+
+```bash
+dotnet run --project src/Hosts/ChengYuan.WebHost
+dotnet run --project src/Hosts/ChengYuan.CliHost
+```
+
+4. Configure `release` environment in GitHub (`Settings` -> `Environments`)
+5. Add `NUGET_API_KEY` secret (if `ENABLE_NUGET` is `true`)
+6. Review [Feature Switches](#feature-switches), then push to `main`
 
 ## Feature Switches
 

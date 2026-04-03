@@ -12,12 +12,20 @@ partial class BuildTask
     [Parameter("Version suffix for prerelease builds (e.g., ci.158)")]
     readonly string VersionSuffix = string.Empty;
 
+    [Parameter("Host to publish - supported values are 'web' and 'cli'")]
+    new readonly string Host = string.Empty;
 
     // Internal path conventions controlled by build tasks (not external parameters).
-    readonly string BuildPath = "Dotnet.CI.Template.slnx";
-    readonly string TestPath = "Dotnet.CI.Template.slnx";
-    readonly string PackPath = "Dotnet.CI.Template.slnx";
-    readonly string PublishPath = "src/Dotnet.CI.Template.Sample/Dotnet.CI.Template.Sample.csproj";
+    readonly string BuildPath = "ChengYuan.slnx";
+    readonly string TestPath = "ChengYuan.slnx";
+    readonly string PackPath = "ChengYuan.slnx";
+    string NormalizedHost => Host.Trim().ToLowerInvariant();
+    string PublishPath => NormalizedHost switch
+    {
+        "web" => "src/Hosts/ChengYuan.WebHost/ChengYuan.WebHost.csproj",
+        "cli" => "src/Hosts/ChengYuan.CliHost/ChengYuan.CliHost.csproj",
+        _ => string.Empty
+    };
 
     // Publish inputs.
     [Parameter("Target runtime identifier used by Publish target")]

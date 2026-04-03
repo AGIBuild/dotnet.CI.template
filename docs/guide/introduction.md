@@ -1,34 +1,49 @@
 # Introduction
 
-Dotnet.CI.Template is a GitHub template repository that gives new .NET projects a production-grade starting point:
+ChengYuan is the target product direction of this repository.
 
-- **NUKE build system** — typed C# build targets replace fragile shell scripts.
-- **GitHub Actions CI/CD** — multi-platform build, test, pack, publish, and release in a single workflow.
-- **Version management** — `VersionPrefix` in `Directory.Build.props` is the single source of truth; CI decides whether to release based on git tags.
-- **Documentation site** — VitePress with i18n (English + Chinese), built and deployed to GitHub Pages automatically.
+It is an opinionated .NET template family for modular monoliths, built around ABP-style module boundaries, DDD+, and strict engineering guardrails. The repository is transitioning from its legacy CI template shape into this architecture model, so some implementation details may still reflect the earlier structure. For new work, treat the architecture described in this documentation as the target state.
 
-## What You Get
+## Product Direction
 
-| Artifact | Description |
-|---|---|
-| NuGet package | Library packaged with symbols and release manifest |
-| Platform installers | Self-contained app archives (`app-{runtime}.zip`) |
-| SBOM | SPDX JSON for supply-chain transparency |
-| Documentation | Static site deployed to GitHub Pages |
+ChengYuan is designed around five core ideas:
 
-## Project Layout
+- **Module-first architecture** — every reusable capability starts as a vertical slice.
+- **Two module families** — `Framework` modules for technical systems and `Application` modules for reusable capabilities and business contexts.
+- **Composable hosts** — Web and CLI are thin hosts that load only the facets they need.
+- **Variable module depth** — not every module needs Web, CLI, Persistence, or UI.
+- **Strong delivery discipline** — build automation, lock files, versioning, tests, and docs remain mandatory.
+
+## Target Topology
 
 ```text
-├── src/                    # Source projects
-├── tests/                  # Test projects
-├── build/                  # NUKE build targets
-├── docs/                   # VitePress documentation
-├── .github/workflows/      # CI/CD pipelines
-├── Directory.Build.props   # Shared build properties & version
-└── Dotnet.CI.Template.slnx # Solution file
+src/
+├── Framework/      # Technical modules and provider integrations
+├── Applications/   # Reusable application modules and business modules
+├── Hosts/          # WebHost and CliHost shells
+├── ...
+tests/              # Layer, integration, architecture, and template tests
+build/              # NUKE build automation
+docs/               # Documentation
 ```
 
-## Next Steps
+Inside the source tree, the preferred shape is:
 
-- [Getting Started](getting-started.md) — install and use the library.
-- [Development](../contributing/development.md) — set up a local dev environment.
+```text
+family -> module -> project
+```
+
+For example, `src/Applications/ChengYuan.Identity/ChengYuan.Identity.Application/` is preferred over flattening all module projects into a single directory.
+
+## What ChengYuan Is Not
+
+- It is not a repository-wide horizontal clean architecture skeleton.
+- It is not a full ABP runtime clone.
+- It is not microservice-first.
+- It does not assume that all modules must expose identical layers or transports.
+
+## Read This Next
+
+- [Architecture](./architecture.md) — the authoritative design rules for future development.
+- [Getting Started](./getting-started.md) — how to use the current template assets.
+- [Development](../contributing/development.md) — local workflow, build commands, and contributor rules.

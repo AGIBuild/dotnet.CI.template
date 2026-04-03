@@ -1,8 +1,8 @@
 import { defineConfig } from 'vitepress'
 
 export default defineConfig({
-  title: 'Dotnet.CI.Template',
-  description: 'A production-ready .NET project template with built-in CI/CD',
+  title: 'ChengYuan',
+  description: 'An ABP-inspired modular .NET template family built around framework and application modules',
   base: '/dotnet.CI.template/',
 
   sitemap: {
@@ -12,12 +12,12 @@ export default defineConfig({
   head: [
     ['meta', { name: 'theme-color', content: '#512bd4' }],
     ['meta', { property: 'og:type', content: 'website' }],
-    ['meta', { property: 'og:title', content: 'Dotnet.CI.Template' }],
-    ['meta', { property: 'og:description', content: 'A production-ready .NET project template with built-in CI/CD' }],
+    ['meta', { property: 'og:title', content: 'ChengYuan' }],
+    ['meta', { property: 'og:description', content: 'An ABP-inspired modular .NET template family built around framework and application modules' }],
     ['meta', { property: 'og:url', content: 'https://agibuild.github.io/dotnet.CI.template/' }],
     ['meta', { name: 'twitter:card', content: 'summary' }],
-    ['meta', { name: 'twitter:title', content: 'Dotnet.CI.Template' }],
-    ['meta', { name: 'twitter:description', content: 'A production-ready .NET project template with built-in CI/CD' }]
+    ['meta', { name: 'twitter:title', content: 'ChengYuan' }],
+    ['meta', { name: 'twitter:description', content: 'An ABP-inspired modular .NET template family built around framework and application modules' }]
   ],
 
   locales: {
@@ -36,6 +36,7 @@ export default defineConfig({
               text: 'Guide',
               items: [
                 { text: 'Introduction', link: '/guide/introduction' },
+                { text: 'Architecture', link: '/guide/architecture' },
                 { text: 'Getting Started', link: '/guide/getting-started' }
               ]
             }
@@ -76,6 +77,7 @@ export default defineConfig({
               text: '指南',
               items: [
                 { text: '产品介绍', link: '/zh-cn/guide/introduction' },
+                { text: '架构设计', link: '/zh-cn/guide/architecture' },
                 { text: '快速开始', link: '/zh-cn/guide/getting-started' }
               ]
             }

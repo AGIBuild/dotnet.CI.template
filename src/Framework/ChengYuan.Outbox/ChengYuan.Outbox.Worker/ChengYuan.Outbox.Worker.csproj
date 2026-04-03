@@ -1,0 +1,13 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\ChengYuan.Outbox.Persistence\ChengYuan.Outbox.Persistence.csproj" />
+    <ProjectReference Include="..\..\ChengYuan.Core\ChengYuan.Core\ChengYuan.Core.csproj" />
+    <ProjectReference Include="..\..\ChengYuan.Core\ChengYuan.Core.Runtime\ChengYuan.Core.Runtime.csproj" />
+  </ItemGroup>
+
+</Project>

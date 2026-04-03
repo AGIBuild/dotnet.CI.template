@@ -626,7 +626,7 @@ jobs:
         run: |
           set -euo pipefail
           TAG="${{ needs.resolve-version.outputs.tag }}"
-          RELEASE_NAME="dotnet.CI.template $TAG"
+          RELEASE_NAME="ChengYuan $TAG"
 
           shopt -s nullglob
           RELEASE_ASSETS=()

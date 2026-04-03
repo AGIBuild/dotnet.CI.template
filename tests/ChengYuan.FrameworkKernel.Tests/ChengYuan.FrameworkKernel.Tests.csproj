@@ -1,0 +1,34 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.Caching.Memory" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" />
+    <PackageReference Include="Shouldly" />
+    <PackageReference Include="xunit.runner.visualstudio">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="xunit.v3" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Using Include="Xunit" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\Framework\ChengYuan.Core\ChengYuan.Core\ChengYuan.Core.csproj" />
+    <ProjectReference Include="..\..\src\Framework\ChengYuan.Core\ChengYuan.Core.Json\ChengYuan.Core.Json.csproj" />
+    <ProjectReference Include="..\..\src\Framework\ChengYuan.Core\ChengYuan.Core.Validation\ChengYuan.Core.Validation.csproj" />
+    <ProjectReference Include="..\..\src\Framework\ChengYuan.Core\ChengYuan.Core.Localization\ChengYuan.Core.Localization.csproj" />
+    <ProjectReference Include="..\..\src\Framework\ChengYuan.Core\ChengYuan.Core.Data\ChengYuan.Core.Data.csproj" />
+    <ProjectReference Include="..\..\src\Framework\ChengYuan.Core\ChengYuan.Core.EntityFrameworkCore\ChengYuan.Core.EntityFrameworkCore.csproj" />
+    <ProjectReference Include="..\..\src\Framework\ChengYuan.Core\ChengYuan.Core.Runtime\ChengYuan.Core.Runtime.csproj" />
+    <ProjectReference Include="..\..\src\Framework\ChengYuan.Caching\ChengYuan.Caching.Memory\ChengYuan.Caching.Memory.csproj" />
+    <ProjectReference Include="..\..\src\Framework\ChengYuan.Outbox\ChengYuan.Outbox.Worker\ChengYuan.Outbox.Worker.csproj" />
+    <ProjectReference Include="..\..\src\Framework\ChengYuan.ExecutionContext\ChengYuan.ExecutionContext.Runtime\ChengYuan.ExecutionContext.Runtime.csproj" />
+    <ProjectReference Include="..\..\src\Framework\ChengYuan.MultiTenancy\ChengYuan.MultiTenancy.Runtime\ChengYuan.MultiTenancy.Runtime.csproj" />
+  </ItemGroup>
+
+</Project>

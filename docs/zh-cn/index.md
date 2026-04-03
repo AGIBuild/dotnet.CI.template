@@ -1,21 +1,23 @@
 ---
 layout: home
 hero:
-  name: Dotnet.CI.Template
-  text: 生产就绪的 .NET 项目模板
-  tagline: 内置 CI/CD、版本管理和文档部署的项目起点。
+  name: 承渊
+  text: 面向模块化的 .NET 模板家族
+  tagline: 一个以 Framework modules、Application modules 以及可组合 Web 和 CLI hosts 为核心的 DDD+ 模板家族。
   actions:
     - theme: brand
       text: 快速开始
       link: /zh-cn/guide/getting-started
     - theme: alt
-      text: 开发贡献
-      link: /zh-cn/contributing/development
+      text: 架构设计
+      link: /zh-cn/guide/architecture
 features:
-  - title: 构建与测试
-    details: 基于 NUKE 的构建系统，支持全平台矩阵（Linux、Windows、macOS）。
-  - title: 自动化发版
-    details: 版本驱动的发布流水线 — NuGet 推送、GitHub Release、SBOM 和构建证明。
-  - title: 文档站点
-    details: 支持多语言的 VitePress 文档站点，自动构建和部署。
+  - title: 模块优先
+    details: 先将能力建成垂直切面，再只在真正需要的模块内部做分层。
+  - title: Framework + Applications
+    details: 遵循 ABP 的核心心智模型，分离技术框架模块与可复用应用模块，但不机械复制 ABP 的全部包结构。
+  - title: 模块深度可变
+    details: 不强制每个模块都拥有 Web、CLI、Persistence 或 UI。每个模块只暴露真正需要的 facet。
+  - title: 工程纪律
+    details: 保留 NUKE、CI/CD、版本管理、锁文件和文档站点这些不可退让的工程约束。
 ---

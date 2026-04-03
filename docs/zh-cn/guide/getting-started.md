@@ -1,35 +1,34 @@
 # 快速开始
 
-## 安装
+## 校验当前骨架
 
-将 NuGet 包添加到项目：
+先还原、构建并测试解决方案：
 
 ```bash
-dotnet add package Dotnet.CI.Template.Sample
+dotnet restore ChengYuan.slnx
+dotnet build ChengYuan.slnx
+dotnet test --solution ChengYuan.slnx
 ```
 
-## 使用
+## 运行 Host
 
-```csharp
-using Dotnet.CI.Template.Sample;
+启动两个轻量组合壳，确认当前模块图可正常装配：
 
-var sum = Calculator.Add(2, 3);       // 5
-var quotient = Calculator.Divide(10, 2); // 5
+```bash
+dotnet run --project src/Hosts/ChengYuan.WebHost
+dotnet run --project src/Hosts/ChengYuan.CliHost
 ```
 
-## 作为模板使用
+Web Host 会暴露 `/health`，CLI Host 会输出已加载模块和相关性信息。
+
+## 扩展模板
 
 1. 在 [GitHub 仓库](https://github.com/AGIBuild/dotnet.CI.template)点击 **Use this template**。
-2. 运行初始化向导，自动重命名解决方案、项目和命名空间：
-
-```bash
-./init.sh              # Linux / macOS
-./init.ps1             # Windows (PowerShell)
-```
-
-3. 用你自己的代码替换示例 `Calculator` 类。
-4. 更新 `Directory.Build.props` 中的包元数据。
-5. 在 GitHub Settings 中配置 `release` environment（参见[发版指南](../contributing/releasing.md)）。
+2. 在模块家族稳定前，保持解决方案和项目名沿用 `ChengYuan.*` 基线。
+3. 按架构规则在 `src/Framework` 或 `src/Applications` 下新增模块。
+4. 仅在确实需要对应传输方式时，把模块接入 `ChengYuan.WebHost` 或 `ChengYuan.CliHost`。
+5. 更新 `Directory.Build.props` 中的包元数据。
+6. 在 GitHub Settings 中配置 `release` environment（参见[发版指南](../contributing/releasing.md)）。
 
 ## 下一步
 
