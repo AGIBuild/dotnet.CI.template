@@ -1,13 +1,8 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+
 namespace ChengYuan.Core.Modularity;
-
-public interface IModuleDescriptor
-{
-    Type ModuleType { get; }
-
-    IReadOnlyList<Type> DependencyTypes { get; }
-}
-
-public sealed record ModuleDescriptor(Type ModuleType, IReadOnlyList<Type> DependencyTypes) : IModuleDescriptor;
 
 public sealed class ModuleCatalog
 {

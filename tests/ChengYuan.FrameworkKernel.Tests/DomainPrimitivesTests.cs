@@ -1,6 +1,7 @@
 using System.Text.Json;
 using ChengYuan.Core.Entities;
 using ChengYuan.Core.EntityFrameworkCore;
+using ChengYuan.Core.Exceptions;
 using ChengYuan.Core.Json;
 using ChengYuan.Core.Modularity;
 using ChengYuan.Core.Results;
@@ -69,6 +70,36 @@ public class DomainPrimitivesTests
         mapped.IsFailure.ShouldBeTrue();
         mapped.Error.ShouldBe(error);
         Should.Throw<InvalidOperationException>(() => _ = mapped.Value);
+    }
+
+    [Fact]
+    public void ErrorCode_ShouldRejectWhitespaceValues()
+    {
+        Should.Throw<ArgumentException>(() => _ = new ErrorCode(" "));
+    }
+
+    [Fact]
+    public void BusinessException_ShouldExposeErrorMetadata()
+    {
+        var exception = new BusinessException(
+            "Workspace was archived.",
+            new ErrorCode("workspace.archived"),
+            ResultErrorType.Conflict);
+
+        exception.ErrorCode.ShouldBe(new ErrorCode("workspace.archived"));
+        exception.ErrorType.ShouldBe(ResultErrorType.Conflict);
+        exception.ToResultError().ShouldBe(ResultError.Conflict("workspace.archived", "Workspace was archived."));
+    }
+
+    [Fact]
+    public void ChengYuanException_ShouldPreserveInnerExceptionAndOptionalCode()
+    {
+        var innerException = new InvalidOperationException("Inner");
+        var exception = new ChengYuanException("Workspace failed.", new ErrorCode("workspace.failed"), innerException);
+
+        exception.Message.ShouldBe("Workspace failed.");
+        exception.ErrorCode.ShouldBe(new ErrorCode("workspace.failed"));
+        exception.InnerException.ShouldBeSameAs(innerException);
     }
 
     [Fact]

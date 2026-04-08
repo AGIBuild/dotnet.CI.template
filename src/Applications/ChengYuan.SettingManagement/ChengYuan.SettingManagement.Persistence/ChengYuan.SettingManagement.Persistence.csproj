@@ -1,0 +1,18 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.EntityFrameworkCore" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\ChengYuan.SettingManagement.Application\ChengYuan.SettingManagement.Application.csproj" />
+    <ProjectReference Include="..\..\..\Framework\ChengYuan.Core\ChengYuan.Core.Runtime\ChengYuan.Core.Runtime.csproj" />
+    <ProjectReference Include="..\..\..\Framework\ChengYuan.Core\ChengYuan.Core.Data\ChengYuan.Core.Data.csproj" />
+    <ProjectReference Include="..\..\..\Framework\ChengYuan.Core\ChengYuan.Core.EntityFrameworkCore\ChengYuan.Core.EntityFrameworkCore.csproj" />
+  </ItemGroup>
+
+</Project>

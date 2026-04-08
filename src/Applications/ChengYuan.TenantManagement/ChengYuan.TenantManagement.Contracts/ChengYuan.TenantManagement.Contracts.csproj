@@ -1,0 +1,11 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\Framework\ChengYuan.MultiTenancy\ChengYuan.MultiTenancy.Abstractions\ChengYuan.MultiTenancy.Abstractions.csproj" />
+  </ItemGroup>
+
+</Project>

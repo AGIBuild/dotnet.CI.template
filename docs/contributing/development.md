@@ -4,7 +4,7 @@
 
 Before adding any project, package reference, or transport adapter, read [Architecture](../guide/architecture.md). That page is the authoritative design guidance for future development.
 
-During the transition from the legacy CI template shape to ChengYuan, prefer the documented target architecture over the current source tree whenever the two differ.
+If the current source tree and the architecture guide differ, prefer the guide and move new work toward it.
 
 ## Core Development Rules
 

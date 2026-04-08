@@ -5,6 +5,7 @@ using Microsoft.Extensions.DependencyInjection.Extensions;
 
 namespace ChengYuan.Core.Validation;
 
+[DependsOn(typeof(global::ChengYuan.Core.CoreRuntimeModule))]
 public sealed class ValidationModule : ModuleBase, IPreConfigureServices
 {
     public void PreConfigureServices(IServiceCollection services)

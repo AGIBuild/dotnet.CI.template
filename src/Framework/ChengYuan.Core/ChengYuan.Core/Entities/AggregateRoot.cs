@@ -1,24 +1,7 @@
+using System;
+using System.Collections.Generic;
+
 namespace ChengYuan.Core.Entities;
-
-public interface IAggregateRoot
-{
-}
-
-public interface IAggregateRoot<out TId> : IEntity<TId>, IAggregateRoot
-    where TId : notnull
-{
-}
-
-public interface IDomainEvent
-{
-}
-
-public interface IHasDomainEvents
-{
-    IReadOnlyCollection<IDomainEvent> DomainEvents { get; }
-
-    void ClearDomainEvents();
-}
 
 public abstract class AggregateRoot<TId> : Entity<TId>, IAggregateRoot<TId>, IHasDomainEvents
     where TId : notnull

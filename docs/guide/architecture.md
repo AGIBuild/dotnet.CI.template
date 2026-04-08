@@ -2,12 +2,12 @@
 
 This page is the authoritative architecture guide for ChengYuan.
 
-The repository is still transitioning from its legacy CI template structure to the ChengYuan design. When the current implementation and this guide differ during the transition, use this guide as the default rule for new work.
+When existing code and this guide differ, use this guide as the default rule for new work and move the codebase toward these rules instead of extending the divergence.
 
 ## Design Principles
 
 - Module first, layer second.
-- Follow the ABP mental model: split reusable slices into `Framework` modules and `Application` modules.
+- Split reusable slices into `Framework` modules and `Application` modules so technical systems stay separate from reusable application capabilities.
 - Allow uneven module depth. Do not force every module to expose the same layers or transports.
 - Keep Web and CLI as optional transport facets.
 - Require explicit dependencies and architecture tests.
@@ -59,7 +59,7 @@ Topology terms belong in directories, not in project names. Prefer `ChengYuan.Id
 | `Applications` | Reusable application capabilities and business bounded contexts | `Identity`, `PermissionManagement`, `TenantManagement`, `SettingManagement`, later user business modules | Can own domain behavior, management use cases, persistence, and optional transports |
 | `Hosts` | Runnable composition shells | `WebHost`, `CliHost` | Compose modules, policies, middleware, and transport glue only |
 
-`ChengYuan.Core` is the only framework module family member allowed to own foundational modularity, failure, DDD, and shared extension seams. `ChengYuan.Hosting` stays as a thin composition helper during the transition and must not remain the owner of the module model.
+`ChengYuan.Core` is the only framework module family member allowed to own foundational modularity, failure, DDD, and shared extension seams. `ChengYuan.Hosting` stays as a thin composition helper and must not own the module model.
 
 ## Facet Model
 
@@ -97,9 +97,9 @@ Examples:
 
 Do not create empty projects just to make all modules look symmetrical.
 
-## ABP-Inspired Pairing Rules
+## Module Pairing Rules
 
-The most important ABP lesson is to separate technical systems from the management modules built on top of them.
+The core rule is to separate technical systems from the management modules built on top of them.
 
 | Framework Module | Application Module | Reason |
 |---|---|---|
@@ -113,14 +113,14 @@ The most important ABP lesson is to separate technical systems from the manageme
 
 ## Core Foundation Design
 
-The next major architectural step is to replace the transitional `ChengYuan.Domain` foundation with an explicit `ChengYuan.Core` family modeled after the high-value parts of ABP Core.
+The foundational split is clear: `ChengYuan.Core` owns foundational platform concerns, and the old `ChengYuan.Domain` baseline is no longer part of the active architecture.
 
-This is not a line-by-line ABP clone. The rule is simpler:
+The rule is simple:
 
 - `Core` owns foundational platform concepts.
 - provider concerns stay in adjacent framework modules.
 - technical systems such as `ExecutionContext`, `MultiTenancy`, `Caching`, and `Outbox` build on top of `Core` instead of being folded into it.
-- no new foundational work should be added to `ChengYuan.Domain` while the refactor is pending.
+- the retired `ChengYuan.Domain` baseline must not be reintroduced.
 
 ### Target Core Family
 
@@ -162,7 +162,7 @@ This is not a line-by-line ABP clone. The rule is simpler:
 4. Wave D: add `ChengYuan.Core.EntityFrameworkCore` for converters, repositories, unit of work, and data-filter implementations.
 5. Wave E: rebase `ExecutionContext`, `MultiTenancy`, `Caching`, `Outbox`, and later `Authorization`, `Settings`, `Features`, and `Auditing` on the new Core family.
 6. Wave F: split and tighten tests into core modularity, core primitives, provider, and framework-kernel suites.
-7. Wave G: retire the transitional `ChengYuan.Domain` naming after all references have moved.
+7. Wave G: retire the old `ChengYuan.Domain` naming after all references have moved. Completed.
 
 ### Architecture Guardrails
 
@@ -171,7 +171,7 @@ This is not a line-by-line ABP clone. The rule is simpler:
 - Json and EF Core support must remain opt-in module dependencies, not behavior hidden inside `Core` itself.
 - Only aggregate roots should get repository defaults in the data layer.
 - `CurrentUser` and `CurrentTenant` stay in their own technical systems and do not move into `Core`.
-- Do not copy ABP package breadth, dynamic proxy infrastructure, auto-API, or UI framework layers into the first Core refactor.
+- Do not pull wide package sprawl, dynamic proxy infrastructure, auto-generated API layers, or UI framework layers into the first Core refactor.
 
 ## Phase 1 Module Catalog
 
@@ -255,7 +255,7 @@ It may intentionally omit modules that are irrelevant to a command-line scenario
 ## Practical Defaults
 
 - Start phase 1 with one shallow framework module such as `Caching`, one stateful framework module such as `Outbox`, and one full application module such as `Identity`.
-- Before expanding more framework or management modules, finish the `ChengYuan.Core` ownership split and stop growing the transitional `ChengYuan.Domain` baseline.
+- Before expanding more framework or management modules, keep the `ChengYuan.Core` ownership split intact and do not reintroduce the retired `ChengYuan.Domain` baseline.
 - Use those three shapes to validate that variable-depth modules remain coherent.
 - Once those shapes are stable, expand the rest of the framework and application families.
 

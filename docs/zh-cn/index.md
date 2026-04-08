@@ -15,7 +15,7 @@ features:
   - title: 模块优先
     details: 先将能力建成垂直切面，再只在真正需要的模块内部做分层。
   - title: Framework + Applications
-    details: 遵循 ABP 的核心心智模型，分离技术框架模块与可复用应用模块，但不机械复制 ABP 的全部包结构。
+    details: 分离技术框架模块与可复用应用模块，让技术系统与可复用业务能力能够独立演进。
   - title: 模块深度可变
     details: 不强制每个模块都拥有 Web、CLI、Persistence 或 UI。每个模块只暴露真正需要的 facet。
   - title: 工程纪律

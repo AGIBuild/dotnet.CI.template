@@ -1,4 +1,5 @@
 using System.Globalization;
+using ChengYuan.Core.Extensions;
 using ChengYuan.Core.Localization;
 using ChengYuan.Core.Modularity;
 using ChengYuan.Core.Results;
@@ -10,6 +11,17 @@ namespace ChengYuan.FrameworkKernel.Tests;
 
 public class CoreSupportModuleTests
 {
+    [Fact]
+    public void ValidationModule_ShouldBringInCoreServices()
+    {
+        var services = new ServiceCollection();
+        services.AddModule<ValidationTestModule>();
+
+        using var serviceProvider = services.BuildServiceProvider();
+
+        serviceProvider.GetRequiredService<ExtraPropertyManager>().ShouldNotBeNull();
+    }
+
     [Fact]
     public void ValidationModule_ShouldRegisterDefaultObjectValidator()
     {

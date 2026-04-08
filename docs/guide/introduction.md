@@ -1,8 +1,8 @@
 # Introduction
 
-ChengYuan is the target product direction of this repository.
+ChengYuan is the modular .NET template family maintained in this repository.
 
-It is an opinionated .NET template family for modular monoliths, built around ABP-style module boundaries, DDD+, and strict engineering guardrails. The repository is transitioning from its legacy CI template shape into this architecture model, so some implementation details may still reflect the earlier structure. For new work, treat the architecture described in this documentation as the target state.
+It is an opinionated .NET template family for modular monoliths, built around clear module boundaries, DDD+, and strict engineering guardrails. This documentation defines the default architecture and naming rules for ongoing development.
 
 ## Product Direction
 
@@ -38,7 +38,7 @@ For example, `src/Applications/ChengYuan.Identity/ChengYuan.Identity.Application
 ## What ChengYuan Is Not
 
 - It is not a repository-wide horizontal clean architecture skeleton.
-- It is not a full ABP runtime clone.
+- It is not a general-purpose all-in-one application framework.
 - It is not microservice-first.
 - It does not assume that all modules must expose identical layers or transports.
 

@@ -2,7 +2,7 @@
 layout: home
 hero:
   name: ChengYuan
-  text: ABP-Inspired Modular .NET Template Family
+  text: Module-First Modular .NET Template Family
   tagline: A DDD+ template family built around framework modules, application modules, and composable Web and CLI hosts.
   actions:
     - theme: brand
@@ -15,7 +15,7 @@ features:
   - title: Module-First Design
     details: Build every capability as a vertical slice first, then layer only inside the module that needs it.
   - title: Framework + Applications
-    details: Separate technical framework modules from reusable application modules, following the ABP mental model without cloning ABP wholesale.
+    details: Separate technical framework modules from reusable application modules so technical systems and reusable business capabilities evolve independently.
   - title: Variable Module Depth
     details: Do not force Web, CLI, Persistence, or UI onto every module. Each module exposes only the facets it actually needs.
   - title: Delivery Discipline

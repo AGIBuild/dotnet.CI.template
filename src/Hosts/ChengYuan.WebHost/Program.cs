@@ -1,7 +1,9 @@
-using ChengYuan.Caching;
+using System.Linq;
 using ChengYuan.Core.Modularity;
 using ChengYuan.ExecutionContext;
 using ChengYuan.MultiTenancy;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Http;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddModule<WebHostModule>();
@@ -18,13 +20,6 @@ app.MapGet("/health", (ModuleCatalog catalog, ICurrentCorrelation correlation, I
     }));
 
 app.Run();
-
-[DependsOn(typeof(ExecutionContextModule))]
-[DependsOn(typeof(MultiTenancyModule))]
-[DependsOn(typeof(MemoryCachingModule))]
-internal sealed class WebHostModule : ModuleBase
-{
-}
 
 public partial class Program
 {

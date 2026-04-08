@@ -1,4 +1,6 @@
 using ChengYuan.Caching;
+using ChengYuan.Core.Extensions;
+using ChengYuan.Core.Guids;
 using ChengYuan.Core.Modularity;
 using ChengYuan.ExecutionContext;
 using ChengYuan.MultiTenancy;
@@ -25,6 +27,25 @@ public class FrameworkKernelTests
         serviceProvider.GetRequiredService<ICurrentUser>().IsAuthenticated.ShouldBeFalse();
         serviceProvider.GetRequiredService<ICurrentCorrelation>().CorrelationId.ShouldNotBeNullOrWhiteSpace();
         serviceProvider.GetRequiredService<ICurrentTenant>().IsAvailable.ShouldBeFalse();
+        serviceProvider.GetRequiredService<IGuidGenerator>().Create().ShouldNotBe(Guid.Empty);
+        serviceProvider.GetRequiredService<ExtraPropertyManager>().ShouldNotBeNull();
+    }
+
+    [Fact]
+    public void GuidGenerator_ShouldProduceDifferentGuids()
+    {
+        var services = new ServiceCollection();
+        services.AddModule<KernelTestModule>();
+
+        using var serviceProvider = services.BuildServiceProvider();
+        var guidGenerator = serviceProvider.GetRequiredService<IGuidGenerator>();
+
+        var first = guidGenerator.Create();
+        var second = guidGenerator.Create();
+
+        first.ShouldNotBe(Guid.Empty);
+        second.ShouldNotBe(Guid.Empty);
+        first.ShouldNotBe(second);
     }
 
     [Fact]

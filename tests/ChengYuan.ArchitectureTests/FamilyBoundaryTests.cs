@@ -98,6 +98,132 @@ public class FamilyBoundaryTests
         projectXml.ShouldNotContain("ChengYuan.Domain");
     }
 
+    [Fact]
+    public void SettingManagementPersistenceProject_ShouldReferenceApplicationAndApprovedCoreDataProjectsOnly()
+    {
+        var repositoryRoot = FindRepositoryRoot();
+        var projectXml = File.ReadAllText(Path.Combine(repositoryRoot, "src", "Applications", "ChengYuan.SettingManagement", "ChengYuan.SettingManagement.Persistence", "ChengYuan.SettingManagement.Persistence.csproj"));
+
+        projectXml.ShouldContain("ChengYuan.SettingManagement.Application");
+        projectXml.ShouldContain("ChengYuan.Core.Runtime");
+        projectXml.ShouldContain("ChengYuan.Core.Data");
+        projectXml.ShouldContain("ChengYuan.Core.EntityFrameworkCore");
+        projectXml.ShouldNotContain("ChengYuan.Hosting");
+        projectXml.ShouldNotContain("ChengYuan.PermissionManagement");
+        projectXml.ShouldNotContain("ChengYuan.FeatureManagement");
+        projectXml.ShouldNotContain("ChengYuan.AuditLogging");
+        projectXml.ShouldNotContain("ChengYuan.TenantManagement");
+    }
+
+    [Fact]
+    public void PermissionManagementPersistenceProject_ShouldReferenceApplicationAndApprovedCoreDataProjectsOnly()
+    {
+        var repositoryRoot = FindRepositoryRoot();
+        var projectXml = File.ReadAllText(Path.Combine(repositoryRoot, "src", "Applications", "ChengYuan.PermissionManagement", "ChengYuan.PermissionManagement.Persistence", "ChengYuan.PermissionManagement.Persistence.csproj"));
+
+        projectXml.ShouldContain("ChengYuan.PermissionManagement.Application");
+        projectXml.ShouldContain("ChengYuan.Core.Runtime");
+        projectXml.ShouldContain("ChengYuan.Core.Data");
+        projectXml.ShouldContain("ChengYuan.Core.EntityFrameworkCore");
+        projectXml.ShouldNotContain("ChengYuan.Hosting");
+        projectXml.ShouldNotContain("ChengYuan.SettingManagement");
+        projectXml.ShouldNotContain("ChengYuan.FeatureManagement");
+        projectXml.ShouldNotContain("ChengYuan.AuditLogging");
+        projectXml.ShouldNotContain("ChengYuan.TenantManagement");
+    }
+
+    [Fact]
+    public void FeatureManagementPersistenceProject_ShouldReferenceApplicationAndApprovedCoreDataProjectsOnly()
+    {
+        var repositoryRoot = FindRepositoryRoot();
+        var projectXml = File.ReadAllText(Path.Combine(repositoryRoot, "src", "Applications", "ChengYuan.FeatureManagement", "ChengYuan.FeatureManagement.Persistence", "ChengYuan.FeatureManagement.Persistence.csproj"));
+
+        projectXml.ShouldContain("ChengYuan.FeatureManagement.Application");
+        projectXml.ShouldContain("ChengYuan.Core.Runtime");
+        projectXml.ShouldContain("ChengYuan.Core.Data");
+        projectXml.ShouldContain("ChengYuan.Core.EntityFrameworkCore");
+        projectXml.ShouldNotContain("ChengYuan.Hosting");
+        projectXml.ShouldNotContain("ChengYuan.SettingManagement");
+        projectXml.ShouldNotContain("ChengYuan.PermissionManagement");
+        projectXml.ShouldNotContain("ChengYuan.AuditLogging");
+        projectXml.ShouldNotContain("ChengYuan.TenantManagement");
+    }
+
+    [Fact]
+    public void AuditLoggingPersistenceProject_ShouldReferenceApplicationAndApprovedCoreDataProjectsOnly()
+    {
+        var repositoryRoot = FindRepositoryRoot();
+        var projectXml = File.ReadAllText(Path.Combine(repositoryRoot, "src", "Applications", "ChengYuan.AuditLogging", "ChengYuan.AuditLogging.Persistence", "ChengYuan.AuditLogging.Persistence.csproj"));
+
+        projectXml.ShouldContain("ChengYuan.AuditLogging.Application");
+        projectXml.ShouldContain("ChengYuan.Core.Runtime");
+        projectXml.ShouldContain("ChengYuan.Core.Data");
+        projectXml.ShouldContain("ChengYuan.Core.EntityFrameworkCore");
+        projectXml.ShouldNotContain("ChengYuan.Hosting");
+        projectXml.ShouldNotContain("ChengYuan.SettingManagement");
+        projectXml.ShouldNotContain("ChengYuan.PermissionManagement");
+        projectXml.ShouldNotContain("ChengYuan.FeatureManagement");
+        projectXml.ShouldNotContain("ChengYuan.TenantManagement");
+    }
+
+    [Fact]
+    public void IdentityContractsProject_ShouldNotReferenceApplicationOrPersistenceProjects()
+    {
+        var repositoryRoot = FindRepositoryRoot();
+        var projectXml = File.ReadAllText(Path.Combine(repositoryRoot, "src", "Applications", "ChengYuan.Identity", "ChengYuan.Identity.Contracts", "ChengYuan.Identity.Contracts.csproj"));
+
+        projectXml.ShouldNotContain("ChengYuan.Identity.Application");
+        projectXml.ShouldNotContain("ChengYuan.Identity.Domain");
+        projectXml.ShouldNotContain("ChengYuan.Identity.Persistence");
+        projectXml.ShouldNotContain("ChengYuan.Hosting");
+    }
+
+    [Fact]
+    public void IdentityDomainProject_ShouldReferenceContractsAndApprovedCoreProjectsOnly()
+    {
+        var repositoryRoot = FindRepositoryRoot();
+        var projectXml = File.ReadAllText(Path.Combine(repositoryRoot, "src", "Applications", "ChengYuan.Identity", "ChengYuan.Identity.Domain", "ChengYuan.Identity.Domain.csproj"));
+
+        projectXml.ShouldContain("ChengYuan.Identity.Contracts");
+        projectXml.ShouldContain("ChengYuan.Core\\ChengYuan.Core\\ChengYuan.Core.csproj");
+        projectXml.ShouldContain("ChengYuan.Core.Data");
+        projectXml.ShouldNotContain("ChengYuan.Identity.Application");
+        projectXml.ShouldNotContain("ChengYuan.Identity.Persistence");
+        projectXml.ShouldNotContain("ChengYuan.Hosting");
+    }
+
+    [Fact]
+    public void IdentityApplicationProject_ShouldReferenceContractsDomainAndApprovedCoreProjectsOnly()
+    {
+        var repositoryRoot = FindRepositoryRoot();
+        var projectXml = File.ReadAllText(Path.Combine(repositoryRoot, "src", "Applications", "ChengYuan.Identity", "ChengYuan.Identity.Application", "ChengYuan.Identity.Application.csproj"));
+
+        projectXml.ShouldContain("ChengYuan.Identity.Contracts");
+        projectXml.ShouldContain("ChengYuan.Identity.Domain");
+        projectXml.ShouldContain("ChengYuan.Core.Runtime");
+        projectXml.ShouldContain("ChengYuan.Core.Data");
+        projectXml.ShouldNotContain("ChengYuan.Identity.Persistence");
+        projectXml.ShouldNotContain("ChengYuan.Hosting");
+    }
+
+    [Fact]
+    public void IdentityPersistenceProject_ShouldReferenceDomainAndApprovedCoreDataProjectsOnly()
+    {
+        var repositoryRoot = FindRepositoryRoot();
+        var projectXml = File.ReadAllText(Path.Combine(repositoryRoot, "src", "Applications", "ChengYuan.Identity", "ChengYuan.Identity.Persistence", "ChengYuan.Identity.Persistence.csproj"));
+
+        projectXml.ShouldContain("ChengYuan.Identity.Application");
+        projectXml.ShouldContain("ChengYuan.Identity.Domain");
+        projectXml.ShouldContain("ChengYuan.Core.Runtime");
+        projectXml.ShouldContain("ChengYuan.Core.Data");
+        projectXml.ShouldContain("ChengYuan.Core.EntityFrameworkCore");
+        projectXml.ShouldNotContain("ChengYuan.Hosting");
+        projectXml.ShouldNotContain("ChengYuan.SettingManagement");
+        projectXml.ShouldNotContain("ChengYuan.PermissionManagement");
+        projectXml.ShouldNotContain("ChengYuan.FeatureManagement");
+        projectXml.ShouldNotContain("ChengYuan.TenantManagement");
+    }
+
     private static string FindRepositoryRoot()
     {
         var currentDirectory = new DirectoryInfo(AppContext.BaseDirectory);

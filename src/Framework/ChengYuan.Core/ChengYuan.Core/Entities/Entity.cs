@@ -1,10 +1,7 @@
-namespace ChengYuan.Core.Entities;
+using System;
+using System.Collections.Generic;
 
-public interface IEntity<out TId>
-    where TId : notnull
-{
-    TId Id { get; }
-}
+namespace ChengYuan.Core.Entities;
 
 public abstract class Entity<TId> : IEntity<TId>, IEquatable<Entity<TId>>
     where TId : notnull

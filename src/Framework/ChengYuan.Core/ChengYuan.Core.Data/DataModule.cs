@@ -5,6 +5,7 @@ using Microsoft.Extensions.DependencyInjection.Extensions;
 
 namespace ChengYuan.Core.Data;
 
+[DependsOn(typeof(global::ChengYuan.Core.CoreRuntimeModule))]
 public sealed class DataModule : ModuleBase, IPreConfigureServices
 {
     public void PreConfigureServices(IServiceCollection services)
