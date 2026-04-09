@@ -1,0 +1,43 @@
+{
+  "version": 2,
+  "dependencies": {
+    "net10.0": {
+      "chengyuan.core": {
+        "type": "Project"
+      },
+      "chengyuan.core.data": {
+        "type": "Project",
+        "dependencies": {
+          "ChengYuan.Core": "[0.2.10-local, )",
+          "ChengYuan.Core.Runtime": "[0.2.10-local, )"
+        }
+      },
+      "chengyuan.core.runtime": {
+        "type": "Project",
+        "dependencies": {
+          "ChengYuan.Core": "[0.2.10-local, )"
+        }
+      },
+      "chengyuan.identity.application": {
+        "type": "Project",
+        "dependencies": {
+          "ChengYuan.Core.Data": "[0.2.10-local, )",
+          "ChengYuan.Core.Runtime": "[0.2.10-local, )",
+          "ChengYuan.Identity.Contracts": "[0.2.10-local, )",
+          "ChengYuan.Identity.Domain": "[0.2.10-local, )"
+        }
+      },
+      "chengyuan.identity.contracts": {
+        "type": "Project"
+      },
+      "chengyuan.identity.domain": {
+        "type": "Project",
+        "dependencies": {
+          "ChengYuan.Core": "[0.2.10-local, )",
+          "ChengYuan.Core.Data": "[0.2.10-local, )",
+          "ChengYuan.Identity.Contracts": "[0.2.10-local, )"
+        }
+      }
+    }
+  }
+}

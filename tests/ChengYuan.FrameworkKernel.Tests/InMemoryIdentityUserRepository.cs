@@ -1,5 +1,4 @@
 using ChengYuan.Identity;
-using Shouldly;
 
 namespace ChengYuan.FrameworkKernel.Tests;
 
@@ -22,9 +21,20 @@ internal sealed class InMemoryIdentityUserRepository : IIdentityUserRepository
         }
     }
 
+    public ValueTask<IdentityUser?> FindDetailsAsync(Guid id, CancellationToken cancellationToken = default)
+    {
+        return FindAsync(id, cancellationToken);
+    }
+
     public async ValueTask<IdentityUser> GetAsync(Guid id, CancellationToken cancellationToken = default)
     {
         var user = await FindAsync(id, cancellationToken);
+        return user ?? throw new InvalidOperationException($"Identity user '{id}' was not found.");
+    }
+
+    public async ValueTask<IdentityUser> GetDetailsAsync(Guid id, CancellationToken cancellationToken = default)
+    {
+        var user = await FindDetailsAsync(id, cancellationToken);
         return user ?? throw new InvalidOperationException($"Identity user '{id}' was not found.");
     }
 
@@ -67,6 +77,25 @@ internal sealed class InMemoryIdentityUserRepository : IIdentityUserRepository
         {
             var user = _users.Values.SingleOrDefault(candidate => !candidate.IsDeleted && candidate.NormalizedEmail == normalizedEmail);
             return ValueTask.FromResult(user);
+        }
+    }
+
+    public ValueTask<IReadOnlyList<IdentityUser>> GetListByRoleIdAsync(Guid roleId, CancellationToken cancellationToken = default)
+    {
+        if (roleId == Guid.Empty)
+        {
+            throw new ArgumentException("Role id cannot be empty.", nameof(roleId));
+        }
+
+        lock (_sync)
+        {
+            var users = _users.Values
+                .Where(user => !user.IsDeleted && user.Roles.Any(role => role.RoleId == roleId))
+                .OrderBy(user => user.NormalizedUserName)
+                .ThenBy(user => user.Id)
+                .ToArray();
+
+            return ValueTask.FromResult<IReadOnlyList<IdentityUser>>(users);
         }
     }
 

@@ -1,6 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.TestHost" />
     <PackageReference Include="Microsoft.Extensions.Caching.Memory" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" />
@@ -23,6 +24,7 @@
     <ProjectReference Include="..\..\src\Applications\ChengYuan.FeatureManagement\ChengYuan.FeatureManagement.Application\ChengYuan.FeatureManagement.Application.csproj" />
     <ProjectReference Include="..\..\src\Applications\ChengYuan.FeatureManagement\ChengYuan.FeatureManagement.Persistence\ChengYuan.FeatureManagement.Persistence.csproj" />
     <ProjectReference Include="..\..\src\Applications\ChengYuan.Identity\ChengYuan.Identity.Application\ChengYuan.Identity.Application.csproj" />
+    <ProjectReference Include="..\..\src\Applications\ChengYuan.Identity\ChengYuan.Identity.Web\ChengYuan.Identity.Web.csproj" />
     <ProjectReference Include="..\..\src\Applications\ChengYuan.Identity\ChengYuan.Identity.Persistence\ChengYuan.Identity.Persistence.csproj" />
     <ProjectReference Include="..\..\src\Applications\ChengYuan.PermissionManagement\ChengYuan.PermissionManagement.Application\ChengYuan.PermissionManagement.Application.csproj" />
     <ProjectReference Include="..\..\src\Applications\ChengYuan.PermissionManagement\ChengYuan.PermissionManagement.Persistence\ChengYuan.PermissionManagement.Persistence.csproj" />
@@ -46,6 +48,7 @@
     <ProjectReference Include="..\..\src\Framework\ChengYuan.Authorization\ChengYuan.Authorization.Runtime\ChengYuan.Authorization.Runtime.csproj" />
     <ProjectReference Include="..\..\src\Framework\ChengYuan.Features\ChengYuan.Features.Runtime\ChengYuan.Features.Runtime.csproj" />
     <ProjectReference Include="..\..\src\Framework\ChengYuan.Settings\ChengYuan.Settings.Runtime\ChengYuan.Settings.Runtime.csproj" />
+    <ProjectReference Include="..\..\src\Hosts\ChengYuan.WebHost\ChengYuan.WebHost.csproj" />
   </ItemGroup>
 
 </Project>

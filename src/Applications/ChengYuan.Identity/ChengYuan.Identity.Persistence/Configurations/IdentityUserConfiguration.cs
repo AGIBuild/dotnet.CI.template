@@ -33,6 +33,14 @@ public sealed class IdentityUserConfiguration : IEntityTypeConfiguration<Identit
         builder.Property(user => user.IsDeleted)
             .IsRequired();
 
+        builder.HasMany(user => user.Roles)
+            .WithOne()
+            .HasForeignKey(userRole => userRole.UserId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        builder.Navigation(user => user.Roles)
+            .UsePropertyAccessMode(PropertyAccessMode.Field);
+
         builder.HasIndex(user => user.NormalizedUserName)
             .IsUnique();
 

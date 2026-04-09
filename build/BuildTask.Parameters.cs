@@ -13,13 +13,13 @@ partial class BuildTask
     readonly string VersionSuffix = string.Empty;
 
     [Parameter("Host to publish - supported values are 'web' and 'cli'")]
-    new readonly string Host = string.Empty;
+    readonly string PublishHost = string.Empty;
 
     // Internal path conventions controlled by build tasks (not external parameters).
     readonly string BuildPath = "ChengYuan.slnx";
     readonly string TestPath = "ChengYuan.slnx";
     readonly string PackPath = "ChengYuan.slnx";
-    string NormalizedHost => Host.Trim().ToLowerInvariant();
+    string NormalizedHost => PublishHost.Trim().ToLowerInvariant();
     string PublishPath => NormalizedHost switch
     {
         "web" => "src/Hosts/ChengYuan.WebHost/ChengYuan.WebHost.csproj",
@@ -33,6 +33,9 @@ partial class BuildTask
 
     [Parameter("Publish self-contained output in Publish target")]
     readonly bool SelfContained;
+
+    [Parameter("Port used by Doc target")]
+    readonly int DocsPort = 5173;
 
     [Parameter("NuGet API key for PushNuGetPackages target. Defaults to NUGET_API_KEY environment variable.")]
     readonly string NuGetApiKey = string.Empty;
@@ -58,6 +61,9 @@ partial class BuildTask
     AbsolutePath PackagesDirectory => ArtifactsDirectory / "packages";
     AbsolutePath PublishDirectory => ArtifactsDirectory / "publish";
     AbsolutePath InstallersDirectory => ArtifactsDirectory / "installers";
+    AbsolutePath DocsDirectory => RootDirectory / "docs";
+    AbsolutePath DocsNodeModulesDirectory => DocsDirectory / "node_modules";
+    AbsolutePath DocsPackageLockFile => DocsDirectory / "package-lock.json";
 
     AbsolutePath ReleaseManifestFile => PackagesDirectory / "release-manifest.json";
     AbsolutePath BuildOutputsMarkerFile => ArtifactsDirectory / ".build-outputs" / "build-outputs.json";

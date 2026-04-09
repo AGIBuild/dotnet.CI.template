@@ -1,0 +1,16 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\ChengYuan.Identity.Application\ChengYuan.Identity.Application.csproj" />
+    <ProjectReference Include="..\..\..\Framework\ChengYuan.Core\ChengYuan.Core.Runtime\ChengYuan.Core.Runtime.csproj" />
+  </ItemGroup>
+
+</Project>

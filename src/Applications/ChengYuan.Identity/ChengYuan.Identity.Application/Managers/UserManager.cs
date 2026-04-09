@@ -2,7 +2,10 @@ using ChengYuan.Core.Data;
 
 namespace ChengYuan.Identity;
 
-public sealed class UserManager(IIdentityUserRepository userRepository, IUnitOfWork unitOfWork) : IUserManager, IUserReader
+public sealed class UserManager(
+    IIdentityUserRepository userRepository,
+    IIdentityRoleRepository roleRepository,
+    IUnitOfWork unitOfWork) : IUserManager, IUserReader
 {
     public async ValueTask<UserRecord> CreateAsync(string userName, string email, CancellationToken cancellationToken = default)
     {
@@ -17,15 +20,43 @@ public sealed class UserManager(IIdentityUserRepository userRepository, IUnitOfW
 
     public async ValueTask<UserRecord> UpdateAsync(Guid userId, string userName, string email, bool isActive, CancellationToken cancellationToken = default)
     {
-        if (userId == Guid.Empty)
-        {
-            throw new ArgumentException("User id cannot be empty.", nameof(userId));
-        }
+        EnsureId(userId, nameof(userId), "User");
 
         await EnsureUniqueAsync(userName, email, userId, cancellationToken);
 
-        var user = await userRepository.GetAsync(userId, cancellationToken);
+        var user = await userRepository.GetDetailsAsync(userId, cancellationToken);
         user.Update(userName, email, isActive);
+        await unitOfWork.SaveChangesAsync(cancellationToken);
+
+        return MapToRecord(user);
+    }
+
+    public async ValueTask<UserRecord> AssignRoleAsync(Guid userId, Guid roleId, CancellationToken cancellationToken = default)
+    {
+        EnsureId(userId, nameof(userId), "User");
+        EnsureId(roleId, nameof(roleId), "Role");
+
+        var user = await userRepository.GetDetailsAsync(userId, cancellationToken);
+        var role = await roleRepository.GetAsync(roleId, cancellationToken);
+
+        if (!role.IsActive)
+        {
+            throw new InvalidOperationException($"Role '{role.Name}' is inactive and cannot be assigned.");
+        }
+
+        user.AssignRole(roleId);
+        await unitOfWork.SaveChangesAsync(cancellationToken);
+
+        return MapToRecord(user);
+    }
+
+    public async ValueTask<UserRecord> UnassignRoleAsync(Guid userId, Guid roleId, CancellationToken cancellationToken = default)
+    {
+        EnsureId(userId, nameof(userId), "User");
+        EnsureId(roleId, nameof(roleId), "Role");
+
+        var user = await userRepository.GetDetailsAsync(userId, cancellationToken);
+        user.UnassignRole(roleId);
         await unitOfWork.SaveChangesAsync(cancellationToken);
 
         return MapToRecord(user);
@@ -33,24 +64,18 @@ public sealed class UserManager(IIdentityUserRepository userRepository, IUnitOfW
 
     public async ValueTask RemoveAsync(Guid userId, CancellationToken cancellationToken = default)
     {
-        if (userId == Guid.Empty)
-        {
-            throw new ArgumentException("User id cannot be empty.", nameof(userId));
-        }
+        EnsureId(userId, nameof(userId), "User");
 
-        var user = await userRepository.GetAsync(userId, cancellationToken);
+        var user = await userRepository.GetDetailsAsync(userId, cancellationToken);
         user.MarkDeleted();
         await unitOfWork.SaveChangesAsync(cancellationToken);
     }
 
     public async ValueTask<UserRecord?> FindByIdAsync(Guid userId, CancellationToken cancellationToken = default)
     {
-        if (userId == Guid.Empty)
-        {
-            throw new ArgumentException("User id cannot be empty.", nameof(userId));
-        }
+        EnsureId(userId, nameof(userId), "User");
 
-        var user = await userRepository.FindAsync(userId, cancellationToken);
+        var user = await userRepository.FindDetailsAsync(userId, cancellationToken);
         return user is null ? null : MapToRecord(user);
     }
 
@@ -92,6 +117,19 @@ public sealed class UserManager(IIdentityUserRepository userRepository, IUnitOfW
 
     private static UserRecord MapToRecord(IdentityUser user)
     {
-        return new UserRecord(user.Id, user.UserName, user.Email, user.IsActive);
+        return new UserRecord(
+            user.Id,
+            user.UserName,
+            user.Email,
+            user.IsActive,
+            user.Roles.Select(userRole => userRole.RoleId).OrderBy(roleId => roleId).ToArray());
+    }
+
+    private static void EnsureId(Guid id, string parameterName, string label)
+    {
+        if (id == Guid.Empty)
+        {
+            throw new ArgumentException($"{label} id cannot be empty.", parameterName);
+        }
     }
 }

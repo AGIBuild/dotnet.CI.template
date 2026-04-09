@@ -224,6 +224,19 @@ public class FamilyBoundaryTests
         projectXml.ShouldNotContain("ChengYuan.TenantManagement");
     }
 
+    [Fact]
+    public void IdentityWebProject_ShouldReferenceApplicationAndApprovedRuntimeProjectsOnly()
+    {
+        var repositoryRoot = FindRepositoryRoot();
+        var projectXml = File.ReadAllText(Path.Combine(repositoryRoot, "src", "Applications", "ChengYuan.Identity", "ChengYuan.Identity.Web", "ChengYuan.Identity.Web.csproj"));
+
+        projectXml.ShouldContain("ChengYuan.Identity.Application");
+        projectXml.ShouldContain("ChengYuan.Core.Runtime");
+        projectXml.ShouldContain("Microsoft.AspNetCore.App");
+        projectXml.ShouldNotContain("ChengYuan.Identity.Persistence");
+        projectXml.ShouldNotContain("ChengYuan.Hosting");
+    }
+
     private static string FindRepositoryRoot()
     {
         var currentDirectory = new DirectoryInfo(AppContext.BaseDirectory);

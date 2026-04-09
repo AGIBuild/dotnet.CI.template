@@ -12,6 +12,9 @@ public static class IdentityServiceCollectionExtensions
         services.TryAddScoped<UserManager>();
         services.TryAddScoped<IUserManager>(serviceProvider => serviceProvider.GetRequiredService<UserManager>());
         services.TryAddScoped<IUserReader>(serviceProvider => serviceProvider.GetRequiredService<UserManager>());
+        services.TryAddScoped<RoleManager>();
+        services.TryAddScoped<IRoleManager>(serviceProvider => serviceProvider.GetRequiredService<RoleManager>());
+        services.TryAddScoped<IRoleReader>(serviceProvider => serviceProvider.GetRequiredService<RoleManager>());
 
         return services;
     }

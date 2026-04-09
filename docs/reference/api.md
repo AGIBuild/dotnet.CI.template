@@ -179,11 +179,18 @@ First full application bounded context for user management.
 | Type | Description |
 |---|---|
 | `IdentityModule` | Registers the Identity application services on top of the core runtime module. |
+| `RoleRecord` | Immutable role snapshot exposed through application contracts. |
 | `UserRecord` | Immutable user snapshot exposed through application contracts. |
+| `IRoleReader` | Reads roles by id, name, or ordered list. |
+| `IRoleManager` | Creates, updates, and removes roles while enforcing unique role-name rules. |
 | `IUserReader` | Reads users by id, user name, email, or ordered list. |
-| `IUserManager` | Creates, updates, and removes users while enforcing unique user name and email rules. |
+| `IUserManager` | Creates, updates, removes users, and manages their role assignments while enforcing unique user name and email rules. |
+| `IdentityRole` | Aggregate root for roles with normalized name and soft-delete behavior. |
 | `IdentityUser` | Aggregate root for users with normalized user name and email plus soft-delete behavior. |
+| `IdentityUserRole` | Domain-owned assignment record that keeps user-role membership inside the Identity model. |
+| `IIdentityRoleRepository` | Domain repository contract for identity-role lookup and persistence. |
 | `IIdentityUserRepository` | Domain repository contract for identity-user lookup and persistence. |
+| `RoleManager` | Application service that coordinates role uniqueness, lifecycle, and assignment cleanup. |
 | `UserManager` | Application service that coordinates uniqueness checks and persistence. |
 
 ### `ChengYuan.Identity.Persistence`
@@ -196,10 +203,24 @@ Persistence facet for identity-user storage backed by EF Core.
 |---|---|
 | `IdentityPersistenceModule` | Registers the EF-backed identity-user repository on top of the Identity application module. |
 | `IdentityDbContext` | Independent module DbContext for identity-user tables within the shared physical database. |
+| `IdentityRoleConfiguration` | EF Core model configuration for the identity-role aggregate. |
 | `IdentityUserConfiguration` | EF Core model configuration for the identity-user aggregate. |
+| `IdentityUserRoleConfiguration` | EF Core model configuration for the user-role assignment table. |
+| `EfIdentityRoleRepository` | EF Core implementation of `IIdentityRoleRepository`. |
 | `EfIdentityUserRepository` | EF Core implementation of `IIdentityUserRepository`. |
 | `AddIdentityDbContext()` | Registers the module DbContext against a caller-provided provider and connection. |
 | `AddIdentityPersistence()` | Registers the EF-backed identity repository and unit of work services. |
+
+### `ChengYuan.Identity.Web`
+
+Minimal HTTP management facet for Identity.
+
+#### Key Types
+
+| Type | Description |
+|---|---|
+| `IdentityWebModule` | Registers the Identity Web facet on top of the Identity application module. |
+| `MapIdentityManagementEndpoints()` | Maps the minimal HTTP management surface for users, roles, and user-role assignment operations. |
 
 ### `ChengYuan.Authorization`
 

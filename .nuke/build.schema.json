@@ -28,6 +28,8 @@
         "Build",
         "Clean",
         "CoverageReport",
+        "Doc",
+        "DocsBuild",
         "Format",
         "GenerateReleaseManifest",
         "Init",
@@ -142,6 +144,11 @@
           "description": "Minimum line coverage percentage (0-100). CoverageReport fails if below this threshold",
           "format": "int32"
         },
+        "DocsPort": {
+          "type": "integer",
+          "description": "Port used by Doc target",
+          "format": "int32"
+        },
         "NuGetApiKey": {
           "type": "string",
           "description": "NuGet API key for PushNuGetPackages target. Defaults to NUGET_API_KEY environment variable"
@@ -149,6 +156,10 @@
         "ProjectName": {
           "type": "string",
           "description": "New project name for Init target (e.g. Acme.Payments)"
+        },
+        "PublishHost": {
+          "type": "string",
+          "description": "Host to publish - supported values are 'web' and 'cli'"
         },
         "ResetGit": {
           "type": "boolean",

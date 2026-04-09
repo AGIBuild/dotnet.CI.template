@@ -14,8 +14,10 @@ public static class EntityFrameworkCoreServiceCollectionExtensions
     {
         ArgumentNullException.ThrowIfNull(services);
 
-        services.TryAddScoped<IUnitOfWork>(serviceProvider =>
+        services.AddScoped<IDbContextUnitOfWorkParticipant>(serviceProvider =>
             new DbContextUnitOfWork(serviceProvider.GetRequiredService<TDbContext>()));
+        services.TryAddScoped<IUnitOfWork>(serviceProvider =>
+            new CompositeDbContextUnitOfWork(serviceProvider.GetServices<IDbContextUnitOfWorkParticipant>()));
 
         return services;
     }

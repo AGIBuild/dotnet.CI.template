@@ -28,4 +28,19 @@ public class IdentityUserTests
         user.IsDeleted.ShouldBeTrue();
         user.IsActive.ShouldBeFalse();
     }
+
+    [Fact]
+    public void IdentityUser_ShouldManageRoleAssignmentsWithoutDuplicates()
+    {
+        var user = new IdentityUser(Guid.NewGuid(), "Alice", "alice@example.com");
+        var firstRoleId = Guid.NewGuid();
+        var secondRoleId = Guid.NewGuid();
+
+        user.AssignRole(firstRoleId);
+        user.AssignRole(firstRoleId);
+        user.AssignRole(secondRoleId);
+        user.UnassignRole(firstRoleId);
+
+        user.Roles.Select(role => role.RoleId).ShouldBe([secondRoleId]);
+    }
 }

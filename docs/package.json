@@ -3,10 +3,12 @@
   "type": "module",
   "scripts": {
     "docs:dev": "vitepress dev",
+    "docs:dev:restart": "node ./scripts/docs-dev-restart.mjs",
     "docs:build": "vitepress build",
     "docs:preview": "vitepress preview"
   },
   "devDependencies": {
+    "kill-port": "^2.0.1",
     "vitepress": "^1.6.3"
   }
 }

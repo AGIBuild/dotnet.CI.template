@@ -1,8 +1,10 @@
+using System.Linq;
+
 namespace ChengYuan.Identity;
 
 public sealed class UserRecord
 {
-    public UserRecord(Guid id, string userName, string email, bool isActive)
+    public UserRecord(Guid id, string userName, string email, bool isActive, IReadOnlyList<Guid>? roleIds = null)
     {
         if (id == Guid.Empty)
         {
@@ -16,6 +18,11 @@ public sealed class UserRecord
         UserName = userName.Trim();
         Email = email.Trim();
         IsActive = isActive;
+        RoleIds = (roleIds ?? Array.Empty<Guid>())
+            .Where(static roleId => roleId != Guid.Empty)
+            .Distinct()
+            .OrderBy(static roleId => roleId)
+            .ToArray();
     }
 
     public Guid Id { get; }
@@ -25,4 +32,6 @@ public sealed class UserRecord
     public string Email { get; }
 
     public bool IsActive { get; }
+
+    public IReadOnlyList<Guid> RoleIds { get; }
 }

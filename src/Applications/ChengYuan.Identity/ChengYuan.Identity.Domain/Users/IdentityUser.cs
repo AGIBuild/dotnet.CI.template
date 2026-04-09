@@ -1,3 +1,4 @@
+using System.Linq;
 using ChengYuan.Core.Data;
 using ChengYuan.Core.Entities;
 
@@ -5,6 +6,7 @@ namespace ChengYuan.Identity;
 
 public sealed class IdentityUser : AggregateRoot<Guid>, ISoftDelete
 {
+    private readonly List<IdentityUserRole> _roles = [];
     private string _userName = string.Empty;
     private string _normalizedUserName = string.Empty;
     private string _email = string.Empty;
@@ -48,6 +50,8 @@ public sealed class IdentityUser : AggregateRoot<Guid>, ISoftDelete
 
     public bool IsDeleted { get; private set; }
 
+    public IReadOnlyCollection<IdentityUserRole> Roles => _roles.AsReadOnly();
+
     public void Update(string userName, string email, bool isActive)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(userName);
@@ -64,6 +68,37 @@ public sealed class IdentityUser : AggregateRoot<Guid>, ISoftDelete
     {
         IsDeleted = true;
         IsActive = false;
+    }
+
+    public void AssignRole(Guid roleId)
+    {
+        if (roleId == Guid.Empty)
+        {
+            throw new ArgumentException("Role id cannot be empty.", nameof(roleId));
+        }
+
+        if (_roles.Any(userRole => userRole.RoleId == roleId))
+        {
+            return;
+        }
+
+        _roles.Add(new IdentityUserRole(Id, roleId));
+    }
+
+    public void UnassignRole(Guid roleId)
+    {
+        if (roleId == Guid.Empty)
+        {
+            throw new ArgumentException("Role id cannot be empty.", nameof(roleId));
+        }
+
+        var existingRole = _roles.FirstOrDefault(userRole => userRole.RoleId == roleId);
+        if (existingRole is null)
+        {
+            return;
+        }
+
+        _roles.Remove(existingRole);
     }
 
     public static string NormalizeUserName(string userName)

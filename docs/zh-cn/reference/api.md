@@ -179,11 +179,18 @@ Repository、工作单元与过滤器缝隙的 provider 无关数据契约。
 | 类型 | 说明 |
 |---|---|
 | `IdentityModule` | 在 core runtime 模块之上注册 Identity 应用服务。 |
+| `RoleRecord` | 通过应用契约暴露的不可变角色快照。 |
 | `UserRecord` | 通过应用契约暴露的不可变用户快照。 |
+| `IRoleReader` | 提供按 id、名称和有序列表读取角色的能力。 |
+| `IRoleManager` | 在保证角色名唯一性的前提下创建、更新和移除角色。 |
 | `IUserReader` | 提供按 id、用户名、邮箱以及有序列表读取用户的能力。 |
-| `IUserManager` | 在保证用户名和邮箱唯一性的前提下创建、更新和移除用户。 |
+| `IUserManager` | 在保证用户名和邮箱唯一性的前提下创建、更新、移除用户并管理其角色分配。 |
+| `IdentityRole` | 带规范化名称和软删除行为的角色聚合根。 |
 | `IdentityUser` | 带规范化用户名、规范化邮箱和软删除行为的用户聚合根。 |
+| `IdentityUserRole` | 由领域模型拥有的用户-角色分配记录。 |
+| `IIdentityRoleRepository` | IdentityRole 的领域仓储契约。 |
 | `IIdentityUserRepository` | IdentityUser 的领域仓储契约。 |
+| `RoleManager` | 负责协调角色唯一性、生命周期以及角色删除时分配清理的应用服务。 |
 | `UserManager` | 负责协调唯一性校验和持久化的应用服务。 |
 
 ### `ChengYuan.Identity.Persistence`
@@ -196,10 +203,24 @@ Repository、工作单元与过滤器缝隙的 provider 无关数据契约。
 |---|---|
 | `IdentityPersistenceModule` | 在 Identity 应用模块之上注册基于 EF 的 identity user 仓储。 |
 | `IdentityDbContext` | 面向共享物理数据库但独立模块边界的 identity user DbContext。 |
+| `IdentityRoleConfiguration` | IdentityRole 聚合的 EF Core 模型配置。 |
 | `IdentityUserConfiguration` | IdentityUser 聚合的 EF Core 模型配置。 |
+| `IdentityUserRoleConfiguration` | 用户-角色分配表的 EF Core 模型配置。 |
+| `EfIdentityRoleRepository` | `IIdentityRoleRepository` 的 EF Core 实现。 |
 | `EfIdentityUserRepository` | `IIdentityUserRepository` 的 EF Core 实现。 |
 | `AddIdentityDbContext()` | 让调用方按自己的 provider 和连接方式注册模块 DbContext。 |
 | `AddIdentityPersistence()` | 注册基于 EF 的 identity 仓储与 unit of work 服务。 |
+
+### `ChengYuan.Identity.Web`
+
+Identity 的最小 HTTP 管理 facet。
+
+#### 关键类型
+
+| 类型 | 说明 |
+|---|---|
+| `IdentityWebModule` | 在 Identity 应用模块之上注册 Identity Web facet。 |
+| `MapIdentityManagementEndpoints()` | 为用户、角色以及用户-角色分配操作映射最小 HTTP 管理面。 |
 
 ### `ChengYuan.Authorization`
 

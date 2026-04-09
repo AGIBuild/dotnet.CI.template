@@ -55,10 +55,12 @@ All build logic lives in `build/`. Workflows call these targets instead of raw `
 | **Build** | Restore | Build the solution |
 | **Test** | Build | Run tests with coverage (trx + Coverlet) |
 | **Pack** | Test | Pack NuGet packages (.nupkg + .snupkg) |
-| **Publish** | Restore | Publish the selected host for a given `--Host` and `--Runtime` |
+| **Publish** | Restore | Publish the selected host for a given `--PublishHost` and `--Runtime` |
 | **PackageApp** | Publish | Zip published output to `app-{host}-{runtime}.zip` |
 | **Format** | Restore | `dotnet format --verify-no-changes` |
 | **CoverageReport** | Test | Generate HTML + Cobertura coverage report |
+| **Doc** | DocsBuild | Clear any same-port docs server and start the docs dev server |
+| **DocsBuild** | — | Install docs dependencies when needed and run `vitepress build` |
 | **ShowVersion** | — | Print current `VersionPrefix` |
 | **UpdateVersion** | — | Bump patch or set `--VersionPrefix` explicitly |
 | **GenerateReleaseManifest** | Pack | Create `release-manifest.json` with SHA256 hashes |
@@ -68,8 +70,11 @@ All build logic lives in `build/`. Workflows call these targets instead of raw `
 ```bash
 ./build.sh Test                                   # Build + Test
 ./build.sh Pack                                   # Build + Test + Pack
-./build.sh Publish --Host web --Runtime linux-x64 --SelfContained  # Publish self-contained web host
+./build.sh Publish --PublishHost web --Runtime linux-x64 --SelfContained  # Publish self-contained web host
 ./build.sh CoverageReport                         # Generate coverage HTML
+./build.sh DocsBuild                              # Build the docs site
+./build.sh Doc                                    # Install docs deps, kill any existing server, and start docs dev server on port 5173
+./build.sh Doc --DocsPort 8080                    # Same on a custom port (Ctrl+C to stop)
 ./build.sh ShowVersion                            # Print version
 ./build.sh UpdateVersion                          # Patch bump (e.g. 0.2.0 → 0.2.1)
 ./build.sh UpdateVersion --VersionPrefix 1.0.0    # Set version explicitly
@@ -82,9 +87,10 @@ All build logic lives in `build/`. Workflows call these targets instead of raw `
 | `--Configuration` | `Debug` (local) / `Release` (CI) | Build configuration |
 | `--VersionPrefix` | — | Version to set (used by `UpdateVersion`) |
 | `--VersionSuffix` | — | Prerelease suffix (e.g. `ci.42`) |
-| `--Host` | — | Host to publish (`web` or `cli`) |
+| `--PublishHost` | — | Host to publish (`web` or `cli`) |
 | `--Runtime` | — | Target RID for `Publish` (e.g. `linux-x64`) |
 | `--SelfContained` | `false` | Produce self-contained output |
+| `--DocsPort` | `5173` | Port used by `Doc` |
 
 ### Artifacts
 
@@ -106,6 +112,9 @@ npm install
 npm run docs:dev      # Local dev server at http://localhost:5173
 npm run docs:build    # Production build
 npm run docs:preview  # Preview production build
+
+# Or use NUKE from the repository root (blocks until Ctrl+C)
+build.ps1 Doc
 ```
 
 ## Next Steps

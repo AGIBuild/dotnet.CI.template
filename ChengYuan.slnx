@@ -39,6 +39,7 @@
     <Project Path="src/Applications/ChengYuan.Identity/ChengYuan.Identity.Domain/ChengYuan.Identity.Domain.csproj" />
     <Project Path="src/Applications/ChengYuan.Identity/ChengYuan.Identity.Application/ChengYuan.Identity.Application.csproj" />
     <Project Path="src/Applications/ChengYuan.Identity/ChengYuan.Identity.Persistence/ChengYuan.Identity.Persistence.csproj" />
+    <Project Path="src/Applications/ChengYuan.Identity/ChengYuan.Identity.Web/ChengYuan.Identity.Web.csproj" />
     <Project Path="src/Applications/ChengYuan.PermissionManagement/ChengYuan.PermissionManagement.Contracts/ChengYuan.PermissionManagement.Contracts.csproj" />
     <Project Path="src/Applications/ChengYuan.PermissionManagement/ChengYuan.PermissionManagement.Application/ChengYuan.PermissionManagement.Application.csproj" />
     <Project Path="src/Applications/ChengYuan.PermissionManagement/ChengYuan.PermissionManagement.Persistence/ChengYuan.PermissionManagement.Persistence.csproj" />

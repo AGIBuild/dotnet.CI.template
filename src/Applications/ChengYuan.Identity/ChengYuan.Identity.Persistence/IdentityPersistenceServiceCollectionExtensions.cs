@@ -12,7 +12,9 @@ public static class IdentityPersistenceServiceCollectionExtensions
         ArgumentNullException.ThrowIfNull(services);
 
         services.AddEntityFrameworkCoreDataAccess<IdentityDbContext>();
+        services.AddEfRepository<IdentityDbContext, IdentityRole, Guid>();
         services.AddEfRepository<IdentityDbContext, IdentityUser, Guid>();
+        services.TryAddScoped<IIdentityRoleRepository, EfIdentityRoleRepository>();
         services.TryAddScoped<IIdentityUserRepository, EfIdentityUserRepository>();
 
         return services;

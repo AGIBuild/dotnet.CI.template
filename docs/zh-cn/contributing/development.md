@@ -55,10 +55,12 @@ build.ps1           # Windows
 | **Build** | Restore | 构建解决方案 |
 | **Test** | Build | 运行测试并收集覆盖率（trx + Coverlet） |
 | **Pack** | Test | 打包 NuGet（.nupkg + .snupkg） |
-| **Publish** | Restore | 为指定 `--Host` 和 `--Runtime` 发布 Host |
+| **Publish** | Restore | 为指定 `--PublishHost` 和 `--Runtime` 发布 Host |
 | **PackageApp** | Publish | 将发布产物打成 `app-{host}-{runtime}.zip` |
 | **Format** | Restore | `dotnet format --verify-no-changes` |
 | **CoverageReport** | Test | 生成 HTML + Cobertura 覆盖率报告 |
+| **Doc** | DocsBuild | 清理同端口 docs 开发服务器，并启动开发服务器 |
+| **DocsBuild** | — | 在需要时安装文档依赖并执行 `vitepress build` |
 | **ShowVersion** | — | 打印当前 `VersionPrefix` |
 | **UpdateVersion** | — | 递增 patch 或显式设置 `--VersionPrefix` |
 | **GenerateReleaseManifest** | Pack | 创建含 SHA256 哈希的 `release-manifest.json` |
@@ -68,8 +70,11 @@ build.ps1           # Windows
 ```bash
 ./build.sh Test                                   # 构建 + 测试
 ./build.sh Pack                                   # 构建 + 测试 + 打包
-./build.sh Publish --Host web --Runtime linux-x64 --SelfContained  # 发布自包含 Web Host
+./build.sh Publish --PublishHost web --Runtime linux-x64 --SelfContained  # 发布自包含 Web Host
 ./build.sh CoverageReport                         # 生成覆盖率 HTML
+./build.sh DocsBuild                              # 构建文档站点
+./build.sh Doc                                    # 安装文档依赖、清理现有服务器，在 5173 端口启动 docs 开发服务器
+./build.sh Doc --DocsPort 8080                    # 在自定义端口启动（Ctrl+C 停止）
 ./build.sh ShowVersion                            # 查看版本号
 ./build.sh UpdateVersion                          # patch 递增（如 0.2.0 → 0.2.1）
 ./build.sh UpdateVersion --VersionPrefix 1.0.0    # 显式设置版本
@@ -82,9 +87,10 @@ build.ps1           # Windows
 | `--Configuration` | `Debug`（本地）/ `Release`（CI） | 构建配置 |
 | `--VersionPrefix` | — | 要设置的版本号（用于 `UpdateVersion`） |
 | `--VersionSuffix` | — | 预发布后缀（如 `ci.42`） |
-| `--Host` | — | 要发布的 Host（`web` 或 `cli`） |
+| `--PublishHost` | — | 要发布的 Host（`web` 或 `cli`） |
 | `--Runtime` | — | 目标 RID（如 `linux-x64`） |
 | `--SelfContained` | `false` | 是否生成自包含产物 |
+| `--DocsPort` | `5173` | `Doc` 使用的端口 |
 
 ### 产物目录
 
@@ -106,6 +112,9 @@ npm install
 npm run docs:dev      # 本地开发服务器 http://localhost:5173
 npm run docs:build    # 生产构建
 npm run docs:preview  # 预览生产构建
+
+# 或者在仓库根目录使用 NUKE（前台阻塞，Ctrl+C 停止）
+build.ps1 Doc
 ```
 
 ## 下一步
