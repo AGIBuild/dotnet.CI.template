@@ -19,30 +19,30 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\src\Framework\ChengYuan.Core\ChengYuan.Core.csproj" />
-    <ProjectReference Include="..\..\src\Applications\ChengYuan.AuditLogging\ChengYuan.AuditLogging.Application\ChengYuan.AuditLogging.Application.csproj" />
-    <ProjectReference Include="..\..\src\Applications\ChengYuan.AuditLogging\ChengYuan.AuditLogging.Persistence\ChengYuan.AuditLogging.Persistence.csproj" />
-    <ProjectReference Include="..\..\src\Applications\ChengYuan.FeatureManagement\ChengYuan.FeatureManagement.Application\ChengYuan.FeatureManagement.Application.csproj" />
-    <ProjectReference Include="..\..\src\Applications\ChengYuan.FeatureManagement\ChengYuan.FeatureManagement.Persistence\ChengYuan.FeatureManagement.Persistence.csproj" />
-    <ProjectReference Include="..\..\src\Applications\ChengYuan.Identity\ChengYuan.Identity.Application\ChengYuan.Identity.Application.csproj" />
-    <ProjectReference Include="..\..\src\Applications\ChengYuan.Identity\ChengYuan.Identity.Web\ChengYuan.Identity.Web.csproj" />
-    <ProjectReference Include="..\..\src\Applications\ChengYuan.Identity\ChengYuan.Identity.Persistence\ChengYuan.Identity.Persistence.csproj" />
-    <ProjectReference Include="..\..\src\Applications\ChengYuan.PermissionManagement\ChengYuan.PermissionManagement.Application\ChengYuan.PermissionManagement.Application.csproj" />
-    <ProjectReference Include="..\..\src\Applications\ChengYuan.PermissionManagement\ChengYuan.PermissionManagement.Persistence\ChengYuan.PermissionManagement.Persistence.csproj" />
-    <ProjectReference Include="..\..\src\Applications\ChengYuan.SettingManagement\ChengYuan.SettingManagement.Application\ChengYuan.SettingManagement.Application.csproj" />
-    <ProjectReference Include="..\..\src\Applications\ChengYuan.SettingManagement\ChengYuan.SettingManagement.Persistence\ChengYuan.SettingManagement.Persistence.csproj" />
-    <ProjectReference Include="..\..\src\Applications\ChengYuan.TenantManagement\ChengYuan.TenantManagement.Application\ChengYuan.TenantManagement.Application.csproj" />
-    <ProjectReference Include="..\..\src\Applications\ChengYuan.TenantManagement\ChengYuan.TenantManagement.Persistence\ChengYuan.TenantManagement.Persistence.csproj" />
-    <ProjectReference Include="..\..\src\Applications\ChengYuan.Identity\ChengYuan.Identity.Domain\ChengYuan.Identity.Domain.csproj" />
-    <ProjectReference Include="..\..\src\Framework\ChengYuan.Caching\ChengYuan.Caching.Memory\ChengYuan.Caching.Memory.csproj" />
-    <ProjectReference Include="..\..\src\Framework\ChengYuan.Outbox\ChengYuan.Outbox.Worker\ChengYuan.Outbox.Worker.csproj" />
-    <ProjectReference Include="..\..\src\Framework\ChengYuan.ExecutionContext\ChengYuan.ExecutionContext.Runtime\ChengYuan.ExecutionContext.Runtime.csproj" />
-    <ProjectReference Include="..\..\src\Framework\ChengYuan.MultiTenancy\ChengYuan.MultiTenancy.Runtime\ChengYuan.MultiTenancy.Runtime.csproj" />
-    <ProjectReference Include="..\..\src\Framework\ChengYuan.Auditing\ChengYuan.Auditing.Runtime\ChengYuan.Auditing.Runtime.csproj" />
-    <ProjectReference Include="..\..\src\Framework\ChengYuan.Authorization\ChengYuan.Authorization.Runtime\ChengYuan.Authorization.Runtime.csproj" />
-    <ProjectReference Include="..\..\src\Framework\ChengYuan.Features\ChengYuan.Features.Runtime\ChengYuan.Features.Runtime.csproj" />
-    <ProjectReference Include="..\..\src\Framework\ChengYuan.Settings\ChengYuan.Settings.Runtime\ChengYuan.Settings.Runtime.csproj" />
-    <ProjectReference Include="..\..\src\Hosts\ChengYuan.WebHost\ChengYuan.WebHost.csproj" />
+    <ProjectReference Include="..\..\src\Framework\Core\ChengYuan.Core.csproj" />
+    <ProjectReference Include="..\..\src\Applications\AuditLogging\ChengYuan.AuditLogging.Application\ChengYuan.AuditLogging.Application.csproj" />
+    <ProjectReference Include="..\..\src\Applications\AuditLogging\ChengYuan.AuditLogging.Persistence\ChengYuan.AuditLogging.Persistence.csproj" />
+    <ProjectReference Include="..\..\src\Applications\FeatureManagement\ChengYuan.FeatureManagement.Application\ChengYuan.FeatureManagement.Application.csproj" />
+    <ProjectReference Include="..\..\src\Applications\FeatureManagement\ChengYuan.FeatureManagement.Persistence\ChengYuan.FeatureManagement.Persistence.csproj" />
+    <ProjectReference Include="..\..\src\Applications\Identity\ChengYuan.Identity.Application\ChengYuan.Identity.Application.csproj" />
+    <ProjectReference Include="..\..\src\Applications\Identity\ChengYuan.Identity.Web\ChengYuan.Identity.Web.csproj" />
+    <ProjectReference Include="..\..\src\Applications\Identity\ChengYuan.Identity.Persistence\ChengYuan.Identity.Persistence.csproj" />
+    <ProjectReference Include="..\..\src\Applications\PermissionManagement\ChengYuan.PermissionManagement.Application\ChengYuan.PermissionManagement.Application.csproj" />
+    <ProjectReference Include="..\..\src\Applications\PermissionManagement\ChengYuan.PermissionManagement.Persistence\ChengYuan.PermissionManagement.Persistence.csproj" />
+    <ProjectReference Include="..\..\src\Applications\SettingManagement\ChengYuan.SettingManagement.Application\ChengYuan.SettingManagement.Application.csproj" />
+    <ProjectReference Include="..\..\src\Applications\SettingManagement\ChengYuan.SettingManagement.Persistence\ChengYuan.SettingManagement.Persistence.csproj" />
+    <ProjectReference Include="..\..\src\Applications\TenantManagement\ChengYuan.TenantManagement.Application\ChengYuan.TenantManagement.Application.csproj" />
+    <ProjectReference Include="..\..\src\Applications\TenantManagement\ChengYuan.TenantManagement.Persistence\ChengYuan.TenantManagement.Persistence.csproj" />
+    <ProjectReference Include="..\..\src\Applications\Identity\ChengYuan.Identity.Domain\ChengYuan.Identity.Domain.csproj" />
+    <ProjectReference Include="..\..\src\Framework\Caching\ChengYuan.Caching.Memory\ChengYuan.Caching.Memory.csproj" />
+    <ProjectReference Include="..\..\src\Framework\Outbox\ChengYuan.Outbox.Worker\ChengYuan.Outbox.Worker.csproj" />
+    <ProjectReference Include="..\..\src\Framework\ExecutionContext\ChengYuan.ExecutionContext.Runtime\ChengYuan.ExecutionContext.Runtime.csproj" />
+    <ProjectReference Include="..\..\src\Framework\MultiTenancy\ChengYuan.MultiTenancy.Runtime\ChengYuan.MultiTenancy.Runtime.csproj" />
+    <ProjectReference Include="..\..\src\Framework\Auditing\ChengYuan.Auditing.Runtime\ChengYuan.Auditing.Runtime.csproj" />
+    <ProjectReference Include="..\..\src\Framework\Authorization\ChengYuan.Authorization.Runtime\ChengYuan.Authorization.Runtime.csproj" />
+    <ProjectReference Include="..\..\src\Framework\Features\ChengYuan.Features.Runtime\ChengYuan.Features.Runtime.csproj" />
+    <ProjectReference Include="..\..\src\Framework\Settings\ChengYuan.Settings.Runtime\ChengYuan.Settings.Runtime.csproj" />
+    <ProjectReference Include="..\..\src\Hosts\WebHost\ChengYuan.WebHost.csproj" />
   </ItemGroup>
 
 </Project>

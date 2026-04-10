@@ -89,8 +89,8 @@ dotnet test --solution ChengYuan.slnx
 3. Run one of the thin hosts to verify composition:
 
 ```bash
-dotnet run --project src/Hosts/ChengYuan.WebHost
-dotnet run --project src/Hosts/ChengYuan.CliHost
+dotnet run --project src/Hosts/WebHost
+dotnet run --project src/Hosts/CliHost
 ```
 
 4. Configure `release` environment in GitHub (`Settings` -> `Environments`)

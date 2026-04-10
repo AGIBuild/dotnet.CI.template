@@ -22,8 +22,8 @@ partial class BuildTask
     string NormalizedHost => PublishHost.Trim().ToLowerInvariant();
     string PublishPath => NormalizedHost switch
     {
-        "web" => "src/Hosts/ChengYuan.WebHost/ChengYuan.WebHost.csproj",
-        "cli" => "src/Hosts/ChengYuan.CliHost/ChengYuan.CliHost.csproj",
+        "web" => "src/Hosts/WebHost/ChengYuan.WebHost.csproj",
+        "cli" => "src/Hosts/CliHost/ChengYuan.CliHost.csproj",
         _ => string.Empty
     };
 

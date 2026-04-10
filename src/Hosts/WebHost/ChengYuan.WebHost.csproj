@@ -1,0 +1,25 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\Framework\Core\ChengYuan.Core.csproj" />
+    <ProjectReference Include="..\..\Applications\AuditLogging\ChengYuan.AuditLogging.Persistence\ChengYuan.AuditLogging.Persistence.csproj" />
+    <ProjectReference Include="..\..\Applications\FeatureManagement\ChengYuan.FeatureManagement.Persistence\ChengYuan.FeatureManagement.Persistence.csproj" />
+    <ProjectReference Include="..\..\Applications\Identity\ChengYuan.Identity.Persistence\ChengYuan.Identity.Persistence.csproj" />
+    <ProjectReference Include="..\..\Applications\Identity\ChengYuan.Identity.Web\ChengYuan.Identity.Web.csproj" />
+    <ProjectReference Include="..\..\Applications\PermissionManagement\ChengYuan.PermissionManagement.Persistence\ChengYuan.PermissionManagement.Persistence.csproj" />
+    <ProjectReference Include="..\..\Applications\SettingManagement\ChengYuan.SettingManagement.Persistence\ChengYuan.SettingManagement.Persistence.csproj" />
+    <ProjectReference Include="..\..\Applications\TenantManagement\ChengYuan.TenantManagement.Persistence\ChengYuan.TenantManagement.Persistence.csproj" />
+    <ProjectReference Include="..\..\Framework\Caching\ChengYuan.Caching.Memory\ChengYuan.Caching.Memory.csproj" />
+    <ProjectReference Include="..\..\Framework\ExecutionContext\ChengYuan.ExecutionContext.Runtime\ChengYuan.ExecutionContext.Runtime.csproj" />
+    <ProjectReference Include="..\..\Framework\MultiTenancy\ChengYuan.MultiTenancy.Runtime\ChengYuan.MultiTenancy.Runtime.csproj" />
+  </ItemGroup>
+
+</Project>

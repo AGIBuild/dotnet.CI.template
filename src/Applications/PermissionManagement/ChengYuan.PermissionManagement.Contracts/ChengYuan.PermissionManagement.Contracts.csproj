@@ -1,0 +1,11 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\Framework\Authorization\ChengYuan.Authorization.Abstractions\ChengYuan.Authorization.Abstractions.csproj" />
+  </ItemGroup>
+
+</Project>

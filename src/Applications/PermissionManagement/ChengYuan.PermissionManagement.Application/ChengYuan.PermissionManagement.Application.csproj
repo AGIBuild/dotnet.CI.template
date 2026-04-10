@@ -1,0 +1,13 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\Framework\Core\ChengYuan.Core.csproj" />
+    <ProjectReference Include="..\ChengYuan.PermissionManagement.Contracts\ChengYuan.PermissionManagement.Contracts.csproj" />
+    <ProjectReference Include="..\..\..\Framework\Authorization\ChengYuan.Authorization.Runtime\ChengYuan.Authorization.Runtime.csproj" />
+  </ItemGroup>
+
+</Project>

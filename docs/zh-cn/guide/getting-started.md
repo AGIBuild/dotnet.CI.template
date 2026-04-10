@@ -15,8 +15,8 @@ dotnet test --solution ChengYuan.slnx
 启动两个轻量组合壳，确认当前模块图可正常装配：
 
 ```bash
-dotnet run --project src/Hosts/ChengYuan.WebHost
-dotnet run --project src/Hosts/ChengYuan.CliHost
+dotnet run --project src/Hosts/WebHost
+dotnet run --project src/Hosts/CliHost
 ```
 
 Web Host 会暴露 `/health`，CLI Host 会输出已加载模块和相关性信息。

@@ -1,15 +1,15 @@
 <Solution>
   <Folder Name="/src/Framework/">
-    <Project Path="src/Framework/ChengYuan.Hosting/ChengYuan.Hosting.csproj" />
-    <Project Path="src/Framework/ChengYuan.ExecutionContext/ChengYuan.ExecutionContext.Abstractions/ChengYuan.ExecutionContext.Abstractions.csproj" />
-    <Project Path="src/Framework/ChengYuan.ExecutionContext/ChengYuan.ExecutionContext.Runtime/ChengYuan.ExecutionContext.Runtime.csproj" />
-    <Project Path="src/Framework/ChengYuan.MultiTenancy/ChengYuan.MultiTenancy.Abstractions/ChengYuan.MultiTenancy.Abstractions.csproj" />
-    <Project Path="src/Framework/ChengYuan.MultiTenancy/ChengYuan.MultiTenancy.Runtime/ChengYuan.MultiTenancy.Runtime.csproj" />
+    <Project Path="src/Framework/Hosting/ChengYuan.Hosting.csproj" />
+    <Project Path="src/Framework/ExecutionContext/ChengYuan.ExecutionContext.Abstractions/ChengYuan.ExecutionContext.Abstractions.csproj" />
+    <Project Path="src/Framework/ExecutionContext/ChengYuan.ExecutionContext.Runtime/ChengYuan.ExecutionContext.Runtime.csproj" />
+    <Project Path="src/Framework/MultiTenancy/ChengYuan.MultiTenancy.Abstractions/ChengYuan.MultiTenancy.Abstractions.csproj" />
+    <Project Path="src/Framework/MultiTenancy/ChengYuan.MultiTenancy.Runtime/ChengYuan.MultiTenancy.Runtime.csproj" />
   </Folder>
   <Folder Name="/src/Applications/" />
   <Folder Name="/src/Hosts/">
-    <Project Path="src/Hosts/ChengYuan.WebHost/ChengYuan.WebHost.csproj" />
-    <Project Path="src/Hosts/ChengYuan.CliHost/ChengYuan.CliHost.csproj" />
+    <Project Path="src/Hosts/WebHost/ChengYuan.WebHost.csproj" />
+    <Project Path="src/Hosts/CliHost/ChengYuan.CliHost.csproj" />
   </Folder>
   <Folder Name="/tests/">
     <Project Path="tests/ChengYuan.ArchitectureTests/ChengYuan.ArchitectureTests.csproj" />

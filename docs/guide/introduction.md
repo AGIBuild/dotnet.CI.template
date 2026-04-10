@@ -33,7 +33,7 @@ Inside the source tree, the preferred shape is:
 family -> module -> project
 ```
 
-For example, `src/Applications/ChengYuan.Identity/ChengYuan.Identity.Application/` is preferred over flattening all module projects into a single directory.
+For example, `src/Applications/Identity/ChengYuan.Identity.Application/` is preferred over flattening all module projects into a single directory.
 
 ## What ChengYuan Is Not
 

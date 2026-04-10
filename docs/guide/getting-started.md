@@ -15,8 +15,8 @@ dotnet test --solution ChengYuan.slnx
 Start the thin composition hosts to verify the current module graph:
 
 ```bash
-dotnet run --project src/Hosts/ChengYuan.WebHost
-dotnet run --project src/Hosts/ChengYuan.CliHost
+dotnet run --project src/Hosts/WebHost
+dotnet run --project src/Hosts/CliHost
 ```
 
 The web host exposes `/health`, and the CLI host prints the loaded module list and correlation information.

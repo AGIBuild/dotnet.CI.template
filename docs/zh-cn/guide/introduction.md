@@ -33,7 +33,7 @@ docs/               # 文档
 family -> module -> project
 ```
 
-例如，更推荐 `src/Applications/ChengYuan.Identity/ChengYuan.Identity.Application/`，而不是把所有模块项目拍平到同一层目录。
+例如，更推荐 `src/Applications/Identity/ChengYuan.Identity.Application/`，而不是把所有模块项目拍平到同一层目录。
 
 ## 承渊不是什么
 
