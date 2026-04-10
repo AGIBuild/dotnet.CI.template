@@ -20,21 +20,24 @@ public static class ModuleServiceCollectionExtensions
             throw new InvalidOperationException($"Module type '{rootModuleType.FullName}' must inherit from {nameof(ModuleBase)}.");
         }
 
-        var orderedModules = OrderModules(rootModuleType);
-        services.AddSingleton(new ModuleCatalog(orderedModules));
+        var orderedNodes = ResolveGraph(rootModuleType);
+        var orderedDescriptors = BuildDescriptors(orderedNodes, rootModuleType);
+        var catalog = new ModuleCatalog(orderedDescriptors);
 
-        foreach (var moduleDescriptor in orderedModules)
+        services.AddSingleton(catalog);
+        services.AddSingleton<IModuleCatalog>(catalog);
+        services.AddSingleton<IModuleManager>(serviceProvider => new ModuleManager(catalog, serviceProvider));
+
+        foreach (var descriptor in orderedDescriptors)
         {
-            var module = (ModuleBase)Activator.CreateInstance(moduleDescriptor.ModuleType)!;
-
-            if (module is IPreConfigureServices preConfigureServices)
+            if (descriptor.Instance is IPreConfigureServices preConfigureServices)
             {
                 preConfigureServices.PreConfigureServices(services);
             }
 
-            module.ConfigureServices(services);
+            descriptor.Instance.ConfigureServices(services);
 
-            if (module is IPostConfigureServices postConfigureServices)
+            if (descriptor.Instance is IPostConfigureServices postConfigureServices)
             {
                 postConfigureServices.PostConfigureServices(services);
             }
@@ -43,19 +46,19 @@ public static class ModuleServiceCollectionExtensions
         return services;
     }
 
-    private static List<ModuleDescriptor> OrderModules(Type rootModuleType)
+    private static List<(Type ModuleType, Type[] DependencyTypes)> ResolveGraph(Type rootModuleType)
     {
-        var orderedModules = new List<ModuleDescriptor>();
+        var orderedNodes = new List<(Type ModuleType, Type[] DependencyTypes)>();
         var visitingModules = new HashSet<Type>();
         var visitedModules = new HashSet<Type>();
 
-        Visit(rootModuleType, orderedModules, visitingModules, visitedModules);
-        return orderedModules;
+        Visit(rootModuleType, orderedNodes, visitingModules, visitedModules);
+        return orderedNodes;
     }
 
     private static void Visit(
         Type moduleType,
-        ICollection<ModuleDescriptor> orderedModules,
+        ICollection<(Type ModuleType, Type[] DependencyTypes)> orderedNodes,
         ISet<Type> visitingModules,
         ISet<Type> visitedModules)
     {
@@ -73,12 +76,39 @@ public static class ModuleServiceCollectionExtensions
 
         foreach (var dependencyType in dependencyTypes)
         {
-            Visit(dependencyType, orderedModules, visitingModules, visitedModules);
+            Visit(dependencyType, orderedNodes, visitingModules, visitedModules);
         }
 
         visitingModules.Remove(moduleType);
         visitedModules.Add(moduleType);
-        orderedModules.Add(new ModuleDescriptor(moduleType, dependencyTypes));
+        orderedNodes.Add((moduleType, dependencyTypes));
+    }
+
+    private static List<ModuleDescriptor> BuildDescriptors(
+        List<(Type ModuleType, Type[] DependencyTypes)> orderedNodes,
+        Type rootModuleType)
+    {
+        var descriptorMap = new Dictionary<Type, ModuleDescriptor>();
+        var descriptors = new List<ModuleDescriptor>();
+
+        foreach (var (moduleType, dependencyTypes) in orderedNodes)
+        {
+            var instance = (ModuleBase)Activator.CreateInstance(moduleType)!;
+            var dependencies = dependencyTypes
+                .Select(type => (IModuleDescriptor)descriptorMap[type])
+                .ToArray();
+
+            var descriptor = new ModuleDescriptor(
+                moduleType,
+                instance,
+                dependencies,
+                isRoot: moduleType == rootModuleType);
+
+            descriptorMap[moduleType] = descriptor;
+            descriptors.Add(descriptor);
+        }
+
+        return descriptors;
     }
 
     private static IEnumerable<Type> GetDependencies(Type moduleType)

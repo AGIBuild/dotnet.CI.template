@@ -12,7 +12,7 @@ public static class WebHostApplicationExtensions
     {
         ArgumentNullException.ThrowIfNull(app);
 
-        app.MapGet("/health", (ModuleCatalog catalog, ICurrentCorrelation correlation, ICurrentTenant currentTenant) =>
+        app.MapGet("/health", (IModuleCatalog catalog, ICurrentCorrelation correlation, ICurrentTenant currentTenant) =>
             Results.Ok(new
             {
                 status = "ok",

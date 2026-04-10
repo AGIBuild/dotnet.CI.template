@@ -28,7 +28,7 @@ public static class WebHostServiceCollectionExtensions
         services.AddFeatureManagementPersistenceDbContext(effectiveConfigureDbContext);
         services.AddAuditLoggingPersistenceDbContext(effectiveConfigureDbContext);
         services.AddIdentityDbContext(effectiveConfigureDbContext);
-        services.AddModule<WebHostModule>();
+        services.AddWebModularApplication<WebHostModule>();
 
         return services;
     }
