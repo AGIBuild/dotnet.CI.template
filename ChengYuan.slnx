@@ -1,12 +1,6 @@
 <Solution>
   <Folder Name="/src/Framework/">
-    <Project Path="src/Framework/ChengYuan.Core/ChengYuan.Core/ChengYuan.Core.csproj" />
-    <Project Path="src/Framework/ChengYuan.Core/ChengYuan.Core.Runtime/ChengYuan.Core.Runtime.csproj" />
-    <Project Path="src/Framework/ChengYuan.Core/ChengYuan.Core.Json/ChengYuan.Core.Json.csproj" />
-    <Project Path="src/Framework/ChengYuan.Core/ChengYuan.Core.Validation/ChengYuan.Core.Validation.csproj" />
-    <Project Path="src/Framework/ChengYuan.Core/ChengYuan.Core.Localization/ChengYuan.Core.Localization.csproj" />
-    <Project Path="src/Framework/ChengYuan.Core/ChengYuan.Core.Data/ChengYuan.Core.Data.csproj" />
-    <Project Path="src/Framework/ChengYuan.Core/ChengYuan.Core.EntityFrameworkCore/ChengYuan.Core.EntityFrameworkCore.csproj" />
+    <Project Path="src/Framework/ChengYuan.Core/ChengYuan.Core.csproj" />
     <Project Path="src/Framework/ChengYuan.Hosting/ChengYuan.Hosting.csproj" />
     <Project Path="src/Framework/ChengYuan.Caching/ChengYuan.Caching.Abstractions/ChengYuan.Caching.Abstractions.csproj" />
     <Project Path="src/Framework/ChengYuan.Caching/ChengYuan.Caching.Runtime/ChengYuan.Caching.Runtime.csproj" />

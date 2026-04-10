@@ -10,8 +10,8 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\Framework\ChengYuan.Core\ChengYuan.Core.csproj" />
     <ProjectReference Include="..\..\Framework\ChengYuan.Caching\ChengYuan.Caching.Memory\ChengYuan.Caching.Memory.csproj" />
-    <ProjectReference Include="..\..\Framework\ChengYuan.Core\ChengYuan.Core.Runtime\ChengYuan.Core.Runtime.csproj" />
     <ProjectReference Include="..\..\Framework\ChengYuan.ExecutionContext\ChengYuan.ExecutionContext.Runtime\ChengYuan.ExecutionContext.Runtime.csproj" />
     <ProjectReference Include="..\..\Framework\ChengYuan.MultiTenancy\ChengYuan.MultiTenancy.Runtime\ChengYuan.MultiTenancy.Runtime.csproj" />
   </ItemGroup>

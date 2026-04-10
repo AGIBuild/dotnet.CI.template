@@ -9,11 +9,9 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\..\Framework\ChengYuan.Core\ChengYuan.Core.csproj" />
     <ProjectReference Include="..\ChengYuan.Identity.Application\ChengYuan.Identity.Application.csproj" />
     <ProjectReference Include="..\ChengYuan.Identity.Domain\ChengYuan.Identity.Domain.csproj" />
-    <ProjectReference Include="..\..\..\Framework\ChengYuan.Core\ChengYuan.Core.Runtime\ChengYuan.Core.Runtime.csproj" />
-    <ProjectReference Include="..\..\..\Framework\ChengYuan.Core\ChengYuan.Core.Data\ChengYuan.Core.Data.csproj" />
-    <ProjectReference Include="..\..\..\Framework\ChengYuan.Core\ChengYuan.Core.EntityFrameworkCore\ChengYuan.Core.EntityFrameworkCore.csproj" />
   </ItemGroup>
 
 </Project>

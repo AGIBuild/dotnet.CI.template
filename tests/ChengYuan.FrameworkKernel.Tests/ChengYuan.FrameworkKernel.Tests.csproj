@@ -19,6 +19,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\src\Framework\ChengYuan.Core\ChengYuan.Core.csproj" />
     <ProjectReference Include="..\..\src\Applications\ChengYuan.AuditLogging\ChengYuan.AuditLogging.Application\ChengYuan.AuditLogging.Application.csproj" />
     <ProjectReference Include="..\..\src\Applications\ChengYuan.AuditLogging\ChengYuan.AuditLogging.Persistence\ChengYuan.AuditLogging.Persistence.csproj" />
     <ProjectReference Include="..\..\src\Applications\ChengYuan.FeatureManagement\ChengYuan.FeatureManagement.Application\ChengYuan.FeatureManagement.Application.csproj" />
@@ -33,13 +34,6 @@
     <ProjectReference Include="..\..\src\Applications\ChengYuan.TenantManagement\ChengYuan.TenantManagement.Application\ChengYuan.TenantManagement.Application.csproj" />
     <ProjectReference Include="..\..\src\Applications\ChengYuan.TenantManagement\ChengYuan.TenantManagement.Persistence\ChengYuan.TenantManagement.Persistence.csproj" />
     <ProjectReference Include="..\..\src\Applications\ChengYuan.Identity\ChengYuan.Identity.Domain\ChengYuan.Identity.Domain.csproj" />
-    <ProjectReference Include="..\..\src\Framework\ChengYuan.Core\ChengYuan.Core\ChengYuan.Core.csproj" />
-    <ProjectReference Include="..\..\src\Framework\ChengYuan.Core\ChengYuan.Core.Json\ChengYuan.Core.Json.csproj" />
-    <ProjectReference Include="..\..\src\Framework\ChengYuan.Core\ChengYuan.Core.Validation\ChengYuan.Core.Validation.csproj" />
-    <ProjectReference Include="..\..\src\Framework\ChengYuan.Core\ChengYuan.Core.Localization\ChengYuan.Core.Localization.csproj" />
-    <ProjectReference Include="..\..\src\Framework\ChengYuan.Core\ChengYuan.Core.Data\ChengYuan.Core.Data.csproj" />
-    <ProjectReference Include="..\..\src\Framework\ChengYuan.Core\ChengYuan.Core.EntityFrameworkCore\ChengYuan.Core.EntityFrameworkCore.csproj" />
-    <ProjectReference Include="..\..\src\Framework\ChengYuan.Core\ChengYuan.Core.Runtime\ChengYuan.Core.Runtime.csproj" />
     <ProjectReference Include="..\..\src\Framework\ChengYuan.Caching\ChengYuan.Caching.Memory\ChengYuan.Caching.Memory.csproj" />
     <ProjectReference Include="..\..\src\Framework\ChengYuan.Outbox\ChengYuan.Outbox.Worker\ChengYuan.Outbox.Worker.csproj" />
     <ProjectReference Include="..\..\src\Framework\ChengYuan.ExecutionContext\ChengYuan.ExecutionContext.Runtime\ChengYuan.ExecutionContext.Runtime.csproj" />

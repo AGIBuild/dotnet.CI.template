@@ -65,28 +65,9 @@
         "contentHash": "inRnbpCS0nwO/RuoZIAqxQUuyjaknOOnCEZB55KSMMjRhl0RQDttSmLSGsUJN3RQ3ocf5NDLFd2mOQViHqMK5w=="
       },
       "chengyuan.core": {
-        "type": "Project"
-      },
-      "chengyuan.core.data": {
         "type": "Project",
         "dependencies": {
-          "ChengYuan.Core": "[0.2.10-local, )",
-          "ChengYuan.Core.Runtime": "[0.2.10-local, )",
-          "Microsoft.Extensions.DependencyInjection.Abstractions": "[10.0.0, )"
-        }
-      },
-      "chengyuan.core.entityframeworkcore": {
-        "type": "Project",
-        "dependencies": {
-          "ChengYuan.Core": "[0.2.10-local, )",
-          "ChengYuan.Core.Data": "[0.2.10-local, )",
-          "Microsoft.EntityFrameworkCore": "[10.0.0, )"
-        }
-      },
-      "chengyuan.core.runtime": {
-        "type": "Project",
-        "dependencies": {
-          "ChengYuan.Core": "[0.2.10-local, )",
+          "Microsoft.EntityFrameworkCore": "[10.0.0, )",
           "Microsoft.Extensions.DependencyInjection.Abstractions": "[10.0.0, )"
         }
       },
@@ -97,14 +78,13 @@
         "type": "Project",
         "dependencies": {
           "ChengYuan.Core": "[0.2.10-local, )",
-          "ChengYuan.Core.Runtime": "[0.2.10-local, )",
           "ChengYuan.ExecutionContext.Abstractions": "[0.2.10-local, )"
         }
       },
       "chengyuan.featuremanagement.application": {
         "type": "Project",
         "dependencies": {
-          "ChengYuan.Core.Runtime": "[0.2.10-local, )",
+          "ChengYuan.Core": "[0.2.10-local, )",
           "ChengYuan.FeatureManagement.Contracts": "[0.2.10-local, )",
           "ChengYuan.Features.Runtime": "[0.2.10-local, )"
         }
@@ -121,7 +101,7 @@
       "chengyuan.features.runtime": {
         "type": "Project",
         "dependencies": {
-          "ChengYuan.Core.Runtime": "[0.2.10-local, )",
+          "ChengYuan.Core": "[0.2.10-local, )",
           "ChengYuan.ExecutionContext.Runtime": "[0.2.10-local, )",
           "ChengYuan.Features.Abstractions": "[0.2.10-local, )",
           "ChengYuan.MultiTenancy.Runtime": "[0.2.10-local, )"
@@ -133,8 +113,7 @@
       "chengyuan.multitenancy.runtime": {
         "type": "Project",
         "dependencies": {
-          "ChengYuan.Core.Data": "[0.2.10-local, )",
-          "ChengYuan.Core.Runtime": "[0.2.10-local, )",
+          "ChengYuan.Core": "[0.2.10-local, )",
           "ChengYuan.ExecutionContext.Runtime": "[0.2.10-local, )",
           "ChengYuan.MultiTenancy.Abstractions": "[0.2.10-local, )"
         }

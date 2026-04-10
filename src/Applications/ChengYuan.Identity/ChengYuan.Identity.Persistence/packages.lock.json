@@ -65,36 +65,16 @@
         "contentHash": "inRnbpCS0nwO/RuoZIAqxQUuyjaknOOnCEZB55KSMMjRhl0RQDttSmLSGsUJN3RQ3ocf5NDLFd2mOQViHqMK5w=="
       },
       "chengyuan.core": {
-        "type": "Project"
-      },
-      "chengyuan.core.data": {
         "type": "Project",
         "dependencies": {
-          "ChengYuan.Core": "[0.2.10-local, )",
-          "ChengYuan.Core.Runtime": "[0.2.10-local, )",
-          "Microsoft.Extensions.DependencyInjection.Abstractions": "[10.0.0, )"
-        }
-      },
-      "chengyuan.core.entityframeworkcore": {
-        "type": "Project",
-        "dependencies": {
-          "ChengYuan.Core": "[0.2.10-local, )",
-          "ChengYuan.Core.Data": "[0.2.10-local, )",
-          "Microsoft.EntityFrameworkCore": "[10.0.0, )"
-        }
-      },
-      "chengyuan.core.runtime": {
-        "type": "Project",
-        "dependencies": {
-          "ChengYuan.Core": "[0.2.10-local, )",
+          "Microsoft.EntityFrameworkCore": "[10.0.0, )",
           "Microsoft.Extensions.DependencyInjection.Abstractions": "[10.0.0, )"
         }
       },
       "chengyuan.identity.application": {
         "type": "Project",
         "dependencies": {
-          "ChengYuan.Core.Data": "[0.2.10-local, )",
-          "ChengYuan.Core.Runtime": "[0.2.10-local, )",
+          "ChengYuan.Core": "[0.2.10-local, )",
           "ChengYuan.Identity.Contracts": "[0.2.10-local, )",
           "ChengYuan.Identity.Domain": "[0.2.10-local, )"
         }
@@ -106,7 +86,6 @@
         "type": "Project",
         "dependencies": {
           "ChengYuan.Core": "[0.2.10-local, )",
-          "ChengYuan.Core.Data": "[0.2.10-local, )",
           "ChengYuan.Identity.Contracts": "[0.2.10-local, )"
         }
       },

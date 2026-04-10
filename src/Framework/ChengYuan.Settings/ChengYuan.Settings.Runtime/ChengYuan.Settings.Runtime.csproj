@@ -5,8 +5,8 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\ChengYuan.Core\ChengYuan.Core.csproj" />
     <ProjectReference Include="..\ChengYuan.Settings.Abstractions\ChengYuan.Settings.Abstractions.csproj" />
-    <ProjectReference Include="..\..\ChengYuan.Core\ChengYuan.Core.Runtime\ChengYuan.Core.Runtime.csproj" />
     <ProjectReference Include="..\..\ChengYuan.ExecutionContext\ChengYuan.ExecutionContext.Runtime\ChengYuan.ExecutionContext.Runtime.csproj" />
     <ProjectReference Include="..\..\ChengYuan.MultiTenancy\ChengYuan.MultiTenancy.Runtime\ChengYuan.MultiTenancy.Runtime.csproj" />
   </ItemGroup>

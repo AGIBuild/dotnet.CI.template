@@ -5,9 +5,8 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\..\Framework\ChengYuan.Core\ChengYuan.Core.csproj" />
     <ProjectReference Include="..\ChengYuan.Identity.Contracts\ChengYuan.Identity.Contracts.csproj" />
-    <ProjectReference Include="..\..\..\Framework\ChengYuan.Core\ChengYuan.Core\ChengYuan.Core.csproj" />
-    <ProjectReference Include="..\..\..\Framework\ChengYuan.Core\ChengYuan.Core.Data\ChengYuan.Core.Data.csproj" />
   </ItemGroup>
 
 </Project>

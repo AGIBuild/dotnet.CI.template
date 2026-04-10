@@ -71,7 +71,7 @@
         "type": "Project",
         "dependencies": {
           "ChengYuan.Auditing.Abstractions": "[0.2.10-local, )",
-          "ChengYuan.Core.Runtime": "[0.2.10-local, )",
+          "ChengYuan.Core": "[0.2.10-local, )",
           "ChengYuan.ExecutionContext.Runtime": "[0.2.10-local, )",
           "ChengYuan.MultiTenancy.Runtime": "[0.2.10-local, )"
         }
@@ -81,35 +81,16 @@
         "dependencies": {
           "ChengYuan.AuditLogging.Contracts": "[0.2.10-local, )",
           "ChengYuan.Auditing.Runtime": "[0.2.10-local, )",
-          "ChengYuan.Core.Runtime": "[0.2.10-local, )"
+          "ChengYuan.Core": "[0.2.10-local, )"
         }
       },
       "chengyuan.auditlogging.contracts": {
         "type": "Project"
       },
       "chengyuan.core": {
-        "type": "Project"
-      },
-      "chengyuan.core.data": {
         "type": "Project",
         "dependencies": {
-          "ChengYuan.Core": "[0.2.10-local, )",
-          "ChengYuan.Core.Runtime": "[0.2.10-local, )",
-          "Microsoft.Extensions.DependencyInjection.Abstractions": "[10.0.0, )"
-        }
-      },
-      "chengyuan.core.entityframeworkcore": {
-        "type": "Project",
-        "dependencies": {
-          "ChengYuan.Core": "[0.2.10-local, )",
-          "ChengYuan.Core.Data": "[0.2.10-local, )",
-          "Microsoft.EntityFrameworkCore": "[10.0.0, )"
-        }
-      },
-      "chengyuan.core.runtime": {
-        "type": "Project",
-        "dependencies": {
-          "ChengYuan.Core": "[0.2.10-local, )",
+          "Microsoft.EntityFrameworkCore": "[10.0.0, )",
           "Microsoft.Extensions.DependencyInjection.Abstractions": "[10.0.0, )"
         }
       },
@@ -120,7 +101,6 @@
         "type": "Project",
         "dependencies": {
           "ChengYuan.Core": "[0.2.10-local, )",
-          "ChengYuan.Core.Runtime": "[0.2.10-local, )",
           "ChengYuan.ExecutionContext.Abstractions": "[0.2.10-local, )"
         }
       },
@@ -130,8 +110,7 @@
       "chengyuan.multitenancy.runtime": {
         "type": "Project",
         "dependencies": {
-          "ChengYuan.Core.Data": "[0.2.10-local, )",
-          "ChengYuan.Core.Runtime": "[0.2.10-local, )",
+          "ChengYuan.Core": "[0.2.10-local, )",
           "ChengYuan.ExecutionContext.Runtime": "[0.2.10-local, )",
           "ChengYuan.MultiTenancy.Abstractions": "[0.2.10-local, )"
         }
