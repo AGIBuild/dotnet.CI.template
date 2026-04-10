@@ -10,10 +10,11 @@ If the current source tree and the architecture guide differ, prefer the guide a
 
 - Choose the module family first: `Framework` or `Applications`.
 - Choose the smallest facet set that satisfies the use case. Do not create empty `Web`, `Cli`, or `Persistence` projects for symmetry.
-- Keep topology terms in directories, not in project names.
+- Keep family words in directories, not in project names. Keep facet words in project names when they describe the project role.
 - `Framework` modules may depend only on other `Framework` modules.
 - `Application` modules may depend on `Framework` modules and on other `Application` modules through `Contracts` only.
 - Hosts compose modules; hosts do not implement business use cases.
+- Mirror source families in tests. Keep module tests under `tests/ChengYuan.FrameworkKernel.Tests/<Family>/<Module>/...` and architecture suites under `tests/ChengYuan.ArchitectureTests/<Suite>/...`.
 - Add architecture tests when you introduce a new module or a new facet profile.
 
 ## Prerequisites

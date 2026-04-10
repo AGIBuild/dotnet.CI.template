@@ -30,10 +30,12 @@ docs/               # 文档
 源码目录中的推荐结构是：
 
 ```text
-family -> module -> project
+家族根目录 -> 短模块目录 -> 项目目录
 ```
 
-例如，更推荐 `src/Applications/Identity/ChengYuan.Identity.Application/`，而不是把所有模块项目拍平到同一层目录。
+例如，更推荐 `src/Applications/Identity/ChengYuan.Identity.Application/`，而不是 `src/Applications/ChengYuan.Identity/ChengYuan.Identity.Application/`，也不要引入 `src/Applications/Identity/Application/ChengYuan.Identity.Application/` 这种只表达角色的中间层。
+
+测试目录遵循同样的镜像规则。模块测试放在 `tests/ChengYuan.FrameworkKernel.Tests/<Family>/<Module>/...` 下，架构测试按测试套件放在 `tests/ChengYuan.ArchitectureTests/<Suite>/...` 下。
 
 ## 承渊不是什么
 

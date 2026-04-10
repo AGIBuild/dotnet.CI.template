@@ -30,10 +30,12 @@ docs/               # Documentation
 Inside the source tree, the preferred shape is:
 
 ```text
-family -> module -> project
+family root -> short module folder -> project
 ```
 
-For example, `src/Applications/Identity/ChengYuan.Identity.Application/` is preferred over flattening all module projects into a single directory.
+For example, `src/Applications/Identity/ChengYuan.Identity.Application/` is preferred over `src/Applications/ChengYuan.Identity/ChengYuan.Identity.Application/`, and over introducing a role-only layer such as `src/Applications/Identity/Application/ChengYuan.Identity.Application/`.
+
+Tests mirror the same organization. Keep module tests under `tests/ChengYuan.FrameworkKernel.Tests/<Family>/<Module>/...` and architecture suites under `tests/ChengYuan.ArchitectureTests/<Suite>/...`.
 
 ## What ChengYuan Is Not
 

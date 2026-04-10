@@ -32,12 +32,12 @@ Use one level of module nesting inside the module families:
 ```text
 src/
 ├── Framework/
-│   └── ChengYuan.Caching/
+│   └── Caching/
 │       ├── ChengYuan.Caching.Abstractions/
 │       ├── ChengYuan.Caching.Runtime/
 │       └── ChengYuan.Caching.Redis/
 ├── Applications/
-│   └── ChengYuan.Identity/
+│   └── Identity/
 │       ├── ChengYuan.Identity.Contracts/
 │       ├── ChengYuan.Identity.Domain/
 │       ├── ChengYuan.Identity.Application/
@@ -45,11 +45,15 @@ src/
 │       ├── ChengYuan.Identity.Web/
 │       └── ChengYuan.Identity.Cli/
 └── Hosts/
-    ├── ChengYuan.WebHost/
-    └── ChengYuan.CliHost/
+    ├── WebHost/
+    └── CliHost/
 ```
 
-Topology terms belong in directories, not in project names. Prefer `ChengYuan.Identity.Application` over `ChengYuan.Applications.Identity.Application`.
+The preferred path shape is `family root -> short module folder -> project`. Use `src/Applications/Identity/ChengYuan.Identity.Application/`, not `src/Applications/ChengYuan.Identity/ChengYuan.Identity.Application/`, and do not add role-only intermediate folders such as `src/Applications/Identity/Application/`.
+
+Apply the same mirroring rule to tests. Keep module tests under paths such as `tests/ChengYuan.FrameworkKernel.Tests/Applications/Identity/` and architecture suites under paths such as `tests/ChengYuan.ArchitectureTests/Structure/`.
+
+Family words such as `Framework`, `Applications`, and `Hosts` belong in directories, not in project names. Facet words such as `Application`, `Persistence`, and `Web` stay in project names when they describe the project role.
 
 ## Module Families
 
@@ -245,8 +249,8 @@ It may intentionally omit modules that are irrelevant to a command-line scenario
 1. Choose the module family before creating any project.
 2. Choose the smallest facet set that satisfies the use case.
 3. Do not create empty `Web`, `Cli`, or `Persistence` projects just for symmetry.
-4. Keep the directory shape `family -> module -> project`.
-5. Keep topology names out of project names.
+4. Keep the directory shape `family root -> short module folder -> project`.
+5. Do not put family words in project names, but keep facet words in project names when they describe the project role.
 6. Add architecture tests whenever a new module or facet is introduced.
 7. Promote recurring technical concerns into `Framework`, not into shared application dumping grounds.
 8. Promote reusable management capabilities into `Applications`, not into hosts.
