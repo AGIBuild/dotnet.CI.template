@@ -1,6 +1,7 @@
 using System.Net;
 using System.Net.Http.Json;
 using ChengYuan.Identity;
+using ChengYuan.MultiTenancy;
 using ChengYuan.WebHost;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.TestHost;
@@ -121,8 +122,10 @@ public class IdentityWebEndpointTests
         var builder = WebApplication.CreateBuilder();
         builder.WebHost.UseTestServer();
         builder.Services.AddWebHostComposition(options => options.UseInMemoryDatabase(databaseName));
+        builder.Services.AddMultiTenancy();
 
         var app = builder.Build();
+        app.UseMultiTenancy();
         app.MapWebHostEndpoints();
         await app.StartAsync();
 

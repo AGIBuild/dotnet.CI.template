@@ -1,4 +1,5 @@
 using ChengYuan.Core.EntityFrameworkCore;
+using ChengYuan.MultiTenancy;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
@@ -14,6 +15,8 @@ public static class TenantManagementPersistenceServiceCollectionExtensions
         services.AddEntityFrameworkCoreDataAccess<TenantManagementDbContext>();
         services.TryAddScoped<ITenantStore, EfTenantStore>();
         services.TryAddScoped<ITenantReader>(serviceProvider => serviceProvider.GetRequiredService<ITenantStore>());
+        services.Replace(ServiceDescriptor.Scoped<ITenantResolutionStore>(serviceProvider =>
+            new TenantResolutionStoreAdapter(serviceProvider.GetRequiredService<ITenantReader>())));
 
         return services;
     }

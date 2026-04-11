@@ -115,6 +115,29 @@ The core rule is to separate technical systems from the management modules built
 
 `Identity` stays in `Applications` because it owns a reusable application capability with domain behavior, management workflows, and administration surfaces.
 
+## Multi-Tenancy Runtime Rules (Web-First Design)
+
+- `ChengYuan.MultiTenancy` owns tenant context, tenant resolution abstractions, and runtime scope activation.
+- `ChengYuan.TenantManagement` owns tenant administration, catalog persistence, and tenant-specific data models. It is optional and must not be referenced by runtime or WebHost composition.
+- **Multi-tenancy is currently a Web-first feature.** Framework primitives (ambient tenant context, resolution contracts) work across hosts, but the full resolution source set is Web-only.
+- ASP.NET Core hosts activate request-scoped tenant resolution through:
+  - `services.AddMultiTenancy(builder => builder.UseHeader(...).UseQueryString(...))` for service registration.
+  - `app.UseMultiTenancy()` middleware insertion.
+- Built-in Web input sources (in priority order):
+  1. Authenticated claims (highest security priority, Order 100)
+  2. HTTP headers (Order 200)
+  3. Query string (Order 300)
+  4. Route values (Order 400)
+  5. Cookies (Order 500)
+  6. Domain/subdomain extraction (Order 600)
+- Each source supports both Guid-based and name-based candidates. Name candidates are normalized through `ITenantResolutionStore` when a store implementation is registered.
+- `TenantManagement` now provides the default application-side implementation of `ITenantResolutionStore` for both in-memory and persistence-backed catalogs.
+- Resolution outcomes: `Resolved`, `Unresolved`, `NotFound`, `Inactive`. Middleware branches on outcome and supports a configurable error handler delegate.
+- Fallback is only applied when **no source provides a candidate**; if a candidate is supplied but lookup fails, the outcome is `NotFound`, not fallback.
+- Custom contributors can be registered via `builder.AddContributor<T>()` for semantic resolution.
+- Custom sources can be registered via `builder.AddSource<T>()` for host-specific input extraction.
+- CLI hosts do not participate in the current multi-tenancy design. The CLI host runs without tenant resolution and does not expose CLI-specific tenant input adapters.
+
 ## Core Foundation Design
 
 The foundational split is clear: `ChengYuan.Core` owns foundational platform concerns, and the old `ChengYuan.Domain` baseline is no longer part of the active architecture.

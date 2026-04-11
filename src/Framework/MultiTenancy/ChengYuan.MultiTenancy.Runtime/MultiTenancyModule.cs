@@ -9,6 +9,6 @@ public sealed class MultiTenancyModule : ModuleBase
 {
     public override void ConfigureServices(IServiceCollection services)
     {
-        services.AddMultiTenancy();
+        services.AddMultiTenancyCore();
     }
 }

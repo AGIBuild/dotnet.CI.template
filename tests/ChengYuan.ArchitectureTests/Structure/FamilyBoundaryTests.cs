@@ -170,6 +170,100 @@ public class FamilyBoundaryTests
         projectXml.ShouldNotContain("ChengYuan.Hosting");
     }
 
+    [Fact]
+    public void FrameworkProjects_ShouldNotReferenceTenantManagement()
+    {
+        var repositoryRoot = FindRepositoryRoot();
+        var frameworkProjects = Directory.EnumerateFiles(Path.Combine(repositoryRoot, "src", "Framework"), "*.csproj", SearchOption.AllDirectories);
+
+        foreach (var projectFile in frameworkProjects)
+        {
+            var projectXml = File.ReadAllText(projectFile);
+            projectXml.ShouldNotContain("ChengYuan.TenantManagement",
+                customMessage: $"Framework project {Path.GetFileName(projectFile)} must not reference TenantManagement (scope management is optional).");
+        }
+    }
+
+    [Fact]
+    public void MultiTenancyAbstractions_ShouldHaveNoProjectReferences()
+    {
+        var repositoryRoot = FindRepositoryRoot();
+        var projectXml = File.ReadAllText(Path.Combine(repositoryRoot, "src", "Framework", "MultiTenancy",
+            "ChengYuan.MultiTenancy.Abstractions", "ChengYuan.MultiTenancy.Abstractions.csproj"));
+
+        projectXml.ShouldNotContain("<ProjectReference");
+    }
+
+    [Fact]
+    public void MultiTenancyRuntime_ShouldNotReferenceHostProjects()
+    {
+        var repositoryRoot = FindRepositoryRoot();
+        var projectXml = File.ReadAllText(Path.Combine(repositoryRoot, "src", "Framework", "MultiTenancy",
+            "ChengYuan.MultiTenancy.Runtime", "ChengYuan.MultiTenancy.Runtime.csproj"));
+
+        projectXml.ShouldNotContain("WebHost");
+        projectXml.ShouldNotContain("CliHost");
+        projectXml.ShouldNotContain("ChengYuan.Hosting");
+    }
+
+    [Fact]
+    public void MultiTenancy_ServiceRegistration_ShouldUseAddNamingOnly()
+    {
+        var repositoryRoot = FindRepositoryRoot();
+        var serviceExtensionsSource = File.ReadAllText(Path.Combine(repositoryRoot, "src", "Framework", "MultiTenancy",
+            "ChengYuan.MultiTenancy.Runtime", "MultiTenancyServiceCollectionExtensions.cs"));
+
+        serviceExtensionsSource.ShouldContain("public static IServiceCollection AddMultiTenancy(");
+        serviceExtensionsSource.ShouldNotContain("public static IServiceCollection UseMultiTenancy(");
+    }
+
+    [Fact]
+    public void MultiTenancy_ApplicationPipeline_ShouldUseUseNamingOnly()
+    {
+        var repositoryRoot = FindRepositoryRoot();
+        var appExtensionsSource = File.ReadAllText(Path.Combine(repositoryRoot, "src", "Hosts", "WebHost",
+            "Composition", "MultiTenancyApplicationBuilderExtensions.cs"));
+
+        appExtensionsSource.ShouldContain("public static IApplicationBuilder UseMultiTenancy(this IApplicationBuilder app)");
+    }
+
+    [Fact]
+    public void MultiTenancy_PublicSurface_ShouldExposeCompleteWebResolverConfiguration()
+    {
+        var repositoryRoot = FindRepositoryRoot();
+        var optionsSource = File.ReadAllText(Path.Combine(repositoryRoot, "src", "Framework", "MultiTenancy",
+            "ChengYuan.MultiTenancy.Abstractions", "MultiTenancyOptions.cs"));
+        var builderSource = File.ReadAllText(Path.Combine(repositoryRoot, "src", "Framework", "MultiTenancy",
+            "ChengYuan.MultiTenancy.Runtime", "MultiTenancyBuilder.cs"));
+
+        // Options must expose all Web resolver configuration fields
+        optionsSource.ShouldContain("QueryStringKey");
+        optionsSource.ShouldContain("RouteKey");
+        optionsSource.ShouldContain("CookieName");
+        optionsSource.ShouldContain("DomainPatterns");
+        optionsSource.ShouldContain("ClaimTypes");
+        optionsSource.ShouldContain("HeaderName");
+
+        // Builder must expose all Web resolver methods and source-level extensibility
+        builderSource.ShouldContain("UseQueryString(");
+        builderSource.ShouldContain("UseRoute(");
+        builderSource.ShouldContain("UseCookie(");
+        builderSource.ShouldContain("UseDomain(");
+        builderSource.ShouldContain("AddSource<");
+    }
+
+    [Fact]
+    public void MultiTenancy_Abstractions_ShouldExposeResolutionStoreContract()
+    {
+        var repositoryRoot = FindRepositoryRoot();
+        var abstractionsDir = Path.Combine(repositoryRoot, "src", "Framework", "MultiTenancy",
+            "ChengYuan.MultiTenancy.Abstractions", "Resolution");
+
+        File.Exists(Path.Combine(abstractionsDir, "ITenantResolutionStore.cs")).ShouldBeTrue();
+        File.Exists(Path.Combine(abstractionsDir, "TenantResolutionRecord.cs")).ShouldBeTrue();
+        File.Exists(Path.Combine(abstractionsDir, "TenantResolveOutcome.cs")).ShouldBeTrue();
+    }
+
     private static string FindRepositoryRoot()
     {
         var currentDirectory = new DirectoryInfo(AppContext.BaseDirectory);

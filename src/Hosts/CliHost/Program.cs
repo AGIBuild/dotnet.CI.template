@@ -1,7 +1,6 @@
 using ChengYuan.Caching;
 using ChengYuan.Core.Modularity;
 using ChengYuan.ExecutionContext;
-using ChengYuan.MultiTenancy;
 using Microsoft.Extensions.DependencyInjection;
 
 var services = new ServiceCollection();
@@ -21,7 +20,6 @@ Console.WriteLine($"Loaded modules: {string.Join(", ", catalog.ModuleTypes.Selec
 
 await application.ShutdownAsync();
 [DependsOn(typeof(ExecutionContextModule))]
-[DependsOn(typeof(MultiTenancyModule))]
 [DependsOn(typeof(MemoryCachingModule))]
 internal sealed class CliHostModule : ModuleBase
 {

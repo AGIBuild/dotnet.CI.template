@@ -1,3 +1,4 @@
+using ChengYuan.MultiTenancy;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 
@@ -16,6 +17,8 @@ public static class TenantManagementServiceCollectionExtensions
         services.TryAddSingleton<InMemoryTenantStore>();
         services.TryAddSingleton<ITenantStore>(serviceProvider => serviceProvider.GetRequiredService<InMemoryTenantStore>());
         services.TryAddSingleton<ITenantReader>(serviceProvider => serviceProvider.GetRequiredService<InMemoryTenantStore>());
+        services.Replace(ServiceDescriptor.Singleton<ITenantResolutionStore>(serviceProvider =>
+            new TenantResolutionStoreAdapter(serviceProvider.GetRequiredService<ITenantReader>())));
 
         return services;
     }

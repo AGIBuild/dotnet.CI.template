@@ -138,6 +138,62 @@ Ambient tenant context contracts.
 | `ICurrentTenant` | Read-only view of the active tenant context. |
 | `ICurrentTenantAccessor` | Scope-based accessor for tenant switching. |
 | `TenantInfo` | Immutable tenant snapshot exposed to consumers. |
+| `MultiTenancyOptions` | Web-only multi-tenancy configuration for tenant key, claim types, header name, query string key, route key, cookie name, domain patterns, fallback tenant, and unresolved behavior. |
+| `TenantResolveContext` | Mutable context passed through the tenant resolution pipeline, supporting id and name candidates with source tracking. |
+| `TenantResolveResult` | Immutable outcome-aware result returned by the tenant resolver, with factory methods for Resolved, Unresolved, NotFound, and Inactive. |
+| `TenantResolveOutcome` | Enum describing the outcome: Unresolved, Resolved, NotFound, Inactive. |
+| `ITenantResolutionStore` | Normalizes tenant name/id candidates into verified records; implemented by the application layer (e.g. TenantManagement). |
+| `TenantResolutionRecord` | Immutable record carrying tenant Id, Name, and IsActive state. |
+| `TenantResolveOptions` | Ordered contributor configuration plus optional fallback tenant policy. |
+| `ITenantResolveContributor` | Extension point for custom tenant resolution contributors. |
+| `ITenantResolver` | Executes the resolution pipeline and returns the resolved tenant outcome. |
+| `ITenantResolutionSource` | Public contract for host-specific tenant input extraction, with Order and availability checks. |
+| `UnresolvedTenantBehavior` | Policy enum controlling whether unresolved tenant execution continues or fails. |
+
+### `ChengYuan.MultiTenancy.Runtime`
+
+Multi-tenancy runtime registration and default resolution behavior.
+
+#### Key Types
+
+| Type | Description |
+|---|---|
+| `MultiTenancyModule` | Registers the core multi-tenancy runtime services used by framework modules. |
+| `AddMultiTenancy()` | Registers host-level multi-tenancy services and accepts a `MultiTenancyBuilder` callback for configuration. |
+| `MultiTenancyBuilder` | Fluent builder for Web configuration: `UseTenantKey`, `UseClaim`, `UseHeader`, `UseQueryString`, `UseRoute`, `UseCookie`, `UseDomain`, `UseFallback`, `RequireResolvedTenant`, `ConfigureErrorHandler`, `AddContributor<T>()`, and `AddSource<T>()`. |
+
+#### Supported Default Web Resolution Sources
+
+| Source | Order | Behavior |
+|---|---|---|
+| Authenticated user claims | 100 | Checks configured claim types in order; supports both Guid and name candidates. |
+| HTTP headers | 200 | Checks `HeaderName`, then falls back to `TenantKey` in headers; supports Guid and name. |
+| Query string | 300 | Reads the `QueryStringKey` parameter from the URL; supports Guid and name. |
+| Route values | 400 | Checks the route value whose key matches `RouteKey`; supports Guid and name. |
+| Cookies | 500 | Reads the `CookieName` cookie value; supports Guid and name. |
+| Domain/subdomain | 600 | Matches the request host against ordered `DomainPatterns`; always yields a name candidate. |
+
+Name candidates are normalized through `ITenantResolutionStore`. If no store is registered, name-based lookups remain unresolved.
+
+#### Resolution Outcomes
+
+| Outcome | Middleware Default |
+|---|---|
+| `Resolved` | Sets tenant scope and continues pipeline. |
+| `Unresolved` | Continues without tenant if `Continue`; returns 400 if `Fail`. |
+| `NotFound` | Returns 404 (candidate was supplied but no matching tenant). |
+| `Inactive` | Returns 403 (tenant found but disabled). |
+
+All non-resolved outcomes can be intercepted by a custom error handler registered via `builder.ConfigureErrorHandler(...)` which returns `true` if the response was handled.
+
+#### Host Usage
+
+Use these conventions consistently:
+
+- Call `services.AddMultiTenancy(...)` to register multi-tenancy services.
+- Call `app.UseMultiTenancy()` in ASP.NET Core after any user-populating middleware and before endpoint execution.
+- `TenantManagement` provides the default application-side `ITenantResolutionStore` implementation for in-memory and persistence-backed tenant catalogs.
+- CLI hosts do not expose built-in multi-tenancy resolution.
 
 ### `ChengYuan.TenantManagement`
 

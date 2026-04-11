@@ -24,6 +24,7 @@ public class TenantManagementModuleTests
         serviceProvider.GetRequiredService<ITenantStore>().ShouldNotBeNull();
         serviceProvider.GetRequiredService<ITenantReader>().ShouldNotBeNull();
         serviceProvider.GetRequiredService<ITenantManager>().ShouldNotBeNull();
+        serviceProvider.GetRequiredService<ITenantResolutionStore>().ShouldNotBeNull();
     }
 
     [Fact]
@@ -119,5 +120,30 @@ public class TenantManagementModuleTests
 
         var tenants = await tenantStore.GetListAsync(cancellationToken);
         tenants.Select(tenant => tenant.Name).ShouldBe(["alpha", "beta", "gamma"]);
+    }
+
+    [Fact]
+    public async Task TenantManagement_ShouldExposeResolutionStoreFromInMemoryCatalog()
+    {
+        var cancellationToken = TestContext.Current.CancellationToken;
+        var services = new ServiceCollection();
+        services.AddModule<TenantManagementTestModule>();
+        services.AddInMemoryTenantManagement();
+
+        using var serviceProvider = services.BuildServiceProvider();
+        var tenantManager = serviceProvider.GetRequiredService<ITenantManager>();
+        var resolutionStore = serviceProvider.GetRequiredService<ITenantResolutionStore>();
+
+        var tenant = await tenantManager.CreateAsync("alpha", cancellationToken: cancellationToken);
+
+        var byId = await resolutionStore.FindByIdAsync(tenant.Id, cancellationToken);
+        var byName = await resolutionStore.FindByNameAsync("ALPHA", cancellationToken);
+
+        byId.ShouldNotBeNull();
+        byId.Id.ShouldBe(tenant.Id);
+        byId.Name.ShouldBe("alpha");
+        byId.IsActive.ShouldBeTrue();
+        byName.ShouldNotBeNull();
+        byName.Id.ShouldBe(tenant.Id);
     }
 }

@@ -1,3 +1,4 @@
+using System;
 using ChengYuan.Core.Data;
 using ChengYuan.ExecutionContext;
 using Microsoft.Extensions.DependencyInjection;
@@ -7,12 +8,53 @@ namespace ChengYuan.MultiTenancy;
 
 public static class MultiTenancyServiceCollectionExtensions
 {
-    public static IServiceCollection AddMultiTenancy(this IServiceCollection services)
+    /// <summary>
+    /// Registers multi-tenancy services for this application.
+    /// Web-specific resolution sources are activated by host composition layers.
+    /// </summary>
+    public static IServiceCollection AddMultiTenancy(
+        this IServiceCollection services,
+        Action<MultiTenancyBuilder>? configure = null)
     {
-        services.AddSingleton<ICurrentTenantAccessor, CurrentTenantAccessor>();
-        services.AddSingleton<ICurrentTenant>(serviceProvider => serviceProvider.GetRequiredService<ICurrentTenantAccessor>());
+        var builder = new MultiTenancyBuilder(services);
+        configure?.Invoke(builder);
+
+        services.AddSingleton(builder.Options);
+
+        // Store the error handler for middleware consumption
+        if (builder.ErrorHandler is not null)
+        {
+            services.AddSingleton(new TenantResolutionErrorHandlerHolder(builder.ErrorHandler));
+        }
+
+        services.Configure<TenantResolveOptions>(resolveOptions =>
+        {
+            if (builder.Options.FallbackTenantId.HasValue)
+            {
+                resolveOptions.FallbackTenantId = builder.Options.FallbackTenantId;
+                resolveOptions.FallbackTenantName = builder.Options.FallbackTenantName;
+            }
+        });
+
+        AddMultiTenancyCore(services);
+
+        return services;
+    }
+
+    internal static IServiceCollection AddMultiTenancyCore(this IServiceCollection services)
+    {
+        services.TryAddSingleton<ICurrentTenantAccessor, CurrentTenantAccessor>();
+        services.TryAddSingleton<ICurrentTenant>(serviceProvider => serviceProvider.GetRequiredService<ICurrentTenantAccessor>());
         services.Replace(ServiceDescriptor.Singleton<IDataTenantProvider>(
             serviceProvider => new CurrentTenantDataTenantProvider(serviceProvider.GetRequiredService<ICurrentTenant>())));
+
+        // Resolution pipeline
+        services.AddOptions<TenantResolveOptions>();
+        services.TryAddTransient<ITenantResolver, TenantResolver>();
+
+        // Default no-op store; application layer can replace with a real implementation
+        services.TryAddSingleton<ITenantResolutionStore, NoOpTenantResolutionStore>();
+
         return services;
     }
 }
