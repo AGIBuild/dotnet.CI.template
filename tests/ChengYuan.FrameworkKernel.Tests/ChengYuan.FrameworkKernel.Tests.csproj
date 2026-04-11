@@ -42,6 +42,7 @@
     <ProjectReference Include="..\..\src\Framework\Authorization\ChengYuan.Authorization.Runtime\ChengYuan.Authorization.Runtime.csproj" />
     <ProjectReference Include="..\..\src\Framework\Features\ChengYuan.Features.Runtime\ChengYuan.Features.Runtime.csproj" />
     <ProjectReference Include="..\..\src\Framework\Settings\ChengYuan.Settings.Runtime\ChengYuan.Settings.Runtime.csproj" />
+    <ProjectReference Include="..\..\src\Hosts\CliHost\ChengYuan.CliHost.csproj" />
     <ProjectReference Include="..\..\src\Hosts\WebHost\ChengYuan.WebHost.csproj" />
   </ItemGroup>
 

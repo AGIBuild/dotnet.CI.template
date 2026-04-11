@@ -141,15 +141,6 @@
           "Microsoft.Extensions.DependencyInjection.Abstractions": "10.0.0"
         }
       },
-      "Microsoft.Extensions.Options": {
-        "type": "Transitive",
-        "resolved": "10.0.0",
-        "contentHash": "8oCAgXOow5XDrY9HaXX1QmH3ORsyZO/ANVHBlhLyCeWTH5Sg4UuqZeOTWJi6484M+LqSx0RqQXDJtdYy2BNiLQ==",
-        "dependencies": {
-          "Microsoft.Extensions.DependencyInjection.Abstractions": "10.0.0",
-          "Microsoft.Extensions.Primitives": "10.0.0"
-        }
-      },
       "Microsoft.Extensions.Primitives": {
         "type": "Transitive",
         "resolved": "10.0.0",
@@ -356,6 +347,16 @@
           "ChengYuan.MultiTenancy.Runtime": "[0.2.10-local, )"
         }
       },
+      "chengyuan.clihost": {
+        "type": "Project",
+        "dependencies": {
+          "ChengYuan.Caching.Memory": "[0.2.10-local, )",
+          "ChengYuan.Core": "[0.2.10-local, )",
+          "ChengYuan.ExecutionContext.Runtime": "[0.2.10-local, )",
+          "ChengYuan.MultiTenancy.Runtime": "[0.2.10-local, )",
+          "Microsoft.Extensions.DependencyInjection": "[10.0.0, )"
+        }
+      },
       "chengyuan.core": {
         "type": "Project",
         "dependencies": {
@@ -449,7 +450,8 @@
         "dependencies": {
           "ChengYuan.Core": "[0.2.10-local, )",
           "ChengYuan.ExecutionContext.Runtime": "[0.2.10-local, )",
-          "ChengYuan.MultiTenancy.Abstractions": "[0.2.10-local, )"
+          "ChengYuan.MultiTenancy.Abstractions": "[0.2.10-local, )",
+          "Microsoft.Extensions.Options": "[10.0.0, )"
         }
       },
       "chengyuan.outbox.abstractions": {
@@ -590,6 +592,16 @@
         "requested": "[10.0.0, )",
         "resolved": "10.0.0",
         "contentHash": "L3AdmZ1WOK4XXT5YFPEwyt0ep6l8lGIPs7F5OOBZc77Zqeo01Of7XXICy47628sdVl0v/owxYJTe86DTgFwKCA=="
+      },
+      "Microsoft.Extensions.Options": {
+        "type": "CentralTransitive",
+        "requested": "[10.0.0, )",
+        "resolved": "10.0.0",
+        "contentHash": "8oCAgXOow5XDrY9HaXX1QmH3ORsyZO/ANVHBlhLyCeWTH5Sg4UuqZeOTWJi6484M+LqSx0RqQXDJtdYy2BNiLQ==",
+        "dependencies": {
+          "Microsoft.Extensions.DependencyInjection.Abstractions": "10.0.0",
+          "Microsoft.Extensions.Primitives": "10.0.0"
+        }
       }
     }
   }
