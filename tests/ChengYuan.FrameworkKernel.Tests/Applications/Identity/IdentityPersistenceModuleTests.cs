@@ -1,4 +1,5 @@
 using ChengYuan.Core.Modularity;
+using ChengYuan.EntityFrameworkCore;
 using ChengYuan.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
@@ -124,7 +125,7 @@ public class IdentityPersistenceModuleTests
         var databaseName = $"identity-{Guid.NewGuid():N}";
         var services = new ServiceCollection();
         services.AddModule<IdentityPersistenceTestModule>();
-        services.AddIdentityDbContext(options =>
+        services.UseDbContextOptions(options =>
             options.UseInMemoryDatabase(databaseName));
 
         return services;

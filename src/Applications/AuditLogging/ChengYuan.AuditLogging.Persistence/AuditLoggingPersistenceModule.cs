@@ -1,13 +1,12 @@
 using ChengYuan.Core.Modularity;
-using Microsoft.Extensions.DependencyInjection;
 
 namespace ChengYuan.AuditLogging;
 
 [DependsOn(typeof(AuditLoggingModule))]
-public sealed class AuditLoggingPersistenceModule : ModuleBase
+public sealed class AuditLoggingPersistenceModule : ExtensionModule
 {
-    public override void ConfigureServices(IServiceCollection services)
+    public override void ConfigureServices(ServiceConfigurationContext context)
     {
-        services.AddAuditLoggingPersistence();
+        context.Services.AddAuditLoggingPersistence();
     }
 }

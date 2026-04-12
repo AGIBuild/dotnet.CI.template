@@ -4,6 +4,6 @@ using ChengYuan.Core.Modularity;
 namespace ChengYuan.FrameworkKernel.Tests;
 
 [DependsOn(typeof(AuditLoggingPersistenceModule))]
-internal sealed class AuditLoggingPersistenceTestModule : ModuleBase
+internal sealed class AuditLoggingPersistenceTestModule : ExtensionModule
 {
 }

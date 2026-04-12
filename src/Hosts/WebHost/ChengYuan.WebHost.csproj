@@ -10,6 +10,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\Framework\Core\ChengYuan.Core.csproj" />
+    <ProjectReference Include="..\..\Framework\Data\ChengYuan.Data.Sqlite\ChengYuan.Data.Sqlite.csproj" />
     <ProjectReference Include="..\..\Applications\AuditLogging\ChengYuan.AuditLogging.Persistence\ChengYuan.AuditLogging.Persistence.csproj" />
     <ProjectReference Include="..\..\Applications\FeatureManagement\ChengYuan.FeatureManagement.Persistence\ChengYuan.FeatureManagement.Persistence.csproj" />
     <ProjectReference Include="..\..\Applications\Identity\ChengYuan.Identity.Persistence\ChengYuan.Identity.Persistence.csproj" />

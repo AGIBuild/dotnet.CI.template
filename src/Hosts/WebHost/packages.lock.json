@@ -11,6 +11,14 @@
           "Microsoft.EntityFrameworkCore": "10.0.0"
         }
       },
+      "Microsoft.Data.Sqlite.Core": {
+        "type": "Transitive",
+        "resolved": "10.0.0",
+        "contentHash": "wPKG/Ym6tSMCo06UOZXzVfeFGzawnOZrTba/R3PfK+RhNuNELZ9I7nFns4WGTtv2kKlrlmmErgJ+kgTXHaNdHg==",
+        "dependencies": {
+          "SQLitePCLRaw.core": "2.1.11"
+        }
+      },
       "Microsoft.EntityFrameworkCore.Abstractions": {
         "type": "Transitive",
         "resolved": "10.0.0",
@@ -20,6 +28,57 @@
         "type": "Transitive",
         "resolved": "10.0.0",
         "contentHash": "TxHQq0kn0tpYs2ljeRl8jtmWk720B0nteqI6mAZM77HWJpYT9Zj8SkkBBlj8K3Yeq18a6NBjz6YutE+shEk4Ag=="
+      },
+      "Microsoft.EntityFrameworkCore.Relational": {
+        "type": "Transitive",
+        "resolved": "10.0.0",
+        "contentHash": "A3MX1ee7RDxWCUdx/KqP+74fbksz0UIhkVZh56YHvbPkEKsffCXgHU3LGkRDwqR/MrBNWLCWC/IVX79tzM30ZA==",
+        "dependencies": {
+          "Microsoft.EntityFrameworkCore": "10.0.0"
+        }
+      },
+      "Microsoft.EntityFrameworkCore.Sqlite.Core": {
+        "type": "Transitive",
+        "resolved": "10.0.0",
+        "contentHash": "VThKv9UqVxFEuuHvjAgMwy6ZFCeKJXOH+ISAR4IMuwlkozv26ptZhr09+6YxWrWwSR/Sinp8BxQ7qePCJFSALQ==",
+        "dependencies": {
+          "Microsoft.Data.Sqlite.Core": "10.0.0",
+          "Microsoft.EntityFrameworkCore.Relational": "10.0.0",
+          "Microsoft.Extensions.DependencyModel": "10.0.0",
+          "SQLitePCLRaw.core": "2.1.11"
+        }
+      },
+      "Microsoft.Extensions.DependencyModel": {
+        "type": "Transitive",
+        "resolved": "10.0.0",
+        "contentHash": "RFYJR7APio/BiqdQunRq6DB+nDB6nc2qhHr77mlvZ0q0BT8PubMXN7XicmfzCbrDE/dzhBnUKBRXLTcqUiZDGg=="
+      },
+      "SQLitePCLRaw.bundle_e_sqlite3": {
+        "type": "Transitive",
+        "resolved": "2.1.11",
+        "contentHash": "DC4nA7yWnf4UZdgJDF+9Mus4/cb0Y3Sfgi3gDnAoKNAIBwzkskNAbNbyu+u4atT0ruVlZNJfwZmwiEwE5oz9LQ==",
+        "dependencies": {
+          "SQLitePCLRaw.lib.e_sqlite3": "2.1.11",
+          "SQLitePCLRaw.provider.e_sqlite3": "2.1.11"
+        }
+      },
+      "SQLitePCLRaw.core": {
+        "type": "Transitive",
+        "resolved": "2.1.11",
+        "contentHash": "PK0GLFkfhZzLQeR3PJf71FmhtHox+U3vcY6ZtswoMjrefkB9k6ErNJEnwXqc5KgXDSjige2XXrezqS39gkpQKA=="
+      },
+      "SQLitePCLRaw.lib.e_sqlite3": {
+        "type": "Transitive",
+        "resolved": "2.1.11",
+        "contentHash": "Ev2ytaXiOlWZ4b3R67GZBsemTINslLD1DCJr2xiacpn4tbapu0Q4dHEzSvZSMnVWeE5nlObU3VZN2p81q3XOYQ=="
+      },
+      "SQLitePCLRaw.provider.e_sqlite3": {
+        "type": "Transitive",
+        "resolved": "2.1.11",
+        "contentHash": "Y/0ZkR+r0Cg3DQFuCl1RBnv/tmxpIZRU3HUvelPw6MVaKHwYYR8YNvgs0vuNuXCMvlyJ+Fh88U1D4tah1tt6qw==",
+        "dependencies": {
+          "SQLitePCLRaw.core": "2.1.11"
+        }
       },
       "chengyuan.auditing.abstractions": {
         "type": "Project"
@@ -48,8 +107,7 @@
         "type": "Project",
         "dependencies": {
           "ChengYuan.AuditLogging.Application": "[0.2.10-local, )",
-          "ChengYuan.Core": "[0.2.10-local, )",
-          "Microsoft.EntityFrameworkCore": "[10.0.0, )"
+          "ChengYuan.EntityFrameworkCore": "[0.2.10-local, )"
         }
       },
       "chengyuan.authorization.abstractions": {
@@ -82,8 +140,19 @@
         }
       },
       "chengyuan.core": {
+        "type": "Project"
+      },
+      "chengyuan.data.sqlite": {
         "type": "Project",
         "dependencies": {
+          "ChengYuan.EntityFrameworkCore": "[0.2.10-local, )",
+          "Microsoft.EntityFrameworkCore.Sqlite": "[10.0.0, )"
+        }
+      },
+      "chengyuan.entityframeworkcore": {
+        "type": "Project",
+        "dependencies": {
+          "ChengYuan.Core": "[0.2.10-local, )",
           "Microsoft.EntityFrameworkCore": "[10.0.0, )"
         }
       },
@@ -114,9 +183,8 @@
       "chengyuan.featuremanagement.persistence": {
         "type": "Project",
         "dependencies": {
-          "ChengYuan.Core": "[0.2.10-local, )",
-          "ChengYuan.FeatureManagement.Application": "[0.2.10-local, )",
-          "Microsoft.EntityFrameworkCore": "[10.0.0, )"
+          "ChengYuan.EntityFrameworkCore": "[0.2.10-local, )",
+          "ChengYuan.FeatureManagement.Application": "[0.2.10-local, )"
         }
       },
       "chengyuan.features.abstractions": {
@@ -152,10 +220,9 @@
       "chengyuan.identity.persistence": {
         "type": "Project",
         "dependencies": {
-          "ChengYuan.Core": "[0.2.10-local, )",
+          "ChengYuan.EntityFrameworkCore": "[0.2.10-local, )",
           "ChengYuan.Identity.Application": "[0.2.10-local, )",
-          "ChengYuan.Identity.Domain": "[0.2.10-local, )",
-          "Microsoft.EntityFrameworkCore": "[10.0.0, )"
+          "ChengYuan.Identity.Domain": "[0.2.10-local, )"
         }
       },
       "chengyuan.identity.web": {
@@ -193,9 +260,8 @@
       "chengyuan.permissionmanagement.persistence": {
         "type": "Project",
         "dependencies": {
-          "ChengYuan.Core": "[0.2.10-local, )",
-          "ChengYuan.PermissionManagement.Application": "[0.2.10-local, )",
-          "Microsoft.EntityFrameworkCore": "[10.0.0, )"
+          "ChengYuan.EntityFrameworkCore": "[0.2.10-local, )",
+          "ChengYuan.PermissionManagement.Application": "[0.2.10-local, )"
         }
       },
       "chengyuan.settingmanagement.application": {
@@ -215,9 +281,8 @@
       "chengyuan.settingmanagement.persistence": {
         "type": "Project",
         "dependencies": {
-          "ChengYuan.Core": "[0.2.10-local, )",
-          "ChengYuan.SettingManagement.Application": "[0.2.10-local, )",
-          "Microsoft.EntityFrameworkCore": "[10.0.0, )"
+          "ChengYuan.EntityFrameworkCore": "[0.2.10-local, )",
+          "ChengYuan.SettingManagement.Application": "[0.2.10-local, )"
         }
       },
       "chengyuan.settings.abstractions": {
@@ -249,9 +314,8 @@
       "chengyuan.tenantmanagement.persistence": {
         "type": "Project",
         "dependencies": {
-          "ChengYuan.Core": "[0.2.10-local, )",
-          "ChengYuan.TenantManagement.Application": "[0.2.10-local, )",
-          "Microsoft.EntityFrameworkCore": "[10.0.0, )"
+          "ChengYuan.EntityFrameworkCore": "[0.2.10-local, )",
+          "ChengYuan.TenantManagement.Application": "[0.2.10-local, )"
         }
       },
       "Microsoft.EntityFrameworkCore": {
@@ -262,6 +326,18 @@
         "dependencies": {
           "Microsoft.EntityFrameworkCore.Abstractions": "10.0.0",
           "Microsoft.EntityFrameworkCore.Analyzers": "10.0.0"
+        }
+      },
+      "Microsoft.EntityFrameworkCore.Sqlite": {
+        "type": "CentralTransitive",
+        "requested": "[10.0.0, )",
+        "resolved": "10.0.0",
+        "contentHash": "nukHe+yBlhitLUUtkanay7zTbHwtcIh/U5PfmwzZJJTCqui9h2Mt+Gifc9ZjJR7QIuE0zgNQQJaI8+eFxkBaEQ==",
+        "dependencies": {
+          "Microsoft.EntityFrameworkCore.Sqlite.Core": "10.0.0",
+          "Microsoft.Extensions.DependencyModel": "10.0.0",
+          "SQLitePCLRaw.bundle_e_sqlite3": "2.1.11",
+          "SQLitePCLRaw.core": "2.1.11"
         }
       }
     }

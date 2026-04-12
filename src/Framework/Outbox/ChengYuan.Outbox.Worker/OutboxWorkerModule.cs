@@ -4,10 +4,10 @@ using Microsoft.Extensions.DependencyInjection;
 namespace ChengYuan.Outbox;
 
 [DependsOn(typeof(OutboxPersistenceModule))]
-public sealed class OutboxWorkerModule : ModuleBase
+public sealed class OutboxWorkerModule : ExtensionModule
 {
-    public override void ConfigureServices(IServiceCollection services)
+    public override void ConfigureServices(ServiceConfigurationContext context)
     {
-        services.AddSingleton<IOutboxWorker, DefaultOutboxWorker>();
+        context.Services.AddSingleton<IOutboxWorker, DefaultOutboxWorker>();
     }
 }

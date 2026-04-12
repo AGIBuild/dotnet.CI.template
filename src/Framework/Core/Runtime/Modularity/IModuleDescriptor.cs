@@ -6,6 +6,8 @@ public interface IModuleDescriptor
 {
     Type ModuleType { get; }
 
+    ModuleCategory Category { get; }
+
     string Name { get; }
 
     Assembly Assembly { get; }

@@ -143,5 +143,5 @@ public class AddMultiTenancyTests
     }
 
     [DependsOn(typeof(MultiTenancyModule))]
-    private sealed class TestModule : ModuleBase;
+    private sealed class TestModule : FrameworkCoreModule;
 }

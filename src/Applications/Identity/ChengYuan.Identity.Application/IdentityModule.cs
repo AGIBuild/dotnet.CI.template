@@ -1,14 +1,13 @@
 using ChengYuan.Core;
 using ChengYuan.Core.Modularity;
-using Microsoft.Extensions.DependencyInjection;
 
 namespace ChengYuan.Identity;
 
 [DependsOn(typeof(CoreRuntimeModule))]
-public sealed class IdentityModule : ModuleBase
+public sealed class IdentityModule : ApplicationModule
 {
-    public override void ConfigureServices(IServiceCollection services)
+    public override void ConfigureServices(ServiceConfigurationContext context)
     {
-        services.AddIdentityApplication();
+        context.Services.AddIdentityApplication();
     }
 }

@@ -1,16 +1,15 @@
 using ChengYuan.Core.Modularity;
 using ChengYuan.ExecutionContext;
 using ChengYuan.MultiTenancy;
-using Microsoft.Extensions.DependencyInjection;
 
 namespace ChengYuan.Authorization;
 
 [DependsOn(typeof(ExecutionContextModule))]
 [DependsOn(typeof(MultiTenancyModule))]
-public sealed class AuthorizationModule : ModuleBase
+public sealed class AuthorizationModule : FrameworkCoreModule
 {
-    public override void ConfigureServices(IServiceCollection services)
+    public override void ConfigureServices(ServiceConfigurationContext context)
     {
-        services.AddAuthorizationCore();
+        context.Services.AddAuthorizationCore();
     }
 }

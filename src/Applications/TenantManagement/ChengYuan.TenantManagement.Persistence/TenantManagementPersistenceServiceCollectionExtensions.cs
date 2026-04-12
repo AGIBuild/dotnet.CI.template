@@ -1,6 +1,5 @@
-using ChengYuan.Core.EntityFrameworkCore;
+using ChengYuan.EntityFrameworkCore;
 using ChengYuan.MultiTenancy;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 
@@ -12,23 +11,13 @@ public static class TenantManagementPersistenceServiceCollectionExtensions
     {
         ArgumentNullException.ThrowIfNull(services);
 
+        services.AddConfiguredDbContext<TenantManagementDbContext>();
+        services.AddConfiguredDbContextFactory<TenantManagementDbContext>();
         services.AddEntityFrameworkCoreDataAccess<TenantManagementDbContext>();
-        services.TryAddScoped<ITenantStore, EfTenantStore>();
-        services.TryAddScoped<ITenantReader>(serviceProvider => serviceProvider.GetRequiredService<ITenantStore>());
-        services.Replace(ServiceDescriptor.Scoped<ITenantResolutionStore>(serviceProvider =>
+        services.TryAddSingleton<ITenantStore, EfTenantStore>();
+        services.TryAddSingleton<ITenantReader>(serviceProvider => serviceProvider.GetRequiredService<ITenantStore>());
+        services.Replace(ServiceDescriptor.Singleton<ITenantResolutionStore>(serviceProvider =>
             new TenantResolutionStoreAdapter(serviceProvider.GetRequiredService<ITenantReader>())));
-
-        return services;
-    }
-
-    public static IServiceCollection AddTenantManagementPersistenceDbContext(
-        this IServiceCollection services,
-        Action<DbContextOptionsBuilder> configureDbContext)
-    {
-        ArgumentNullException.ThrowIfNull(services);
-        ArgumentNullException.ThrowIfNull(configureDbContext);
-
-        services.AddDbContext<TenantManagementDbContext>(configureDbContext);
 
         return services;
     }

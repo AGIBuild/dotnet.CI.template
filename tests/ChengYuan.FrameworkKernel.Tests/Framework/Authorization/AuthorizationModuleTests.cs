@@ -182,10 +182,9 @@ public class AuthorizationModuleTests
     }
 
     [DependsOn(typeof(AuthorizationModule))]
-    private sealed class AuthorizationTestModule : ModuleBase
+    private sealed class AuthorizationTestModule : FrameworkCoreModule
     {
     }
-
     private sealed class TestGlobalPermissionGrantProvider(Dictionary<string, bool> values) : IPermissionGrantProvider
     {
         public Dictionary<string, bool> Values { get; } = values;

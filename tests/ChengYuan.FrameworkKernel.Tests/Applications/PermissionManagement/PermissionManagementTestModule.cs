@@ -4,6 +4,6 @@ using ChengYuan.PermissionManagement;
 namespace ChengYuan.FrameworkKernel.Tests;
 
 [DependsOn(typeof(PermissionManagementModule))]
-internal sealed class PermissionManagementTestModule : ModuleBase
+internal sealed class PermissionManagementTestModule : ApplicationModule
 {
 }

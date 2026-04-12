@@ -1,4 +1,7 @@
 using ChengYuan.Core.Lifecycle;
+using ChengYuan.Core.Logging;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 
 namespace ChengYuan.Core.Modularity;
 
@@ -21,6 +24,8 @@ public sealed class ModuleManager : IModuleManager
             throw new InvalidOperationException("Module initialization has already been executed.");
         }
 
+        ReplayInitLogs();
+
         var context = new ModuleInitializationContext(_serviceProvider, _catalog, cancellationToken);
 
         foreach (var descriptor in _catalog.ConcreteModules)
@@ -29,20 +34,9 @@ public sealed class ModuleManager : IModuleManager
 
             try
             {
-                if (descriptor.Instance is IOnModulePreInitialize preInitialize)
-                {
-                    await preInitialize.PreInitializeAsync(context);
-                }
-
-                if (descriptor.Instance is IOnModuleInitialize initialize)
-                {
-                    await initialize.InitializeAsync(context);
-                }
-
-                if (descriptor.Instance is IOnModulePostInitialize postInitialize)
-                {
-                    await postInitialize.PostInitializeAsync(context);
-                }
+                await descriptor.Instance.PreInitializeAsync(context);
+                await descriptor.Instance.InitializeAsync(context);
+                await descriptor.Instance.PostInitializeAsync(context);
             }
             catch (OperationCanceledException)
             {
@@ -69,10 +63,7 @@ public sealed class ModuleManager : IModuleManager
         {
             try
             {
-                if (descriptor.Instance is IOnModuleShutdown shutdown)
-                {
-                    await shutdown.ShutdownAsync(context);
-                }
+                await descriptor.Instance.ShutdownAsync(context);
             }
             catch (OperationCanceledException)
             {
@@ -84,5 +75,32 @@ public sealed class ModuleManager : IModuleManager
                     $"An error occurred during shutdown of module '{descriptor.Name}'.", ex);
             }
         }
+    }
+
+    private void ReplayInitLogs()
+    {
+        var initLoggerFactory = _serviceProvider.GetService<IInitLoggerFactory>();
+        if (initLoggerFactory is null)
+        {
+            return;
+        }
+
+        var entries = initLoggerFactory.GetAllEntries();
+        if (entries.Count == 0)
+        {
+            return;
+        }
+
+        var loggerFactory = _serviceProvider.GetRequiredService<ILoggerFactory>();
+
+        foreach (var entry in entries)
+        {
+            var logger = loggerFactory.CreateLogger(entry.CategoryName);
+#pragma warning disable CA1848, CA2254 // Init log entries are pre-formatted during module loading
+            logger.Log(entry.LogLevel, entry.EventId, entry.Exception, entry.Message);
+#pragma warning restore CA1848, CA2254
+        }
+
+        initLoggerFactory.ClearAllEntries();
     }
 }

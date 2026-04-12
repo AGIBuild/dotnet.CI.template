@@ -135,5 +135,5 @@ public class MultiTenancyRuntimeTests
     }
 
     [DependsOn(typeof(MultiTenancyModule))]
-    private sealed class MultiTenancyTestModule : ModuleBase;
+    private sealed class MultiTenancyTestModule : FrameworkCoreModule;
 }

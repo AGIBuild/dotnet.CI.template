@@ -8,6 +8,16 @@ namespace ChengYuan.WebHost;
 
 public static class WebHostApplicationExtensions
 {
+    public static WebApplication UseWebHostComposition(this WebApplication app)
+    {
+        ArgumentNullException.ThrowIfNull(app);
+
+        app.UseMultiTenancy();
+        app.MapWebHostEndpoints();
+
+        return app;
+    }
+
     public static WebApplication MapWebHostEndpoints(this WebApplication app)
     {
         ArgumentNullException.ThrowIfNull(app);

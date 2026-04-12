@@ -1,13 +1,12 @@
 using ChengYuan.Core.Modularity;
-using Microsoft.Extensions.DependencyInjection;
 
 namespace ChengYuan.TenantManagement;
 
 [DependsOn(typeof(TenantManagementModule))]
-public sealed class TenantManagementPersistenceModule : ModuleBase
+public sealed class TenantManagementPersistenceModule : ExtensionModule
 {
-    public override void ConfigureServices(IServiceCollection services)
+    public override void ConfigureServices(ServiceConfigurationContext context)
     {
-        services.AddTenantManagementPersistence();
+        context.Services.AddTenantManagementPersistence();
     }
 }

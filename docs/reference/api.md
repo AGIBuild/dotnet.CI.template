@@ -39,10 +39,24 @@ Core module composition primitives.
 #### Key Types
 
 | Type | Description |
-|---|---|---|
-| `ModuleBase` | Base type for framework and application modules. |
+|---|---|
+| `ModuleBase` | Low-level module engine primitive and unified lifecycle template. Owns load, service-registration, initialization, and shutdown entry points, and caches direct topology metadata during load for derived modules. |
+| `FrameworkCoreModule` | Category-specific base class for reusable technical capabilities and modularity primitives. Validates `FrameworkCore -> FrameworkCore` dependencies and exposes shared-foundation versus leaf-foundation load hooks. |
+| `ApplicationModule` | Category-specific base class for reusable business capabilities and bounded contexts. Validates `Application -> FrameworkCore/Application` dependencies and exposes capability-owner composition state such as host and extension dependents. |
+| `ExtensionModule` | Category-specific base class for storage, transport, adapter, and technology-binding modules. Validates `Extension -> FrameworkCore/Application/Extension` dependencies, resolves the attached capability from the graph, and exposes binding-specific lifecycle hooks. |
+| `HostModule` | Category-specific base class for runnable composition shells and environment glue. Validates that only other `Host` modules depend on host modules and branches lifecycle hooks between root hosts and inner host-composition modules. |
+| `ModuleCategory` | Runtime-visible logical category for a loaded module descriptor. |
+| `IModuleLoadContext` / `ModuleLoadContext` | Load-stage context carrying the current module descriptor, the full catalog, and direct dependents for category validation, topology caching, and diagnostics. |
 | `DependsOnAttribute` | Declares direct module dependencies for composition ordering. |
 | `ModuleCatalog` | Exposes the ordered module list loaded by a host. |
+| `IModuleDescriptor.Category` | Reports whether a loaded module is `FrameworkCore`, `Application`, `Extension`, or `Host`. |
+| `ServiceConfigurationContext` | Service-registration context wrapping `IServiceCollection`, `IInitLoggerFactory`, and a cross-module `Items` dictionary. Passed to every module during `ConfigureServices`. |
+| `IInitLoggerFactory` | Factory for creating `IInitLogger<T>` instances that buffer log entries before DI is built. Exposed via `ServiceConfigurationContext.InitLoggerFactory`. |
+| `IInitLogger<T>` | `ILogger<T>` implementation that buffers `InitLogEntry` records during module loading for later replay once DI is available. |
+| `InitLogEntry` | Sealed record carrying category name, log level, event id, formatted message, and optional exception for replay. |
+| `IHasLogLevel` | Interface for exceptions or objects that carry a self-declared `LogLevel`. |
+| `IExceptionWithSelfLogging` | Interface for exceptions that provide structured self-logging via `Log(ILogger)`. |
+| `HasLogLevelExtensions` | Fluent `WithLogLevel()` extension for `IHasLogLevel` exceptions. |
 
 ### `ChengYuan.Core.Json`
 
@@ -474,6 +488,47 @@ Definition-driven runtime feature evaluation.
 | `AddInMemoryFeatures()` | Registers host-level in-memory feature value providers for testing and simple bootstrapping. |
 | `FeatureContext` | Carries the current tenant, user, and correlation values into feature evaluation. |
 | `FeatureValue` | Carries a resolved raw value plus its provider source. |
+
+### `ChengYuan.Caching.Abstractions`
+
+Pluggable caching abstraction layer with typed cache contract, cache naming, and global options.
+
+#### Key Types
+
+| Type | Description |
+|---|---|
+| `IChengYuanCache<TCacheItem>` | Typed cache interface exposing `GetAsync`, `SetAsync`, `ExistsAsync`, `RemoveAsync`, and `GetOrCreateAsync` operations with `ValueTask` returns. |
+| `CacheNameAttribute` | Attribute-driven cache name resolution. Falls back to stripping the `CacheItem` suffix from the type's full name. |
+| `ChengYuanCacheOptions` | Global cache options: `HideErrors` (default `true`), `KeyPrefix`, `GlobalCacheEntryOptions` (default 20 min sliding), and per-type `CacheConfigurators`. |
+| `ChengYuanCacheEntryOptions` | Per-entry expiration settings with absolute and sliding expiration. |
+| `IChengYuanCache` | Non-generic low-level cache interface for raw byte operations. |
+| `IChengYuanCacheStore` | Provider-agnostic store abstraction consumed by cache implementations. |
+| `IChengYuanCacheKeyNormalizer` | Normalizes cache keys with prefix and scope information. |
+| `ChengYuanCacheKey` | Value carrying the raw key, normalized key, and optional scope. |
+| `IChengYuanCacheSerializer` | Serialization abstraction for cache item types. |
+
+### `ChengYuan.Caching.Runtime`
+
+Default caching runtime with stampede protection and error hiding.
+
+#### Key Types
+
+| Type | Description |
+|---|---|
+| `CachingModule` | Registers default `ChengYuanCacheOptions` with 20-minute sliding expiration. |
+| `AddCaching()` | Registers the open-generic `IChengYuanCache<>` backed by `DefaultChengYuanTypedCache<>`, the non-generic cache, serializer, and key normalizer. |
+| `DefaultChengYuanTypedCache<TCacheItem>` | Internal typed cache with `SemaphoreSlim`-based stampede protection in `GetOrCreateAsync` (double-check pattern), `HideErrors` exception filtering, and `[LoggerMessage]`-based warning for swallowed cache errors. |
+
+### `ChengYuan.Caching.Memory`
+
+In-memory cache store backed by `IMemoryCache`.
+
+#### Key Types
+
+| Type | Description |
+|---|---|
+| `MemoryCachingModule` | Registers the memory cache store on top of the Caching runtime module. |
+| `MemoryCacheStore` | `IChengYuanCacheStore` implementation backed by `IMemoryCache`. |
 
 #### Example
 

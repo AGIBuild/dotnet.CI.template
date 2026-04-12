@@ -1,5 +1,4 @@
-using ChengYuan.Core.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore;
+using ChengYuan.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 
@@ -11,22 +10,11 @@ public static class FeatureManagementPersistenceServiceCollectionExtensions
     {
         ArgumentNullException.ThrowIfNull(services);
 
+        services.AddConfiguredDbContext<FeatureManagementDbContext>();
+        services.AddConfiguredDbContextFactory<FeatureManagementDbContext>();
         services.AddEntityFrameworkCoreDataAccess<FeatureManagementDbContext>();
         services.TryAddSingleton<IFeatureValueStore, EfFeatureValueStore>();
         services.TryAddSingleton<IFeatureValueReader>(serviceProvider => serviceProvider.GetRequiredService<IFeatureValueStore>());
-
-        return services;
-    }
-
-    public static IServiceCollection AddFeatureManagementPersistenceDbContext(
-        this IServiceCollection services,
-        Action<DbContextOptionsBuilder> configureDbContext)
-    {
-        ArgumentNullException.ThrowIfNull(services);
-        ArgumentNullException.ThrowIfNull(configureDbContext);
-
-        services.AddDbContext<FeatureManagementDbContext>(configureDbContext);
-        services.AddDbContextFactory<FeatureManagementDbContext>(configureDbContext);
 
         return services;
     }

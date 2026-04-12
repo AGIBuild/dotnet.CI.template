@@ -1,14 +1,13 @@
 using ChengYuan.Core.Modularity;
 using ChengYuan.MultiTenancy;
-using Microsoft.Extensions.DependencyInjection;
 
 namespace ChengYuan.TenantManagement;
 
 [DependsOn(typeof(MultiTenancyModule))]
-public sealed class TenantManagementModule : ModuleBase
+public sealed class TenantManagementModule : ApplicationModule
 {
-    public override void ConfigureServices(IServiceCollection services)
+    public override void ConfigureServices(ServiceConfigurationContext context)
     {
-        services.AddTenantManagement();
+        context.Services.AddTenantManagement();
     }
 }

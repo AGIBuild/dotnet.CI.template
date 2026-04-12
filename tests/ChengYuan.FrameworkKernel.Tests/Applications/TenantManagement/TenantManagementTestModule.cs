@@ -4,6 +4,6 @@ using ChengYuan.TenantManagement;
 namespace ChengYuan.FrameworkKernel.Tests;
 
 [DependsOn(typeof(TenantManagementModule))]
-internal sealed class TenantManagementTestModule : ModuleBase
+internal sealed class TenantManagementTestModule : ApplicationModule
 {
 }

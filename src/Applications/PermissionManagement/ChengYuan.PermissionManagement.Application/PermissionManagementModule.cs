@@ -1,14 +1,13 @@
 using ChengYuan.Authorization;
 using ChengYuan.Core.Modularity;
-using Microsoft.Extensions.DependencyInjection;
 
 namespace ChengYuan.PermissionManagement;
 
 [DependsOn(typeof(AuthorizationModule))]
-public sealed class PermissionManagementModule : ModuleBase
+public sealed class PermissionManagementModule : ApplicationModule
 {
-    public override void ConfigureServices(IServiceCollection services)
+    public override void ConfigureServices(ServiceConfigurationContext context)
     {
-        services.AddPermissionManagement();
+        context.Services.AddPermissionManagement();
     }
 }

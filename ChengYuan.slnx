@@ -1,6 +1,9 @@
 <Solution>
   <Folder Name="/src/Framework/">
     <Project Path="src/Framework/Core/ChengYuan.Core.csproj" />
+    <Project Path="src/Framework/Data/ChengYuan.EntityFrameworkCore/ChengYuan.EntityFrameworkCore.csproj" />
+    <Project Path="src/Framework/Data/ChengYuan.Data.Sqlite/ChengYuan.Data.Sqlite.csproj" />
+    <Project Path="src/Framework/Data/ChengYuan.Data.PostgreSql/ChengYuan.Data.PostgreSql.csproj" />
     <Project Path="src/Framework/Hosting/ChengYuan.Hosting.csproj" />
     <Project Path="src/Framework/Caching/ChengYuan.Caching.Abstractions/ChengYuan.Caching.Abstractions.csproj" />
     <Project Path="src/Framework/Caching/ChengYuan.Caching.Runtime/ChengYuan.Caching.Runtime.csproj" />

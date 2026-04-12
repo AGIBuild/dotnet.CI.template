@@ -1,6 +1,6 @@
 using System.Text.Json;
 using ChengYuan.Core.Entities;
-using ChengYuan.Core.EntityFrameworkCore;
+using ChengYuan.EntityFrameworkCore;
 using ChengYuan.Core.Exceptions;
 using ChengYuan.Core.Json;
 using ChengYuan.Core.Modularity;
@@ -209,7 +209,7 @@ public class DomainPrimitivesTests
     }
 
     [DependsOn(typeof(JsonModule))]
-    private sealed class JsonTestModule : ModuleBase
+    private sealed class JsonTestModule : FrameworkCoreModule
     {
     }
 

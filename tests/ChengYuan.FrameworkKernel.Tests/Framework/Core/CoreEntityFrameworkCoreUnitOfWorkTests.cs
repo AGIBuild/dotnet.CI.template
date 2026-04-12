@@ -1,5 +1,5 @@
 using ChengYuan.Core.Data;
-using ChengYuan.Core.EntityFrameworkCore;
+using ChengYuan.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Shouldly;

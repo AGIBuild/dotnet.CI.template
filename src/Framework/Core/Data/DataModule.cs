@@ -6,12 +6,12 @@ using Microsoft.Extensions.DependencyInjection.Extensions;
 namespace ChengYuan.Core.Data;
 
 [DependsOn(typeof(global::ChengYuan.Core.CoreRuntimeModule))]
-public sealed class DataModule : ModuleBase, IPreConfigureServices
+public sealed class DataModule : FrameworkCoreModule
 {
-    public void PreConfigureServices(IServiceCollection services)
+    public override void PreConfigureServices(ServiceConfigurationContext context)
     {
-        services.TryAddSingleton(typeof(IDataFilter<>), typeof(DataFilter<>));
-        services.TryAddSingleton<IDataTenantProvider, NullDataTenantProvider>();
-        services.TryAddSingleton<IUnitOfWorkAccessor, UnitOfWorkAccessor>();
+        context.Services.TryAddSingleton(typeof(IDataFilter<>), typeof(DataFilter<>));
+        context.Services.TryAddSingleton<IDataTenantProvider, NullDataTenantProvider>();
+        context.Services.TryAddSingleton<IUnitOfWorkAccessor, UnitOfWorkAccessor>();
     }
 }

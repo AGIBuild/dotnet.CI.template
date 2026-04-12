@@ -6,14 +6,14 @@ using Microsoft.Extensions.DependencyInjection;
 namespace ChengYuan.FrameworkKernel.Tests;
 
 [DependsOn(typeof(IdentityModule))]
-internal sealed class IdentityTestModule : ModuleBase
+internal sealed class IdentityTestModule : ApplicationModule
 {
-    public override void ConfigureServices(IServiceCollection services)
+    public override void ConfigureServices(ServiceConfigurationContext context)
     {
-        services.AddSingleton<InMemoryIdentityRoleRepository>();
-        services.AddSingleton<InMemoryIdentityUserRepository>();
-        services.AddSingleton<IIdentityRoleRepository>(serviceProvider => serviceProvider.GetRequiredService<InMemoryIdentityRoleRepository>());
-        services.AddSingleton<IIdentityUserRepository>(serviceProvider => serviceProvider.GetRequiredService<InMemoryIdentityUserRepository>());
-        services.AddSingleton<IUnitOfWork, NoopUnitOfWork>();
+        context.Services.AddSingleton<InMemoryIdentityRoleRepository>();
+        context.Services.AddSingleton<InMemoryIdentityUserRepository>();
+        context.Services.AddSingleton<IIdentityRoleRepository>(serviceProvider => serviceProvider.GetRequiredService<InMemoryIdentityRoleRepository>());
+        context.Services.AddSingleton<IIdentityUserRepository>(serviceProvider => serviceProvider.GetRequiredService<InMemoryIdentityUserRepository>());
+        context.Services.AddSingleton<IUnitOfWork, NoopUnitOfWork>();
     }
 }

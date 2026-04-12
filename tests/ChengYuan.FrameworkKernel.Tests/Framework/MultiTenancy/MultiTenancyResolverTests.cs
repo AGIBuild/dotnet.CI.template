@@ -249,7 +249,7 @@ public class MultiTenancyResolverTests
     }
 
     [DependsOn(typeof(MultiTenancyModule))]
-    private sealed class ResolverTestModule : ModuleBase;
+    private sealed class ResolverTestModule : FrameworkCoreModule;
 
     private sealed class UnresolvedContributor : ITenantResolveContributor
     {

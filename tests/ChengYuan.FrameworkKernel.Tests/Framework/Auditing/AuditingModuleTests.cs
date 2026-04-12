@@ -130,10 +130,9 @@ public class AuditingModuleTests
     }
 
     [DependsOn(typeof(AuditingModule))]
-    private sealed class AuditingTestModule : ModuleBase
+    private sealed class AuditingTestModule : FrameworkCoreModule
     {
     }
-
     private sealed class TestAuditContributor : IAuditLogContributor
     {
         public ValueTask ContributeAsync(AuditLogEntry entry, CancellationToken cancellationToken = default)

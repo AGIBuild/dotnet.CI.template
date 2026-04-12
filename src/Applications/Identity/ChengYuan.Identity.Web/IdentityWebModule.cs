@@ -1,13 +1,12 @@
 using ChengYuan.Core.Modularity;
-using Microsoft.Extensions.DependencyInjection;
 
 namespace ChengYuan.Identity;
 
 [DependsOn(typeof(IdentityModule))]
-public sealed class IdentityWebModule : ModuleBase
+public sealed class IdentityWebModule : ExtensionModule
 {
-    public override void ConfigureServices(IServiceCollection services)
+    public override void ConfigureServices(ServiceConfigurationContext context)
     {
-        services.AddIdentityWeb();
+        context.Services.AddIdentityWeb();
     }
 }

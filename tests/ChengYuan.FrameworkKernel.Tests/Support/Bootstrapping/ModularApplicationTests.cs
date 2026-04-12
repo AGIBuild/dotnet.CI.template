@@ -151,22 +151,22 @@ public class ModularApplicationTests
         }
     }
 
-    private sealed class ShellLifecycleModule : ModuleBase, IOnModuleInitialize, IOnModuleShutdown
+    private sealed class ShellLifecycleModule : ModuleBase
     {
-        public Task InitializeAsync(IModuleInitializationContext context)
+        protected override Task OnInitializeAsync(IModuleInitializationContext context)
         {
             ShellLifecycleRecorder.InitLog.Add("ShellLifecycleModule.Initialize");
             return Task.CompletedTask;
         }
 
-        public Task ShutdownAsync(IModuleShutdownContext context)
+        protected override Task OnShutdownAsync(IModuleShutdownContext context)
         {
             ShellLifecycleRecorder.ShutdownLog.Add("ShellLifecycleModule.Shutdown");
             return Task.CompletedTask;
         }
     }
 
-    private sealed class ContextInspectingModule : ModuleBase, IOnModuleInitialize
+    private sealed class ContextInspectingModule : ModuleBase
     {
         [ThreadStatic]
         internal static IModuleCatalog? CapturedCatalog;
@@ -174,7 +174,7 @@ public class ModularApplicationTests
         [ThreadStatic]
         internal static CancellationToken CapturedToken;
 
-        public Task InitializeAsync(IModuleInitializationContext context)
+        protected override Task OnInitializeAsync(IModuleInitializationContext context)
         {
             CapturedCatalog = context.ModuleCatalog;
             CapturedToken = context.CancellationToken;

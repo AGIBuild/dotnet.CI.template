@@ -1,5 +1,7 @@
 using ChengYuan.AuditLogging;
 using ChengYuan.Core.Data;
+using ChengYuan.Core.Modularity;
+using ChengYuan.EntityFrameworkCore;
 using ChengYuan.FeatureManagement;
 using ChengYuan.Identity;
 using ChengYuan.MultiTenancy;
@@ -16,11 +18,37 @@ namespace ChengYuan.FrameworkKernel.Tests;
 public class WebHostCompositionTests
 {
     [Fact]
+    public void WebHostSqliteComposition_ShouldRegisterSqliteProviderModuleAndUseSqliteDbContexts()
+    {
+        var connectionString = $"Data Source={Path.Combine(Path.GetTempPath(), $"chengyuan-web-{Guid.NewGuid():N}.db")}";
+        var services = new ServiceCollection();
+        services.UseSqlite(connectionString);
+        services.AddWebHostComposition();
+
+        using var serviceProvider = services.BuildServiceProvider();
+        var moduleCatalog = serviceProvider.GetRequiredService<ChengYuan.Core.Modularity.ModuleCatalog>();
+        var moduleNames = moduleCatalog.ModuleTypes.Select(moduleType => moduleType.Name).ToArray();
+
+        moduleNames.ShouldContain("WebHostModule");
+        moduleNames.ShouldContain("ChengYuanEntityFrameworkCoreSqliteModule");
+
+        using var scope = serviceProvider.CreateScope();
+        var identityProviderName = scope.ServiceProvider.GetRequiredService<IdentityDbContext>().Database.ProviderName;
+        var tenantProviderName = scope.ServiceProvider.GetRequiredService<TenantManagementDbContext>().Database.ProviderName;
+
+        identityProviderName.ShouldNotBeNull();
+        tenantProviderName.ShouldNotBeNull();
+        identityProviderName.ShouldContain("Sqlite");
+        tenantProviderName.ShouldContain("Sqlite");
+    }
+
+    [Fact]
     public void WebHostComposition_ShouldRegisterIdentityWebAndPersistenceBackedModules()
     {
         var databaseName = $"composition-{Guid.NewGuid():N}";
         var services = new ServiceCollection();
-        services.AddWebHostComposition(options => options.UseInMemoryDatabase(databaseName));
+        services.UseDbContextOptions(options => options.UseInMemoryDatabase(databaseName));
+        services.AddWebHostComposition();
 
         using var serviceProvider = services.BuildServiceProvider();
         var moduleCatalog = serviceProvider.GetRequiredService<ChengYuan.Core.Modularity.ModuleCatalog>();
@@ -51,7 +79,8 @@ public class WebHostCompositionTests
     {
         var databaseName = $"composition-uow-{Guid.NewGuid():N}";
         var services = new ServiceCollection();
-        services.AddWebHostComposition(options => options.UseInMemoryDatabase(databaseName));
+        services.UseDbContextOptions(options => options.UseInMemoryDatabase(databaseName));
+        services.AddWebHostComposition();
 
         await using var serviceProvider = services.BuildServiceProvider();
 
@@ -85,8 +114,8 @@ public class WebHostCompositionTests
     {
         var databaseName = $"composition-resolution-store-{Guid.NewGuid():N}";
         var services = new ServiceCollection();
-        services.AddWebHostComposition(options => options.UseInMemoryDatabase(databaseName));
-        services.AddMultiTenancy();
+        services.UseDbContextOptions(options => options.UseInMemoryDatabase(databaseName));
+        services.AddWebHostComposition();
 
         await using var serviceProvider = services.BuildServiceProvider();
         var tenantId = Guid.NewGuid();

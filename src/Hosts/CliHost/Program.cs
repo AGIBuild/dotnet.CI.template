@@ -1,26 +1,10 @@
-using ChengYuan.Caching;
-using ChengYuan.Core.Modularity;
-using ChengYuan.ExecutionContext;
+using ChengYuan.CliHost;
+using ChengYuan.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 
 var services = new ServiceCollection();
-services.AddModularApplication<CliHostModule>();
+services.UseSqlite("Data Source=chengyuan-clihost.db");
+services.AddCliHostComposition();
 
-using var serviceProvider = services.BuildServiceProvider();
-
-var application = serviceProvider.GetRequiredService<IModularApplication>();
-await application.InitializeAsync();
-
-var catalog = application.ModuleCatalog;
-var currentCorrelation = serviceProvider.GetRequiredService<ICurrentCorrelation>();
-
-Console.WriteLine("ChengYuan CLI host");
-Console.WriteLine($"Correlation: {currentCorrelation.CorrelationId}");
-Console.WriteLine($"Loaded modules: {string.Join(", ", catalog.ModuleTypes.Select(moduleType => moduleType.Name))}");
-
-await application.ShutdownAsync();
-[DependsOn(typeof(ExecutionContextModule))]
-[DependsOn(typeof(MemoryCachingModule))]
-internal sealed class CliHostModule : ModuleBase
-{
-}
+await using var serviceProvider = services.BuildServiceProvider();
+await serviceProvider.RunCliHostCompositionAsync();

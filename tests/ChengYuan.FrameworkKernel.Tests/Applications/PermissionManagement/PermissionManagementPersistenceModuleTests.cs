@@ -1,5 +1,6 @@
 using ChengYuan.Authorization;
 using ChengYuan.Core.Modularity;
+using ChengYuan.EntityFrameworkCore;
 using ChengYuan.ExecutionContext;
 using ChengYuan.MultiTenancy;
 using ChengYuan.PermissionManagement;
@@ -106,7 +107,7 @@ public class PermissionManagementPersistenceModuleTests
         var databaseName = $"permission-management-{Guid.NewGuid():N}";
         var services = new ServiceCollection();
         services.AddModule<PermissionManagementPersistenceTestModule>();
-        services.AddPermissionManagementPersistenceDbContext(options =>
+        services.UseDbContextOptions(options =>
             options.UseInMemoryDatabase(databaseName));
 
         return services;

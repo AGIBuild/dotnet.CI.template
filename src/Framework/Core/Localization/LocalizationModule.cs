@@ -6,10 +6,10 @@ using Microsoft.Extensions.DependencyInjection.Extensions;
 namespace ChengYuan.Core.Localization;
 
 [DependsOn(typeof(global::ChengYuan.Core.CoreRuntimeModule))]
-public sealed class LocalizationModule : ModuleBase, IPreConfigureServices
+public sealed class LocalizationModule : FrameworkCoreModule
 {
-    public void PreConfigureServices(IServiceCollection services)
+    public override void PreConfigureServices(ServiceConfigurationContext context)
     {
-        services.TryAddSingleton<IErrorLocalizer, ErrorLocalizer>();
+        context.Services.TryAddSingleton<IErrorLocalizer, ErrorLocalizer>();
     }
 }

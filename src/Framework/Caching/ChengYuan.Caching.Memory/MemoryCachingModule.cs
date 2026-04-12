@@ -4,11 +4,11 @@ using Microsoft.Extensions.DependencyInjection;
 namespace ChengYuan.Caching;
 
 [DependsOn(typeof(CachingModule))]
-public sealed class MemoryCachingModule : ModuleBase
+public sealed class MemoryCachingModule : ExtensionModule
 {
-    public override void ConfigureServices(IServiceCollection services)
+    public override void ConfigureServices(ServiceConfigurationContext context)
     {
-        services.AddMemoryCache();
-        services.AddSingleton<IChengYuanCacheStore, MemoryCacheStore>();
+        context.Services.AddMemoryCache();
+        context.Services.AddSingleton<IChengYuanCacheStore, MemoryCacheStore>();
     }
 }

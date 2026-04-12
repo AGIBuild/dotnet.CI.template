@@ -1,5 +1,4 @@
-using ChengYuan.Core.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore;
+using ChengYuan.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 
@@ -11,22 +10,11 @@ public static class SettingManagementPersistenceServiceCollectionExtensions
     {
         ArgumentNullException.ThrowIfNull(services);
 
+        services.AddConfiguredDbContext<SettingManagementDbContext>();
+        services.AddConfiguredDbContextFactory<SettingManagementDbContext>();
         services.AddEntityFrameworkCoreDataAccess<SettingManagementDbContext>();
         services.TryAddSingleton<ISettingValueStore, EfSettingValueStore>();
         services.TryAddSingleton<ISettingValueReader>(serviceProvider => serviceProvider.GetRequiredService<ISettingValueStore>());
-
-        return services;
-    }
-
-    public static IServiceCollection AddSettingManagementPersistenceDbContext(
-        this IServiceCollection services,
-        Action<DbContextOptionsBuilder> configureDbContext)
-    {
-        ArgumentNullException.ThrowIfNull(services);
-        ArgumentNullException.ThrowIfNull(configureDbContext);
-
-        services.AddDbContext<SettingManagementDbContext>(configureDbContext);
-        services.AddDbContextFactory<SettingManagementDbContext>(configureDbContext);
 
         return services;
     }

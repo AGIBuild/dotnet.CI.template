@@ -1,16 +1,15 @@
 using ChengYuan.Core.Modularity;
 using ChengYuan.ExecutionContext;
 using ChengYuan.MultiTenancy;
-using Microsoft.Extensions.DependencyInjection;
 
 namespace ChengYuan.Features;
 
 [DependsOn(typeof(ExecutionContextModule))]
 [DependsOn(typeof(MultiTenancyModule))]
-public sealed class FeaturesModule : ModuleBase
+public sealed class FeaturesModule : FrameworkCoreModule
 {
-    public override void ConfigureServices(IServiceCollection services)
+    public override void ConfigureServices(ServiceConfigurationContext context)
     {
-        services.AddFeatures();
+        context.Services.AddFeatures();
     }
 }

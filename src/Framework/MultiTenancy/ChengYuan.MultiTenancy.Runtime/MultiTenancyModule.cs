@@ -1,14 +1,13 @@
 using ChengYuan.Core.Modularity;
 using ChengYuan.ExecutionContext;
-using Microsoft.Extensions.DependencyInjection;
 
 namespace ChengYuan.MultiTenancy;
 
 [DependsOn(typeof(ExecutionContextModule))]
-public sealed class MultiTenancyModule : ModuleBase
+public sealed class MultiTenancyModule : FrameworkCoreModule
 {
-    public override void ConfigureServices(IServiceCollection services)
+    public override void ConfigureServices(ServiceConfigurationContext context)
     {
-        services.AddMultiTenancyCore();
+        context.Services.AddMultiTenancyCore();
     }
 }

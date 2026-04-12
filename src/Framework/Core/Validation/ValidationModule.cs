@@ -6,10 +6,10 @@ using Microsoft.Extensions.DependencyInjection.Extensions;
 namespace ChengYuan.Core.Validation;
 
 [DependsOn(typeof(global::ChengYuan.Core.CoreRuntimeModule))]
-public sealed class ValidationModule : ModuleBase, IPreConfigureServices
+public sealed class ValidationModule : FrameworkCoreModule
 {
-    public void PreConfigureServices(IServiceCollection services)
+    public override void PreConfigureServices(ServiceConfigurationContext context)
     {
-        services.TryAddTransient(typeof(IObjectValidator<>), typeof(ObjectValidator<>));
+        context.Services.TryAddTransient(typeof(IObjectValidator<>), typeof(ObjectValidator<>));
     }
 }

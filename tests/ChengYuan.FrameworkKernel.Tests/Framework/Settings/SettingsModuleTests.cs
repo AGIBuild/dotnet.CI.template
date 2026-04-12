@@ -242,7 +242,7 @@ public class SettingsModuleTests
     }
 
     [DependsOn(typeof(SettingsModule))]
-    private sealed class SettingsTestModule : ModuleBase
+    private sealed class SettingsTestModule : FrameworkCoreModule
     {
     }
 

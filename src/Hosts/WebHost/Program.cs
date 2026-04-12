@@ -1,14 +1,14 @@
-using ChengYuan.MultiTenancy;
+using ChengYuan.EntityFrameworkCore;
 using ChengYuan.WebHost;
 
 var builder = WebApplication.CreateBuilder(args);
+var connectionString = builder.Configuration.GetConnectionString("Default") ?? "Data Source=chengyuan-webhost.db";
+builder.Services.UseSqlite(connectionString);
 builder.Services.AddWebHostComposition();
-builder.Services.AddMultiTenancy();
 
 var app = builder.Build();
 
-app.UseMultiTenancy();
-app.MapWebHostEndpoints();
+app.UseWebHostComposition();
 
 app.Run();
 

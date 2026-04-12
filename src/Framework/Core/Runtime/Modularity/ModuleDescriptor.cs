@@ -12,6 +12,7 @@ public sealed class ModuleDescriptor : IModuleDescriptor
     {
         ModuleType = moduleType;
         Instance = instance;
+        Category = ResolveCategory(instance);
         Name = moduleType.Name;
         Assembly = moduleType.Assembly;
         AdditionalAssemblies = [];
@@ -20,6 +21,8 @@ public sealed class ModuleDescriptor : IModuleDescriptor
     }
 
     public Type ModuleType { get; }
+
+    public ModuleCategory Category { get; }
 
     public string Name { get; }
 
@@ -32,4 +35,14 @@ public sealed class ModuleDescriptor : IModuleDescriptor
     public bool IsRoot { get; }
 
     internal ModuleBase Instance { get; }
+
+    private static ModuleCategory ResolveCategory(ModuleBase instance) => instance switch
+    {
+        FrameworkCoreModule => ModuleCategory.FrameworkCore,
+        ApplicationModule => ModuleCategory.Application,
+        ExtensionModule => ModuleCategory.Extension,
+        HostModule => ModuleCategory.Host,
+        // Keep direct ModuleBase subclasses working for low-level infrastructure and engine tests.
+        _ => ModuleCategory.FrameworkCore
+    };
 }

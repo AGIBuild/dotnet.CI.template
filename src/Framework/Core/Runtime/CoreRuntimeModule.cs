@@ -1,13 +1,12 @@
 using ChengYuan.Core.Lifecycle;
 using ChengYuan.Core.Modularity;
-using Microsoft.Extensions.DependencyInjection;
 
 namespace ChengYuan.Core;
 
-public sealed class CoreRuntimeModule : ModuleBase, IPreConfigureServices
+public sealed class CoreRuntimeModule : FrameworkCoreModule
 {
-    public void PreConfigureServices(IServiceCollection services)
+    public override void PreConfigureServices(ServiceConfigurationContext context)
     {
-        services.AddCoreRuntime();
+        context.Services.AddCoreRuntime();
     }
 }

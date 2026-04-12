@@ -1,5 +1,5 @@
 using ChengYuan.Core.Data;
-using ChengYuan.Core.EntityFrameworkCore;
+using ChengYuan.EntityFrameworkCore;
 using ChengYuan.Core.Timing;
 using Microsoft.EntityFrameworkCore;
 

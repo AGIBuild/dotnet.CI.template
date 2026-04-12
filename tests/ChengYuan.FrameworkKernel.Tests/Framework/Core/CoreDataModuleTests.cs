@@ -1,5 +1,5 @@
 using ChengYuan.Core.Data;
-using ChengYuan.Core.EntityFrameworkCore;
+using ChengYuan.EntityFrameworkCore;
 using ChengYuan.Core.Modularity;
 using ChengYuan.MultiTenancy;
 using Microsoft.EntityFrameworkCore;
@@ -10,6 +10,57 @@ namespace ChengYuan.FrameworkKernel.Tests;
 
 public class CoreDataModuleTests
 {
+    [Fact]
+    public void ConfiguredDbContext_ShouldThrowClearError_WhenProviderIsMissing()
+    {
+        var services = new ServiceCollection();
+        services.AddModule<ConfiguredDbContextWithoutProviderModule>();
+
+        using var serviceProvider = services.BuildServiceProvider();
+        using var scope = serviceProvider.CreateScope();
+
+        var exception = Should.Throw<InvalidOperationException>(() =>
+            scope.ServiceProvider.GetRequiredService<ConfiguredDbContextWithoutProvider>());
+
+        exception.Message.ShouldContain("database provider");
+    }
+
+    [Fact]
+    public void UseDbContextOptionsProvider_ShouldAllowProviderModulesToOwnConfiguration()
+    {
+        ProviderOwnedDbContextOptionsConfigureCallCount = 0;
+
+        var services = new ServiceCollection();
+        services.AddModule<ConfiguredDbContextWithProviderModule>();
+
+        using var serviceProvider = services.BuildServiceProvider();
+        using var scope = serviceProvider.CreateScope();
+
+        scope.ServiceProvider.GetRequiredService<ConfiguredDbContextWithProvider>().ShouldNotBeNull();
+
+        ProviderOwnedDbContextOptionsConfigureCallCount.ShouldBe(1);
+    }
+
+    [Fact]
+    public void UseSqlite_ShouldConfigureConfiguredDbContext_ThroughSimplifiedExtension()
+    {
+        var connectionString = $"Data Source={Path.Combine(Path.GetTempPath(), $"core-data-sqlite-{Guid.NewGuid():N}.db")}";
+        var services = new ServiceCollection();
+        services.AddModule<ConfiguredDbContextWithSqliteModule>();
+        services.UseSqlite(connectionString);
+
+        using var serviceProvider = services.BuildServiceProvider();
+        using var scope = serviceProvider.CreateScope();
+
+        var providerName = scope.ServiceProvider
+            .GetRequiredService<ConfiguredDbContextWithSqlite>()
+            .Database
+            .ProviderName;
+
+        providerName.ShouldNotBeNull();
+        providerName.ShouldContain("Sqlite");
+    }
+
     [Fact]
     public void DataModule_ShouldRegisterSoftDeleteDataFilter()
     {
@@ -135,13 +186,47 @@ public class CoreDataModuleTests
     }
 
     [DependsOn(typeof(DataModule))]
-    private sealed class DataTestModule : ModuleBase
+    private sealed class DataTestModule : FrameworkCoreModule
     {
+    }
+
+    [DependsOn(typeof(ChengYuanEntityFrameworkCoreModule))]
+    private sealed class ConfiguredDbContextWithoutProviderModule : FrameworkCoreModule
+    {
+        public override void ConfigureServices(ServiceConfigurationContext context)
+        {
+            context.Services.AddConfiguredDbContext<ConfiguredDbContextWithoutProvider>();
+        }
+    }
+
+    [DependsOn(typeof(ChengYuanEntityFrameworkCoreModule))]
+    private sealed class ConfiguredDbContextWithProviderModule : FrameworkCoreModule
+    {
+        public override void ConfigureServices(ServiceConfigurationContext context)
+        {
+            context.Services.Configure<ChengYuanDbContextOptions>(options =>
+                options.Configure(ctx =>
+                {
+                    ProviderOwnedDbContextOptionsConfigureCallCount++;
+                    ctx.DbContextOptions.UseInMemoryDatabase(
+                        $"provider-owned-{ctx.DbContextOptions.Options.ContextType?.Name}");
+                }));
+            context.Services.AddConfiguredDbContext<ConfiguredDbContextWithProvider>();
+        }
+    }
+
+    [DependsOn(typeof(ChengYuanEntityFrameworkCoreModule))]
+    private sealed class ConfiguredDbContextWithSqliteModule : FrameworkCoreModule
+    {
+        public override void ConfigureServices(ServiceConfigurationContext context)
+        {
+            context.Services.AddConfiguredDbContext<ConfiguredDbContextWithSqlite>();
+        }
     }
 
     [DependsOn(typeof(DataModule))]
     [DependsOn(typeof(MultiTenancyModule))]
-    private sealed class MultiTenantDataTestModule : ModuleBase
+    private sealed class MultiTenantDataTestModule : FrameworkCoreModule
     {
     }
 
@@ -163,4 +248,14 @@ public class CoreDataModuleTests
             return Task.FromResult(1);
         }
     }
+    private sealed class ConfiguredDbContextWithoutProvider(DbContextOptions<ConfiguredDbContextWithoutProvider> options)
+        : DbContext(options);
+
+    private sealed class ConfiguredDbContextWithProvider(DbContextOptions<ConfiguredDbContextWithProvider> options)
+        : DbContext(options);
+
+    private sealed class ConfiguredDbContextWithSqlite(DbContextOptions<ConfiguredDbContextWithSqlite> options)
+        : DbContext(options);
+
+    private static int ProviderOwnedDbContextOptionsConfigureCallCount;
 }

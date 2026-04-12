@@ -1,5 +1,6 @@
 using ChengYuan.Core.Data;
 using ChengYuan.Core.Modularity;
+using ChengYuan.EntityFrameworkCore;
 using ChengYuan.TenantManagement;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
@@ -120,7 +121,7 @@ public class TenantManagementPersistenceModuleTests
         var databaseName = $"tenant-management-{Guid.NewGuid():N}";
         var services = new ServiceCollection();
         services.AddModule<TenantManagementPersistenceTestModule>();
-        services.AddTenantManagementPersistenceDbContext(options =>
+        services.UseDbContextOptions(options =>
             options.UseInMemoryDatabase(databaseName));
 
         return services;

@@ -1,14 +1,13 @@
 using ChengYuan.Core.Modularity;
 using ChengYuan.Features;
-using Microsoft.Extensions.DependencyInjection;
 
 namespace ChengYuan.FeatureManagement;
 
 [DependsOn(typeof(FeaturesModule))]
-public sealed class FeatureManagementModule : ModuleBase
+public sealed class FeatureManagementModule : ApplicationModule
 {
-    public override void ConfigureServices(IServiceCollection services)
+    public override void ConfigureServices(ServiceConfigurationContext context)
     {
-        services.AddFeatureManagement();
+        context.Services.AddFeatureManagement();
     }
 }

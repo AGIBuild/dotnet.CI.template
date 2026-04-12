@@ -1,4 +1,5 @@
 using ChengYuan.Core.Modularity;
+using ChengYuan.EntityFrameworkCore;
 using ChengYuan.ExecutionContext;
 using ChengYuan.FeatureManagement;
 using ChengYuan.Features;
@@ -126,7 +127,7 @@ public class FeatureManagementPersistenceModuleTests
         var databaseName = $"feature-management-{Guid.NewGuid():N}";
         var services = new ServiceCollection();
         services.AddModule<FeatureManagementPersistenceTestModule>();
-        services.AddFeatureManagementPersistenceDbContext(options =>
+        services.UseDbContextOptions(options =>
             options.UseInMemoryDatabase(databaseName));
 
         return services;

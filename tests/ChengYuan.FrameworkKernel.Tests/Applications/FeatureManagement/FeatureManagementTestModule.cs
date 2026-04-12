@@ -4,6 +4,6 @@ using ChengYuan.FeatureManagement;
 namespace ChengYuan.FrameworkKernel.Tests;
 
 [DependsOn(typeof(FeatureManagementModule))]
-internal sealed class FeatureManagementTestModule : ModuleBase
+internal sealed class FeatureManagementTestModule : ApplicationModule
 {
 }

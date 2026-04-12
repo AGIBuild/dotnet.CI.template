@@ -1,6 +1,7 @@
 using ChengYuan.Auditing;
 using ChengYuan.AuditLogging;
 using ChengYuan.Core.Modularity;
+using ChengYuan.EntityFrameworkCore;
 using ChengYuan.ExecutionContext;
 using ChengYuan.MultiTenancy;
 using Microsoft.EntityFrameworkCore;
@@ -121,7 +122,7 @@ public class AuditLoggingPersistenceModuleTests
         var databaseName = $"audit-logging-{Guid.NewGuid():N}";
         var services = new ServiceCollection();
         services.AddModule<AuditLoggingPersistenceTestModule>();
-        services.AddAuditLoggingPersistenceDbContext(options =>
+        services.UseDbContextOptions(options =>
             options.UseInMemoryDatabase(databaseName));
 
         return services;

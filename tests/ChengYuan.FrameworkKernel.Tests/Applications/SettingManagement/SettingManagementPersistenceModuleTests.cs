@@ -1,4 +1,5 @@
 using ChengYuan.Core.Modularity;
+using ChengYuan.EntityFrameworkCore;
 using ChengYuan.ExecutionContext;
 using ChengYuan.MultiTenancy;
 using ChengYuan.SettingManagement;
@@ -126,7 +127,7 @@ public class SettingManagementPersistenceModuleTests
         var databaseName = $"setting-management-{Guid.NewGuid():N}";
         var services = new ServiceCollection();
         services.AddModule<SettingManagementPersistenceTestModule>();
-        services.AddSettingManagementPersistenceDbContext(options =>
+        services.UseDbContextOptions(options =>
             options.UseInMemoryDatabase(databaseName));
 
         return services;

@@ -1,5 +1,4 @@
-using ChengYuan.Core.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore;
+using ChengYuan.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 
@@ -11,22 +10,11 @@ public static class PermissionManagementPersistenceServiceCollectionExtensions
     {
         ArgumentNullException.ThrowIfNull(services);
 
+        services.AddConfiguredDbContext<PermissionManagementDbContext>();
+        services.AddConfiguredDbContextFactory<PermissionManagementDbContext>();
         services.AddEntityFrameworkCoreDataAccess<PermissionManagementDbContext>();
         services.TryAddSingleton<IPermissionGrantStore, EfPermissionGrantStore>();
         services.TryAddSingleton<IPermissionGrantReader>(serviceProvider => serviceProvider.GetRequiredService<IPermissionGrantStore>());
-
-        return services;
-    }
-
-    public static IServiceCollection AddPermissionManagementPersistenceDbContext(
-        this IServiceCollection services,
-        Action<DbContextOptionsBuilder> configureDbContext)
-    {
-        ArgumentNullException.ThrowIfNull(services);
-        ArgumentNullException.ThrowIfNull(configureDbContext);
-
-        services.AddDbContext<PermissionManagementDbContext>(configureDbContext);
-        services.AddDbContextFactory<PermissionManagementDbContext>(configureDbContext);
 
         return services;
     }

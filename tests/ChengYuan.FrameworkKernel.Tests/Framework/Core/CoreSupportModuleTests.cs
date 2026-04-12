@@ -80,12 +80,12 @@ public class CoreSupportModuleTests
     }
 
     [DependsOn(typeof(ValidationModule))]
-    private sealed class ValidationTestModule : ModuleBase
+    private sealed class ValidationTestModule : FrameworkCoreModule
     {
     }
 
     [DependsOn(typeof(LocalizationModule))]
-    private sealed class LocalizationTestModule : ModuleBase
+    private sealed class LocalizationTestModule : FrameworkCoreModule
     {
     }
 

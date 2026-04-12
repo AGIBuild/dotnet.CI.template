@@ -5,11 +5,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.EntityFrameworkCore" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <ProjectReference Include="..\..\..\Framework\Core\ChengYuan.Core.csproj" />
+    <ProjectReference Include="..\..\..\Framework\Data\ChengYuan.EntityFrameworkCore\ChengYuan.EntityFrameworkCore.csproj" />
     <ProjectReference Include="..\ChengYuan.PermissionManagement.Application\ChengYuan.PermissionManagement.Application.csproj" />
   </ItemGroup>
 

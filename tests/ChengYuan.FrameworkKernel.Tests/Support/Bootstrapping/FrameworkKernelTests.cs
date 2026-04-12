@@ -211,17 +211,17 @@ public class FrameworkKernelTests
     }
 
     [DependsOn(typeof(MultiTenancyModule))]
-    private sealed class KernelTestModule : ModuleBase
+    private sealed class KernelTestModule : FrameworkCoreModule
     {
     }
 
     [DependsOn(typeof(MemoryCachingModule))]
-    private sealed class CachingTestModule : ModuleBase
+    private sealed class CachingTestModule : ExtensionModule
     {
     }
 
     [DependsOn(typeof(OutboxWorkerModule))]
-    private sealed class OutboxTestModule : ModuleBase
+    private sealed class OutboxTestModule : ExtensionModule
     {
     }
 

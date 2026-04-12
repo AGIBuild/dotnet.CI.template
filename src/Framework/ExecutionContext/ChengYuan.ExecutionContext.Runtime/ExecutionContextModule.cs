@@ -1,13 +1,12 @@
 using ChengYuan.Core.Modularity;
-using Microsoft.Extensions.DependencyInjection;
 
 namespace ChengYuan.ExecutionContext;
 
 [DependsOn(typeof(global::ChengYuan.Core.CoreRuntimeModule))]
-public sealed class ExecutionContextModule : ModuleBase
+public sealed class ExecutionContextModule : FrameworkCoreModule
 {
-    public override void ConfigureServices(IServiceCollection services)
+    public override void ConfigureServices(ServiceConfigurationContext context)
     {
-        services.AddExecutionContext();
+        context.Services.AddExecutionContext();
     }
 }

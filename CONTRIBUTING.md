@@ -58,6 +58,36 @@ The CI pipeline behavior is controlled by boolean switches in `.github/workflows
 - Run `./build.sh Format` locally before committing.
 - All warnings are treated as errors (`TreatWarningsAsErrors`).
 
+## Module Taxonomy
+
+New work should follow the logical taxonomy `FrameworkCore / Application / Extension / Host`:
+
+- `FrameworkCore`: broadly reusable technical capabilities and modularity primitives.
+- `Application`: reusable business capabilities and bounded contexts.
+- `Extension`: optional modules that attach a capability to a concrete technology or transport, such as `Persistence`, `Web`, `Memory`, or future `Redis` and `MongoDb` adapters.
+- `Host`: runnable shells that compose modules and provide environment configuration.
+
+Use responsibility to classify a module, not directory name alone. A project under `src/Framework/` can still be an `Extension` if it is technology-specific, such as `ChengYuan.Caching.Memory`.
+
+### Module Base Classes
+
+New production modules must inherit a category-specific base class:
+
+- `FrameworkCoreModule` for framework capabilities.
+- `ApplicationModule` for business capabilities.
+- `ExtensionModule` for persistence, web, memory, worker, or other technology adapters.
+- `HostModule` for host shells and composition modules.
+
+Direct `ModuleBase` inheritance is reserved for low-level modularity infrastructure only. The shared service-registration entry point `ConfigureServices(IServiceCollection services)` remains the same across all categories.
+
+During the current architecture refactor:
+
+- Keep explicit `DependsOn` module composition.
+- Do not introduce automatic module discovery.
+- Move application persistence registration out of Hosts and back into the corresponding `*.Persistence` extension modules.
+- Keep Host internals layered. For WebHost, separate framework composition, application composition, and HTTP/runtime glue into different composition modules instead of one all-knowing host module.
+- Keep `Program.cs` thin by routing setup through host composition seams such as `AddWebHostComposition(...)` and `UseWebHostComposition()`.
+
 ## Versioning
 
 - Version is managed via `VersionPrefix` in `Directory.Build.props`.

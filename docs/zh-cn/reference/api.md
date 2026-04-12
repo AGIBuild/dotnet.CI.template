@@ -39,10 +39,24 @@
 #### 关键类型
 
 | 类型 | 说明 |
-|---|---|---|
-| `ModuleBase` | Framework 与 Application 模块的基类。 |
+|---|---|
+| `ModuleBase` | 底层模块引擎原语，也是统一生命周期模板。负责 load、服务注册、初始化与关闭入口，并在 load 阶段缓存直接拓扑元数据供派生类使用。 |
+| `FrameworkCoreModule` | 面向可复用技术能力与模块化基础原语的分类基类。校验 `FrameworkCore -> FrameworkCore` 依赖，并暴露 shared foundation 与 leaf foundation 两类 load hook。 |
+| `ApplicationModule` | 面向可复用业务能力与边界上下文的分类基类。校验 `Application -> FrameworkCore/Application` 依赖，并暴露能力拥有者的组合状态，例如 host 与 extension dependents。 |
+| `ExtensionModule` | 面向存储、传输、适配器与技术绑定模块的分类基类。校验 `Extension -> FrameworkCore/Application/Extension` 依赖，从依赖图解析附着能力，并暴露 binding 级生命周期 hook。 |
+| `HostModule` | 面向可执行宿主壳与环境胶水的分类基类。校验 host 模块只能被其他 `Host` 模块依赖，并在生命周期里区分 root host 与内部组合模块。 |
+| `ModuleCategory` | 运行时可见的模块逻辑分类枚举。 |
+| `IModuleLoadContext` / `ModuleLoadContext` | load 阶段上下文，携带当前模块描述、完整 catalog 以及直接 dependents，用于分类校验、拓扑缓存与诊断。 |
 | `DependsOnAttribute` | 声明直接模块依赖，用于组合排序。 |
 | `ModuleCatalog` | 暴露 Host 已加载的有序模块列表。 |
+| `IModuleDescriptor.Category` | 报告已加载模块属于 `FrameworkCore`、`Application`、`Extension` 还是 `Host`。 |
+| `ServiceConfigurationContext` | 服务注册上下文，包装 `IServiceCollection`、`IInitLoggerFactory` 与跨模块 `Items` 字典。在 `ConfigureServices` 阶段传递给每个模块。 |
+| `IInitLoggerFactory` | 用于创建 `IInitLogger<T>` 实例的工厂，在 DI 容器构建前缓冲日志条目。通过 `ServiceConfigurationContext.InitLoggerFactory` 暴露。 |
+| `IInitLogger<T>` | 在模块加载期间缓冲 `InitLogEntry` 记录的 `ILogger<T>` 实现，待 DI 可用后重放。 |
+| `InitLogEntry` | 密封记录，携带类别名、日志级别、事件 Id、格式化消息与可选异常，用于延迟重放。 |
+| `IHasLogLevel` | 为异常或对象声明自带 `LogLevel` 的接口。 |
+| `IExceptionWithSelfLogging` | 通过 `Log(ILogger)` 提供结构化自记录能力的异常接口。 |
+| `HasLogLevelExtensions` | 面向 `IHasLogLevel` 异常的 fluent `WithLogLevel()` 扩展方法。 |
 
 ### `ChengYuan.Core.Json`
 
@@ -418,6 +432,47 @@ Identity 的最小 HTTP 管理 facet。
 | `AddInMemoryFeatures()` | 为测试和简单宿主启动场景注册内存型 feature value provider。 |
 | `FeatureContext` | 将当前租户、用户与相关性信息带入 feature 求值流程。 |
 | `FeatureValue` | 承载已解析的原始值及其 provider 来源。 |
+
+### `ChengYuan.Caching.Abstractions`
+
+可插拔缓存抽象层，提供类型化缓存契约、缓存命名与全局选项。
+
+#### 关键类型
+
+| 类型 | 说明 |
+|---|---|
+| `IChengYuanCache<TCacheItem>` | 类型化缓存接口，提供 `GetAsync`、`SetAsync`、`ExistsAsync`、`RemoveAsync` 和 `GetOrCreateAsync` 操作，返回 `ValueTask`。 |
+| `CacheNameAttribute` | 基于属性的缓存名称解析，其次从类型全称去除 `CacheItem` 后缀。 |
+| `ChengYuanCacheOptions` | 全局缓存选项：`HideErrors`（默认 `true`）、`KeyPrefix`、`GlobalCacheEntryOptions`（默认 20 分钟滑动过期）以及按类型配置的 `CacheConfigurators`。 |
+| `ChengYuanCacheEntryOptions` | 单条目过期设置，支持绝对过期与滑动过期。 |
+| `IChengYuanCache` | 非泛型底层缓存接口，用于原始字节操作。 |
+| `IChengYuanCacheStore` | 供缓存实现使用的 provider 无关存储抽象。 |
+| `IChengYuanCacheKeyNormalizer` | 使用前缀和作用域信息规范化缓存键。 |
+| `ChengYuanCacheKey` | 承载原始键、规范化键和可选作用域的值对象。 |
+| `IChengYuanCacheSerializer` | 缓存条目类型的序列化抽象。 |
+
+### `ChengYuan.Caching.Runtime`
+
+默认缓存运行时，内置 stampede 保护与错误隐藏机制。
+
+#### 关键类型
+
+| 类型 | 说明 |
+|---|---|
+| `CachingModule` | 注册默认 `ChengYuanCacheOptions`，设置 20 分钟滑动过期。 |
+| `AddCaching()` | 注册开放泛型 `IChengYuanCache<>` 由 `DefaultChengYuanTypedCache<>` 支撑，同时注册非泛型缓存、序列化器与键规范化器。 |
+| `DefaultChengYuanTypedCache<TCacheItem>` | 内部类型化缓存实现：`GetOrCreateAsync` 使用 `SemaphoreSlim` 双重检查模式防止 stampede，`HideErrors` 异常过滤，以及 `[LoggerMessage]` 生成的警告日志。 |
+
+### `ChengYuan.Caching.Memory`
+
+基于 `IMemoryCache` 的内存缓存存储。
+
+#### 关键类型
+
+| 类型 | 说明 |
+|---|---|
+| `MemoryCachingModule` | 在 Caching runtime 模块之上注册内存缓存存储。 |
+| `MemoryCacheStore` | 基于 `IMemoryCache` 的 `IChengYuanCacheStore` 实现。 |
 
 #### 示例
 

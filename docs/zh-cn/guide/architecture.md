@@ -7,7 +7,8 @@
 ## 设计原则
 
 - 先模块，后分层。
-- 将可复用切面拆成 `Framework` modules 和 `Application` modules，让技术系统与可复用应用能力分离演进。
+- 保持逻辑分类清晰：`FrameworkCore`、`Application`、`Extension`、`Host`。
+- 将可复用切面拆开，让技术系统、可复用应用能力与可选扩展各自演进。
 - 允许模块深度不一致，不强制所有模块都暴露相同层次或相同传输方式。
 - Web 和 CLI 都是可选的 transport facet。
 - 所有依赖必须显式声明，并通过架构测试约束。
@@ -55,6 +56,45 @@ src/
 
 `Framework`、`Applications`、`Hosts` 这类家族词只属于目录，不属于项目名。`Application`、`Persistence`、`Web` 这类 facet 词如果是在描述项目职责，则继续保留在项目名中。
 
+## 逻辑分类
+
+承渊当前仍然保留 `Framework`、`Applications`、`Hosts` 这三个物理顶层目录，但新设计应遵循下面的逻辑分类：
+
+| 逻辑分类 | 含义 | 典型例子 |
+|---|---|---|
+| `FrameworkCore` | 可复用的技术能力与模块化基础原语 | `Core`、`ExecutionContext`、`MultiTenancy`、`Authorization`、`Settings`、`Features`、`Auditing`、`Outbox` |
+| `Application` | 可复用的业务能力与边界上下文 | `Identity`、`TenantManagement`、`SettingManagement`、`PermissionManagement`、`FeatureManagement`、`AuditLogging` |
+| `Extension` | 将能力接到具体技术、存储或传输方式上的可选模块 | `*.Persistence`、`*.Web`、`MemoryCaching`、未来的 `Redis`、`MongoDb`、HTTP 租户来源适配器 |
+| `Host` | 负责组合模块并提供运行环境配置的可执行宿主 | `WebHost`、`CliHost` |
+
+分类依据是职责，而不是目录名。比如 `ChengYuan.Caching.Memory` 虽然位于 `src/Framework/` 下，但它的逻辑分类是 `Extension`，不是 `FrameworkCore`。
+
+### 模块基类
+
+每种逻辑分类都对应一个专用抽象基类。生产模块默认不应再直接继承 `ModuleBase`，而应选择对应的分类基类：
+
+| 逻辑分类 | 基类 | 适用场景 |
+|---|---|---|
+| `FrameworkCore` | `FrameworkCoreModule` | 共享技术能力与模块化基础原语 |
+| `Application` | `ApplicationModule` | 业务能力与边界上下文 |
+| `Extension` | `ExtensionModule` | 存储、传输、适配器、技术绑定 |
+| `Host` | `HostModule` | 宿主壳与环境胶水 |
+
+`ModuleBase` 仍然保留为底层模块引擎原语。只有低层模块化基础设施代码才允许直接继承它。其他生产模块都应使用四个分类基类之一。
+
+服务注册入口保持统一：所有模块都接收一个 `ServiceConfigurationContext`，包裹了 `IServiceCollection`、用于 DI 构建前日志记录的 `IInitLoggerFactory`、以及跨模块传递状态的 `Items` 字典。`ModuleBase` 提供 `Configure<TOptions>()` 系列辅助方法，并承载统一生命周期模板：`OnLoaded`、`PreConfigureServices`、`ConfigureServices`、`PostConfigureServices`、`PreInitializeAsync`、`InitializeAsync`、`PostInitializeAsync`、`ShutdownAsync`。模块初始化时，注册阶段通过 `IInitLogger<T>` 缓冲的日志条目会通过真实的 `ILoggerFactory` 重放。
+
+在 `OnLoaded` 阶段，`ModuleBase` 会缓存当前模块描述、直接依赖、直接被依赖方、分类结果以及是否为 root module。分类基类应直接使用这些缓存拓扑信息，而不是再次回查 catalog。
+
+四个分类基类不再只是标记类型，它们会在 load 阶段承担分类约束校验，并向派生模块提供分类级生命周期钩子：
+
+- `FrameworkCoreModule` 校验 framework 模块只能依赖其他 `FrameworkCore` 模块，并根据缓存的 dependents 区分 shared foundation 与 leaf foundation。
+- `ApplicationModule` 校验 application 模块只能依赖 `FrameworkCore` 或其他 `Application` 模块，并暴露能力拥有者的组合状态，例如是否被 `Extension` 扩展、是否被 `Host` 直接组合。
+- `ExtensionModule` 校验 extension 模块只能依赖 `FrameworkCore`、`Application` 或其他 `Extension` 模块，并从依赖图中解析它所附着的能力。Persistence 仍然只是 `Extension` 的一种形态，不是第五类。
+- `HostModule` 校验 host 模块只能被其他 `Host` 模块依赖，并基于缓存的 root 状态区分真正的启动宿主与内部组合模块。
+
+`ModuleDescriptor.Category` 仍然是运行时可见的分类元数据，用于诊断、测试和 host 观察。新模块应直接 override 这些模板方法或分类级 hook。
+
 ## 模块家族
 
 | 家族 | 目的 | 典型例子 | 说明 |
@@ -64,6 +104,8 @@ src/
 | `Hosts` | 可运行组合壳 | `WebHost`、`CliHost` | 只做模块组合、策略接线和传输胶水 |
 
 `ChengYuan.Core` 是唯一允许承载基础模块化、失败模型、DDD 原语以及共享扩展缝隙的 framework module。`ChengYuan.Hosting` 只保留薄的组合辅助角色，不能继续拥有模块模型本身。
+
+在这些物理家族内部，逻辑规则是：`FrameworkCore` 与 `Extension` 都可以位于 `src/Framework/` 下；`Application` 与它的可选 `Extension` 项目都可以位于 `src/Applications/` 下；`Host` 项目保持在 `src/Hosts/` 下。
 
 ## Facet 模型
 
@@ -89,6 +131,8 @@ src/
 | `Persistence` | 有状态模块的存储实现 |
 | `Web` | 可选 HTTP 适配层 |
 | `Cli` | 可选 CLI 适配层 |
+
+`Persistence`、`Web`、`Cli`、`Memory` 以及类似面向具体技术的 facet，在逻辑分类里都属于 `Extension`。它们是按需挂接到 `Application` 或 `FrameworkCore` 能力上的可选模块。
 
 ### 深度不一致是刻意设计
 
@@ -131,7 +175,7 @@ src/
 | 模块 | 负责内容 | 明确不负责 | 依赖 |
 |---|---|---|---|
 | `ChengYuan.Core` | 基础异常、错误码、`Result`、DDD 原语、强类型 Id、对象扩展契约、`IClock`、`IGuidGenerator` | Json、EF Core、租户上下文、当前用户上下文、缓存、Outbox | 不依赖内部模块 |
-| `ChengYuan.Core.Runtime` | 模块描述、模块目录、生命周期钩子、模块引导与排序 | 领域原语、序列化 Provider、数据 Provider | `ChengYuan.Core` |
+| `ChengYuan.Core.Runtime` | 模块描述、模块目录、生命周期钩子、模块引导与排序、`ServiceConfigurationContext`、初始化日志（`IInitLoggerFactory`、`IInitLogger<T>`）、日志工具（`IHasLogLevel`、`IExceptionWithSelfLogging`） | 领域原语、序列化 Provider、数据 Provider | `ChengYuan.Core` |
 | `ChengYuan.Core.Json` | 序列化抽象、System.Text.Json 集成、强类型 Id 转换器 | EF Core、仓储或 UoW 逻辑 | `ChengYuan.Core` |
 | `ChengYuan.Core.Validation` | 校验契约与默认校验管道 | 本地化资源、持久化 Provider | `ChengYuan.Core` |
 | `ChengYuan.Core.Localization` | 资源注册与异常/错误消息本地化缝隙 | 校验运行时策略、持久化 Provider | `ChengYuan.Core` |
@@ -236,13 +280,21 @@ src/
 
 ### CLI Host
 
-`ChengYuan.CliHost` 是基于 System.CommandLine 和 Spectre.Console 的命令行外壳，负责组合：
+`ChengYuan.CliHost` 是一个薄的命令行外壳，负责组合：
 
 - 被选中的 framework runtime facet
-- 被选中的 application `Cli` facet
-- 控制台交互与脚本友好的输出
+- 被选中的 application 模块或未来的 `Cli` facet
+- CLI 专属运行时胶水与脚本友好输出
 
-CLI 场景可以有意省略某些与命令行无关的模块。认证型模块、重 UI 模块，甚至某些持久化较重的模块都可以按需选择，只要声明依赖被满足即可。
+`CliHost` 的内部结构应与 `WebHost` 一样保持分层：
+
+- `CliHostFrameworkCompositionModule` 负责 framework runtime 依赖
+- `CliHostApplicationCompositionModule` 负责选中的 application 模块
+- `CliHostRuntimeGlueModule` 负责 CLI 专属运行时胶水
+
+`Program.cs` 必须保持极薄，通过 `AddCliHostComposition(...)` 和 `RunCliHostCompositionAsync()` 这类宿主接缝来完成组合。
+
+CLI 场景可以有意省略某些与命令行无关的模块。不要把 Web transport facet 拉进 `CliHost`；但当命令工作负载需要时，引入 persistence-backed application 模块是合理的。
 
 ## 后续开发规则
 

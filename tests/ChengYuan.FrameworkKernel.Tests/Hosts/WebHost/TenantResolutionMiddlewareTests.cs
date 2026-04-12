@@ -1,6 +1,8 @@
 using System.Net;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
+using ChengYuan.Core.Modularity;
+using ChengYuan.EntityFrameworkCore;
 using System.Security.Claims;
 using ChengYuan.MultiTenancy;
 using ChengYuan.WebHost;
@@ -239,14 +241,13 @@ public class TenantResolutionMiddlewareTests
         var databaseName = $"tenant-middleware-{Guid.NewGuid():N}";
         var builder = WebApplication.CreateBuilder();
         builder.WebHost.UseTestServer();
-        builder.Services.AddWebHostComposition(options => options.UseInMemoryDatabase(databaseName));
-        builder.Services.AddMultiTenancy(configure);
+        builder.Services.UseDbContextOptions(options => options.UseInMemoryDatabase(databaseName));
+        builder.Services.AddWebHostComposition(configure);
         configureServices?.Invoke(builder.Services);
 
         var app = builder.Build();
         beforeMultiTenancy?.Invoke(app);
-        app.UseMultiTenancy();
-        app.MapWebHostEndpoints();
+        app.UseWebHostComposition();
         await app.StartAsync();
 
         return app;

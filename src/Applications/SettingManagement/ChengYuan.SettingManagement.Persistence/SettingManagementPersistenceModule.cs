@@ -1,13 +1,12 @@
 using ChengYuan.Core.Modularity;
-using Microsoft.Extensions.DependencyInjection;
 
 namespace ChengYuan.SettingManagement;
 
 [DependsOn(typeof(SettingManagementModule))]
-public sealed class SettingManagementPersistenceModule : ModuleBase
+public sealed class SettingManagementPersistenceModule : ExtensionModule
 {
-    public override void ConfigureServices(IServiceCollection services)
+    public override void ConfigureServices(ServiceConfigurationContext context)
     {
-        services.AddSettingManagementPersistence();
+        context.Services.AddSettingManagementPersistence();
     }
 }

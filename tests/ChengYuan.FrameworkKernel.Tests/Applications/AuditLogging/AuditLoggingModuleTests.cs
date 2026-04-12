@@ -121,7 +121,8 @@ public class AuditLoggingModuleTests
     }
 
     [DependsOn(typeof(AuditLoggingModule))]
-    private sealed class AuditLoggingTestModule : ModuleBase
+    private sealed class AuditLoggingTestModule : ApplicationModule
     {
     }
+
 }

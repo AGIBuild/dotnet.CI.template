@@ -189,7 +189,7 @@ public class FeaturesModuleTests
     }
 
     [DependsOn(typeof(FeaturesModule))]
-    private sealed class FeaturesTestModule : ModuleBase
+    private sealed class FeaturesTestModule : FrameworkCoreModule
     {
     }
 

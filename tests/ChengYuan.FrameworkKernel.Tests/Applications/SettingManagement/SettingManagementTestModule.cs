@@ -4,6 +4,6 @@ using ChengYuan.SettingManagement;
 namespace ChengYuan.FrameworkKernel.Tests;
 
 [DependsOn(typeof(SettingManagementModule))]
-internal sealed class SettingManagementTestModule : ModuleBase
+internal sealed class SettingManagementTestModule : ApplicationModule
 {
 }
