@@ -1,16 +1,39 @@
 using ChengYuan.EntityFrameworkCore;
 using ChengYuan.WebHost;
+using Serilog;
 
-var builder = WebApplication.CreateBuilder(args);
-var connectionString = builder.Configuration.GetConnectionString("Default") ?? "Data Source=chengyuan-webhost.db";
-builder.Services.UseSqlite(connectionString);
-builder.Services.AddWebHostComposition();
+Log.Logger = new LoggerConfiguration()
+    .WriteTo.Console(formatProvider: System.Globalization.CultureInfo.InvariantCulture)
+    .CreateBootstrapLogger();
 
-var app = builder.Build();
+try
+{
+    var builder = WebApplication.CreateBuilder(args);
 
-app.UseWebHostComposition();
+    builder.Host.UseSerilog((context, services, configuration) => configuration
+        .ReadFrom.Configuration(context.Configuration)
+        .ReadFrom.Services(services));
 
-app.Run();
+    var connectionString = builder.Configuration.GetConnectionString("Default") ?? "Data Source=chengyuan-webhost.db";
+    builder.Services.UseSqlite(connectionString);
+    builder.Services.AddWebHostComposition();
+
+    var app = builder.Build();
+
+    app.UseSerilogRequestLogging();
+
+    app.UseWebHostComposition();
+
+    app.Run();
+}
+catch (Exception ex) when (ex is not HostAbortedException)
+{
+    Log.Fatal(ex, "Application terminated unexpectedly");
+}
+finally
+{
+    Log.CloseAndFlush();
+}
 
 public partial class Program
 {

@@ -16,6 +16,7 @@ public static class ChengYuanDbContextConfigurationContextPostgreSqlExtensions
         return context.DbContextOptions.UseNpgsql(connectionString, optionsBuilder =>
         {
             optionsBuilder.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery);
+            ApplyMigrationHistoryTable(context, optionsBuilder);
             npgsqlOptionsAction?.Invoke(optionsBuilder);
         });
     }
@@ -31,7 +32,19 @@ public static class ChengYuanDbContextConfigurationContextPostgreSqlExtensions
         return context.DbContextOptions.UseNpgsql(connection, optionsBuilder =>
         {
             optionsBuilder.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery);
+            ApplyMigrationHistoryTable(context, optionsBuilder);
             npgsqlOptionsAction?.Invoke(optionsBuilder);
         });
+    }
+
+    private static void ApplyMigrationHistoryTable(
+        ChengYuanDbContextConfigurationContext context,
+        NpgsqlDbContextOptionsBuilder builder)
+    {
+        var contextType = context.DbContextOptions.Options.ContextType;
+        if (contextType is not null)
+        {
+            builder.MigrationsHistoryTable(MigrationHistoryTableNameResolver.Resolve(contextType));
+        }
     }
 }

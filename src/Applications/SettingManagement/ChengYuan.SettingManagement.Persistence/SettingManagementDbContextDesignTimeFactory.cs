@@ -1,0 +1,5 @@
+using ChengYuan.EntityFrameworkCore;
+
+namespace ChengYuan.SettingManagement;
+
+public sealed class SettingManagementDbContextDesignTimeFactory : ChengYuanSqliteDesignTimeDbContextFactory<SettingManagementDbContext>;

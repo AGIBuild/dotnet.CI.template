@@ -56,6 +56,12 @@ public static class ConventionalRegistrationExtensions
 
     private static List<Type> GetExposedServiceTypes(Type implementationType)
     {
+        var attribute = implementationType.GetCustomAttribute<ExposeServicesAttribute>();
+        if (attribute is not null && attribute.ServiceTypes.Length > 0)
+        {
+            return [.. attribute.ServiceTypes];
+        }
+
         var serviceTypes = new List<Type>();
 
         foreach (var interfaceType in implementationType.GetInterfaces())

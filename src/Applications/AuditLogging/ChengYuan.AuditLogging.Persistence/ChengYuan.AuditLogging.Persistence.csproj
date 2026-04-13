@@ -6,6 +6,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\..\Framework\Data\ChengYuan.EntityFrameworkCore\ChengYuan.EntityFrameworkCore.csproj" />
+    <ProjectReference Include="..\..\..\Framework\Data\ChengYuan.Data.Sqlite\ChengYuan.Data.Sqlite.csproj" />
     <ProjectReference Include="..\ChengYuan.AuditLogging.Application\ChengYuan.AuditLogging.Application.csproj" />
   </ItemGroup>
 

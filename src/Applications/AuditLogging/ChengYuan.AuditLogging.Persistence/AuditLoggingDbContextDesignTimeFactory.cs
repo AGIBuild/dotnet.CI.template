@@ -1,0 +1,5 @@
+using ChengYuan.EntityFrameworkCore;
+
+namespace ChengYuan.AuditLogging;
+
+public sealed class AuditLoggingDbContextDesignTimeFactory : ChengYuanSqliteDesignTimeDbContextFactory<AuditLoggingDbContext>;

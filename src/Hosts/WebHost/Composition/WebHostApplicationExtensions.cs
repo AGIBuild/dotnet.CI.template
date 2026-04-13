@@ -13,7 +13,20 @@ public static class WebHostApplicationExtensions
     {
         ArgumentNullException.ThrowIfNull(app);
 
+        app.UseMiddleware<GlobalExceptionMiddleware>();
+        app.UseMiddleware<SecurityHeadersMiddleware>();
+
+        if (!app.Environment.IsDevelopment())
+        {
+            app.UseHsts();
+        }
+
+        app.UseCors();
+        app.UseAuthentication();
+        app.UseMiddleware<CurrentUserMiddleware>();
         app.UseMultiTenancy();
+        app.UseAuthorization();
+
         app.MapWebHostEndpoints();
 
         return app;
@@ -22,6 +35,8 @@ public static class WebHostApplicationExtensions
     public static WebApplication MapWebHostEndpoints(this WebApplication app)
     {
         ArgumentNullException.ThrowIfNull(app);
+
+        app.MapOpenApi();
 
         app.MapHealthChecks("/healthz", new HealthCheckOptions
         {

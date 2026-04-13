@@ -13,7 +13,11 @@ public static class ChengYuanDbContextConfigurationContextSqliteExtensions
         ArgumentNullException.ThrowIfNull(context);
         ArgumentException.ThrowIfNullOrWhiteSpace(connectionString);
 
-        return context.DbContextOptions.UseSqlite(connectionString, sqliteOptionsAction);
+        return context.DbContextOptions.UseSqlite(connectionString, builder =>
+        {
+            ApplyMigrationHistoryTable(context, builder);
+            sqliteOptionsAction?.Invoke(builder);
+        });
     }
 
     public static DbContextOptionsBuilder UseSqlite(
@@ -24,6 +28,21 @@ public static class ChengYuanDbContextConfigurationContextSqliteExtensions
         ArgumentNullException.ThrowIfNull(context);
         ArgumentNullException.ThrowIfNull(connection);
 
-        return context.DbContextOptions.UseSqlite(connection, sqliteOptionsAction);
+        return context.DbContextOptions.UseSqlite(connection, builder =>
+        {
+            ApplyMigrationHistoryTable(context, builder);
+            sqliteOptionsAction?.Invoke(builder);
+        });
+    }
+
+    private static void ApplyMigrationHistoryTable(
+        ChengYuanDbContextConfigurationContext context,
+        SqliteDbContextOptionsBuilder builder)
+    {
+        var contextType = context.DbContextOptions.Options.ContextType;
+        if (contextType is not null)
+        {
+            builder.MigrationsHistoryTable(MigrationHistoryTableNameResolver.Resolve(contextType));
+        }
     }
 }

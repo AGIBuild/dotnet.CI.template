@@ -1,11 +1,13 @@
 using ChengYuan.Core.Data;
+using ChengYuan.Core.DependencyInjection;
 
 namespace ChengYuan.Identity;
 
+[ExposeServices(typeof(IRoleManager), typeof(IRoleReader))]
 public sealed class RoleManager(
     IIdentityRoleRepository roleRepository,
     IIdentityUserRepository userRepository,
-    IUnitOfWork unitOfWork) : IRoleManager, IRoleReader
+    IUnitOfWork unitOfWork) : IRoleManager, IRoleReader, IScopedService
 {
     public async ValueTask<RoleRecord> CreateAsync(string name, CancellationToken cancellationToken = default)
     {
