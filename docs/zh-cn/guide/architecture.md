@@ -82,7 +82,7 @@ src/
 
 `ModuleBase` 仍然保留为底层模块引擎原语。只有低层模块化基础设施代码才允许直接继承它。其他生产模块都应使用四个分类基类之一。
 
-服务注册入口保持统一：所有模块都接收一个 `ServiceConfigurationContext`，包裹了 `IServiceCollection`、用于 DI 构建前日志记录的 `IInitLoggerFactory`、以及跨模块传递状态的 `Items` 字典。`ModuleBase` 提供 `Configure<TOptions>()` 系列辅助方法，并承载统一生命周期模板：`OnLoaded`、`PreConfigureServices`、`ConfigureServices`、`PostConfigureServices`、`PreInitializeAsync`、`InitializeAsync`、`PostInitializeAsync`、`ShutdownAsync`。模块初始化时，注册阶段通过 `IInitLogger<T>` 缓冲的日志条目会通过真实的 `ILoggerFactory` 重放。
+服务注册入口保持统一：所有模块都接收一个 `ServiceConfigurationContext`，包裹了 `IServiceCollection`、用于 DI 构建前日志记录的 `IInitLoggerFactory`、寿主已注册时可用的可选 `IConfiguration`、以及跨模块传递状态的 `Items` 字典。`ModuleBase` 提供 `Configure<TOptions>()` 和 `PreConfigure<TOptions>()` 系列辅助方法，并承载统一生命周期模板：`OnLoaded`、`PreConfigureServices`、`ConfigureServices`、`PostConfigureServices`、`PreInitializeAsync`、`InitializeAsync`、`PostInitializeAsync`、`ShutdownAsync`。异步服务注册替代方法（`PreConfigureServicesAsync`、`ConfigureServicesAsync`、`PostConfigureServicesAsync`）供需要在注册阶段执行 I/O 的模块使用。模块初始化时，注册阶段通过 `IInitLogger<T>` 缓冲的日志条目会通过真实的 `ILoggerFactory` 重放。通过 `ModuleLifecycleOptions` 注册的生命周期贡献者会在每个模块的初始化和关闭阶段执行横切逻辑。
 
 在 `OnLoaded` 阶段，`ModuleBase` 会缓存当前模块描述、直接依赖、直接被依赖方、分类结果以及是否为 root module。分类基类应直接使用这些缓存拓扑信息，而不是再次回查 catalog。
 
@@ -175,7 +175,7 @@ src/
 | 模块 | 负责内容 | 明确不负责 | 依赖 |
 |---|---|---|---|
 | `ChengYuan.Core` | 基础异常、错误码、`Result`、DDD 原语、强类型 Id、对象扩展契约、`IClock`、`IGuidGenerator` | Json、EF Core、租户上下文、当前用户上下文、缓存、Outbox | 不依赖内部模块 |
-| `ChengYuan.Core.Runtime` | 模块描述、模块目录、生命周期钩子、模块引导与排序、`ServiceConfigurationContext`、初始化日志（`IInitLoggerFactory`、`IInitLogger<T>`）、日志工具（`IHasLogLevel`、`IExceptionWithSelfLogging`） | 领域原语、序列化 Provider、数据 Provider | `ChengYuan.Core` |
+| `ChengYuan.Core.Runtime` | 模块描述、模块目录、生命周期钩子、模块引导与排序、`ServiceConfigurationContext`、初始化日志（`IInitLoggerFactory`、`IInitLogger<T>`）、日志工具（`IHasLogLevel`、`IExceptionWithSelfLogging`）、异步服务注册（`AddModuleAsync`、`AddModularApplicationAsync`）、生命周期贡献者（`IModuleLifecycleContributor`、`ModuleLifecycleOptions`）、依赖注入原语（`ObjectAccessor<T>`、`PreConfigureActionList<T>`、约定式注册标记） | 领域原语、序列化 Provider、数据 Provider | `ChengYuan.Core` |
 | `ChengYuan.Core.Json` | 序列化抽象、System.Text.Json 集成、强类型 Id 转换器 | EF Core、仓储或 UoW 逻辑 | `ChengYuan.Core` |
 | `ChengYuan.Core.Validation` | 校验契约与默认校验管道 | 本地化资源、持久化 Provider | `ChengYuan.Core` |
 | `ChengYuan.Core.Localization` | 资源注册与异常/错误消息本地化缝隙 | 校验运行时策略、持久化 Provider | `ChengYuan.Core` |

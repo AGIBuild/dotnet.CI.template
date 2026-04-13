@@ -50,13 +50,30 @@
 | `DependsOnAttribute` | 声明直接模块依赖，用于组合排序。 |
 | `ModuleCatalog` | 暴露 Host 已加载的有序模块列表。 |
 | `IModuleDescriptor.Category` | 报告已加载模块属于 `FrameworkCore`、`Application`、`Extension` 还是 `Host`。 |
-| `ServiceConfigurationContext` | 服务注册上下文，包装 `IServiceCollection`、`IInitLoggerFactory` 与跨模块 `Items` 字典。在 `ConfigureServices` 阶段传递给每个模块。 |
+| `ServiceConfigurationContext` | 服务注册上下文，包装 `IServiceCollection`、`IInitLoggerFactory`、可选的 `IConfiguration` 与跨模块 `Items` 字典。在 `ConfigureServices` 阶段传递给每个模块。 |
 | `IInitLoggerFactory` | 用于创建 `IInitLogger<T>` 实例的工厂，在 DI 容器构建前缓冲日志条目。通过 `ServiceConfigurationContext.InitLoggerFactory` 暴露。 |
 | `IInitLogger<T>` | 在模块加载期间缓冲 `InitLogEntry` 记录的 `ILogger<T>` 实现，待 DI 可用后重放。 |
 | `InitLogEntry` | 密封记录，携带类别名、日志级别、事件 Id、格式化消息与可选异常，用于延迟重放。 |
 | `IHasLogLevel` | 为异常或对象声明自带 `LogLevel` 的接口。 |
 | `IExceptionWithSelfLogging` | 通过 `Log(ILogger)` 提供结构化自记录能力的异常接口。 |
 | `HasLogLevelExtensions` | 面向 `IHasLogLevel` 异常的 fluent `WithLogLevel()` 扩展方法。 |
+| `AddModuleAsync<TModule>()` | `AddModule<TModule>()` 的异步替代，依次调用每个模块的 `PreConfigureServicesAsync`、`ConfigureServicesAsync` 和 `PostConfigureServicesAsync`。 |
+| `AddModularApplicationAsync<TStartupModule>()` | `AddModularApplication<TStartupModule>()` 的异步替代，供需要异步服务注册的宿主使用。 |
+| `IModuleLifecycleContributor` | 横切扩展点，在每个模块的 `InitializeAsync` 和 `ShutdownAsync` 期间执行。初始化时按注册顺序调用，关闭时按逆序调用。 |
+| `ModuleLifecycleOptions` | 携带有序 `Contributors` 列表的选项类，包含在初始化时解析的 `IModuleLifecycleContributor` 类型集合。 |
+| `IObjectAccessor<T>` | 协变只读访问器，用于读取服务注册阶段存入 `IServiceCollection` 的可变值。 |
+| `ObjectAccessor<T>` | `IObjectAccessor<T>` 的可变实现，注册在 `IServiceCollection` 的位置 0 以实现快速检索。 |
+| `AddObjectAccessor<T>()` | 向服务集合注册 `ObjectAccessor<T>`。重复添加时抛出异常。 |
+| `TryAddObjectAccessor<T>()` | 仅在不存在时才注册 `ObjectAccessor<T>`。 |
+| `GetObject<T>()` / `GetObjectOrNull<T>()` | 从已注册的 `ObjectAccessor<T>` 中检索值。 |
+| `PreConfigureActionList<T>` | 预配置操作累加器。模块调用 `PreConfigure<T>(action)` 贡献操作，框架在 `ConfigureServices` 之前统一应用。 |
+| `PreConfigure<T>(Action<T>)` | `IServiceCollection` 上的扩展方法，用于注册选项类型的预配置动作。 |
+| `ExecutePreConfiguredActions<T>()` | 将已累积的所有 `PreConfigure<T>` 动作应用到选项实例并返回。 |
+| `ITransientService` | 供 `AddConventionalServices()` 按 Transient 生命周期注册的标记接口。 |
+| `IScopedService` | 供 `AddConventionalServices()` 按 Scoped 生命周期注册的标记接口。 |
+| `ISingletonService` | 供 `AddConventionalServices()` 按 Singleton 生命周期注册的标记接口。 |
+| `DisableConventionalRegistrationAttribute` | 将类排除在约定式服务注册扫描之外的特性标记。 |
+| `AddConventionalServices(Assembly)` | 扫描程序集中实现 `ITransientService`、`IScopedService` 或 `ISingletonService` 的类，并使用 `TryAdd` 语义按匹配的服务类型注册。 |
 
 ### `ChengYuan.Core.Json`
 

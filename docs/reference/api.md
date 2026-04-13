@@ -50,13 +50,30 @@ Core module composition primitives.
 | `DependsOnAttribute` | Declares direct module dependencies for composition ordering. |
 | `ModuleCatalog` | Exposes the ordered module list loaded by a host. |
 | `IModuleDescriptor.Category` | Reports whether a loaded module is `FrameworkCore`, `Application`, `Extension`, or `Host`. |
-| `ServiceConfigurationContext` | Service-registration context wrapping `IServiceCollection`, `IInitLoggerFactory`, and a cross-module `Items` dictionary. Passed to every module during `ConfigureServices`. |
+| `ServiceConfigurationContext` | Service-registration context wrapping `IServiceCollection`, `IInitLoggerFactory`, an optional `IConfiguration`, and a cross-module `Items` dictionary. Passed to every module during `ConfigureServices`. |
 | `IInitLoggerFactory` | Factory for creating `IInitLogger<T>` instances that buffer log entries before DI is built. Exposed via `ServiceConfigurationContext.InitLoggerFactory`. |
 | `IInitLogger<T>` | `ILogger<T>` implementation that buffers `InitLogEntry` records during module loading for later replay once DI is available. |
 | `InitLogEntry` | Sealed record carrying category name, log level, event id, formatted message, and optional exception for replay. |
 | `IHasLogLevel` | Interface for exceptions or objects that carry a self-declared `LogLevel`. |
 | `IExceptionWithSelfLogging` | Interface for exceptions that provide structured self-logging via `Log(ILogger)`. |
 | `HasLogLevelExtensions` | Fluent `WithLogLevel()` extension for `IHasLogLevel` exceptions. |
+| `AddModuleAsync<TModule>()` | Async alternative to `AddModule<TModule>()` that calls `PreConfigureServicesAsync`, `ConfigureServicesAsync`, and `PostConfigureServicesAsync` on each module. |
+| `AddModularApplicationAsync<TStartupModule>()` | Async alternative to `AddModularApplication<TStartupModule>()` for hosts that need async service registration. |
+| `IModuleLifecycleContributor` | Extension point for cross-cutting logic that runs during every module's `InitializeAsync` and `ShutdownAsync`. Contributors are invoked in registration order on init and reverse order on shutdown. |
+| `ModuleLifecycleOptions` | Options class carrying an ordered `Contributors` list of `IModuleLifecycleContributor` types resolved at initialization time. |
+| `IObjectAccessor<T>` | Covariant read-only accessor for a mutable value stored in the service collection during registration. |
+| `ObjectAccessor<T>` | Mutable implementation of `IObjectAccessor<T>`, registered at position 0 in `IServiceCollection` for fast retrieval. |
+| `AddObjectAccessor<T>()` | Registers an `ObjectAccessor<T>` into the service collection. Throws if a duplicate is added. |
+| `TryAddObjectAccessor<T>()` | Registers an `ObjectAccessor<T>` only if one does not already exist. |
+| `GetObject<T>()` / `GetObjectOrNull<T>()` | Retrieves the value from a registered `ObjectAccessor<T>`. |
+| `PreConfigureActionList<T>` | Accumulator for pre-configuration actions. Modules call `PreConfigure<T>(action)` to contribute, and the framework applies all actions before `ConfigureServices`. |
+| `PreConfigure<T>(Action<T>)` | Extension on `IServiceCollection` to register a pre-configuration action for an options type. |
+| `ExecutePreConfiguredActions<T>()` | Applies all accumulated `PreConfigure<T>` actions and returns the configured options instance. |
+| `ITransientService` | Marker interface for classes that should be registered as transient by `AddConventionalServices()`. |
+| `IScopedService` | Marker interface for classes that should be registered as scoped by `AddConventionalServices()`. |
+| `ISingletonService` | Marker interface for classes that should be registered as singleton by `AddConventionalServices()`. |
+| `DisableConventionalRegistrationAttribute` | Attribute that opts a class out of conventional service registration scanning. |
+| `AddConventionalServices(Assembly)` | Scans an assembly for classes implementing `ITransientService`, `IScopedService`, or `ISingletonService` and registers them with matching service types using `TryAdd` semantics. |
 
 ### `ChengYuan.Core.Json`
 
