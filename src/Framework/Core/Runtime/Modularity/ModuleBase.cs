@@ -1,3 +1,4 @@
+using ChengYuan.Core.DependencyInjection;
 using ChengYuan.Core.Lifecycle;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -35,8 +36,7 @@ public abstract class ModuleBase
     protected internal ServiceConfigurationContext ServiceConfigurationContext
     {
         get => _serviceConfigurationContext ?? throw new InvalidOperationException(
-            $"{nameof(ServiceConfigurationContext)} is only available in the " +
-            $"{nameof(PreConfigureServices)}, {nameof(ConfigureServices)}, and {nameof(PostConfigureServices)} methods.");
+            $"{nameof(ServiceConfigurationContext)} is only available during the service registration phase.");
         internal set => _serviceConfigurationContext = value;
     }
 
@@ -53,14 +53,38 @@ public abstract class ModuleBase
         ArgumentNullException.ThrowIfNull(context);
     }
 
+    public virtual Task PreConfigureServicesAsync(ServiceConfigurationContext context)
+    {
+        ArgumentNullException.ThrowIfNull(context);
+
+        PreConfigureServices(context);
+        return Task.CompletedTask;
+    }
+
     public virtual void ConfigureServices(ServiceConfigurationContext context)
     {
         ArgumentNullException.ThrowIfNull(context);
     }
 
+    public virtual Task ConfigureServicesAsync(ServiceConfigurationContext context)
+    {
+        ArgumentNullException.ThrowIfNull(context);
+
+        ConfigureServices(context);
+        return Task.CompletedTask;
+    }
+
     public virtual void PostConfigureServices(ServiceConfigurationContext context)
     {
         ArgumentNullException.ThrowIfNull(context);
+    }
+
+    public virtual Task PostConfigureServicesAsync(ServiceConfigurationContext context)
+    {
+        ArgumentNullException.ThrowIfNull(context);
+
+        PostConfigureServices(context);
+        return Task.CompletedTask;
     }
 
     public virtual async Task PreInitializeAsync(IModuleInitializationContext context)
@@ -141,6 +165,12 @@ public abstract class ModuleBase
         return Dependents
             .Where(dependent => categories.Contains(dependent.Category))
             .ToArray();
+    }
+
+    protected void PreConfigure<TOptions>(Action<TOptions> configureOptions)
+        where TOptions : class
+    {
+        ServiceConfigurationContext.Services.PreConfigure(configureOptions);
     }
 
     protected void Configure<TOptions>(Action<TOptions> configureOptions)

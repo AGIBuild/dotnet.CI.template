@@ -10,22 +10,23 @@ public static class ModularApplicationServiceCollectionExtensions
         Action<ModularApplicationOptions>? configure = null)
         where TStartupModule : ModuleBase, new()
     {
-        var options = new ModularApplicationOptions { StartupModuleType = typeof(TStartupModule) };
-        foreach (var additionalModuleType in GetAdditionalModuleTypes(services))
-        {
-            options.AddAdditionalModule(additionalModuleType);
-        }
-
-        configure?.Invoke(options);
+        var options = BuildOptions<TStartupModule>(services, configure);
 
         services.AddModule(typeof(TStartupModule), options.AdditionalModuleTypes);
-        services.AddSingleton(options);
+        RegisterModularApplication(services, options);
 
-        services.AddSingleton<IModularApplication>(serviceProvider =>
-            new ModularApplication(
-                serviceProvider,
-                serviceProvider.GetRequiredService<IModuleCatalog>(),
-                serviceProvider.GetRequiredService<IModuleManager>()));
+        return services;
+    }
+
+    public static async Task<IServiceCollection> AddModularApplicationAsync<TStartupModule>(
+        this IServiceCollection services,
+        Action<ModularApplicationOptions>? configure = null)
+        where TStartupModule : ModuleBase, new()
+    {
+        var options = BuildOptions<TStartupModule>(services, configure);
+
+        await services.AddModuleAsync(typeof(TStartupModule), options.AdditionalModuleTypes);
+        RegisterModularApplication(services, options);
 
         return services;
     }
@@ -52,6 +53,32 @@ public static class ModularApplicationServiceCollectionExtensions
         services.AddSingleton(new AdditionalModuleRegistration(moduleType));
 
         return services;
+    }
+
+    private static ModularApplicationOptions BuildOptions<TStartupModule>(
+        IServiceCollection services,
+        Action<ModularApplicationOptions>? configure)
+        where TStartupModule : ModuleBase
+    {
+        var options = new ModularApplicationOptions { StartupModuleType = typeof(TStartupModule) };
+        foreach (var additionalModuleType in GetAdditionalModuleTypes(services))
+        {
+            options.AddAdditionalModule(additionalModuleType);
+        }
+
+        configure?.Invoke(options);
+        return options;
+    }
+
+    private static void RegisterModularApplication(IServiceCollection services, ModularApplicationOptions options)
+    {
+        services.AddSingleton(options);
+
+        services.AddSingleton<IModularApplication>(serviceProvider =>
+            new ModularApplication(
+                serviceProvider,
+                serviceProvider.GetRequiredService<IModuleCatalog>(),
+                serviceProvider.GetRequiredService<IModuleManager>()));
     }
 
     private static Type[] GetAdditionalModuleTypes(IServiceCollection services)

@@ -1,10 +1,41 @@
 using ChengYuan.Core.Logging;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace ChengYuan.Core.Modularity;
 
 public static class ModuleServiceCollectionExtensions
 {
+    public static Task<IServiceCollection> AddModuleAsync<TModule>(this IServiceCollection services)
+        where TModule : ModuleBase, new()
+    {
+        return services.AddModuleAsync(typeof(TModule), []);
+    }
+
+    public static Task<IServiceCollection> AddModuleAsync(this IServiceCollection services, Type rootModuleType)
+    {
+        return services.AddModuleAsync(rootModuleType, []);
+    }
+
+    public static async Task<IServiceCollection> AddModuleAsync(
+        this IServiceCollection services,
+        Type rootModuleType,
+        IEnumerable<Type> additionalModuleTypes)
+    {
+        ArgumentNullException.ThrowIfNull(services);
+        ArgumentNullException.ThrowIfNull(rootModuleType);
+        ArgumentNullException.ThrowIfNull(additionalModuleTypes);
+
+        var (catalog, configurationContext) = PrepareModuleGraph(services, rootModuleType, additionalModuleTypes);
+
+        foreach (var descriptor in catalog.ConcreteModules)
+        {
+            await ExecuteServiceRegistrationStageAsync(descriptor, configurationContext);
+        }
+
+        return services;
+    }
+
     public static IServiceCollection AddModule<TModule>(this IServiceCollection services)
         where TModule : ModuleBase, new()
     {
@@ -25,6 +56,21 @@ public static class ModuleServiceCollectionExtensions
         ArgumentNullException.ThrowIfNull(rootModuleType);
         ArgumentNullException.ThrowIfNull(additionalModuleTypes);
 
+        var (catalog, configurationContext) = PrepareModuleGraph(services, rootModuleType, additionalModuleTypes);
+
+        foreach (var descriptor in catalog.ConcreteModules)
+        {
+            ExecuteServiceRegistrationStage(descriptor, configurationContext);
+        }
+
+        return services;
+    }
+
+    private static (ModuleCatalog Catalog, ServiceConfigurationContext Context) PrepareModuleGraph(
+        IServiceCollection services,
+        Type rootModuleType,
+        IEnumerable<Type> additionalModuleTypes)
+    {
         if (!typeof(ModuleBase).IsAssignableFrom(rootModuleType))
         {
             throw new InvalidOperationException($"Module type '{rootModuleType.FullName}' must inherit from {nameof(ModuleBase)}.");
@@ -61,14 +107,16 @@ public static class ModuleServiceCollectionExtensions
             ExecuteLoadStage(descriptor, catalog, dependentsMap);
         }
 
-        var configurationContext = new ServiceConfigurationContext(services, initLoggerFactory);
+        var configurationContext = new ServiceConfigurationContext(services, initLoggerFactory, ResolveConfiguration(services));
 
-        foreach (var descriptor in orderedDescriptors)
-        {
-            ExecuteServiceRegistrationStage(descriptor, configurationContext);
-        }
+        return (catalog, configurationContext);
+    }
 
-        return services;
+    private static IConfiguration? ResolveConfiguration(IServiceCollection services)
+    {
+        return services
+            .LastOrDefault(static d => d.ServiceType == typeof(IConfiguration))
+            ?.ImplementationInstance as IConfiguration;
     }
 
     private static Dictionary<Type, IReadOnlyList<IModuleDescriptor>> BuildDependentsMap(
@@ -125,6 +173,31 @@ public static class ModuleServiceCollectionExtensions
             descriptor.Instance.PreConfigureServices(context);
             descriptor.Instance.ConfigureServices(context);
             descriptor.Instance.PostConfigureServices(context);
+        }
+        catch (OperationCanceledException)
+        {
+            throw;
+        }
+        catch (Exception ex)
+        {
+            throw new InvalidOperationException(
+                $"An error occurred during service registration of module '{descriptor.Name}'.",
+                ex);
+        }
+        finally
+        {
+            descriptor.Instance.ServiceConfigurationContext = null!;
+        }
+    }
+
+    private static async Task ExecuteServiceRegistrationStageAsync(ModuleDescriptor descriptor, ServiceConfigurationContext context)
+    {
+        try
+        {
+            descriptor.Instance.ServiceConfigurationContext = context;
+            await descriptor.Instance.PreConfigureServicesAsync(context);
+            await descriptor.Instance.ConfigureServicesAsync(context);
+            await descriptor.Instance.PostConfigureServicesAsync(context);
         }
         catch (OperationCanceledException)
         {

@@ -10,6 +10,7 @@
       "chengyuan.core": {
         "type": "Project",
         "dependencies": {
+          "Microsoft.Extensions.Configuration.Abstractions": "[10.0.0, )",
           "Microsoft.Extensions.DependencyInjection.Abstractions": "[10.0.0, )",
           "Microsoft.Extensions.Logging.Abstractions": "[10.0.0, )",
           "Microsoft.Extensions.Options": "[10.0.0, )"
@@ -52,6 +53,15 @@
           "ChengYuan.Core": "[0.2.10-local, )",
           "ChengYuan.ExecutionContext.Runtime": "[0.2.10-local, )",
           "ChengYuan.MultiTenancy.Abstractions": "[0.2.10-local, )"
+        }
+      },
+      "Microsoft.Extensions.Configuration.Abstractions": {
+        "type": "CentralTransitive",
+        "requested": "[10.0.0, )",
+        "resolved": "10.0.0",
+        "contentHash": "d2kDKnCsJvY7mBVhcjPSp9BkJk48DsaHPg5u+Oy4f8XaOqnEedRy/USyvnpHL92wpJ6DrTPy7htppUUzskbCXQ==",
+        "dependencies": {
+          "Microsoft.Extensions.Primitives": "10.0.0"
         }
       },
       "Microsoft.Extensions.DependencyInjection.Abstractions": {

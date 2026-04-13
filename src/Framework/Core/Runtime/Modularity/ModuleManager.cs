@@ -2,6 +2,7 @@ using ChengYuan.Core.Lifecycle;
 using ChengYuan.Core.Logging;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 
 namespace ChengYuan.Core.Modularity;
 
@@ -26,6 +27,7 @@ public sealed class ModuleManager : IModuleManager
 
         ReplayInitLogs();
 
+        var contributors = ResolveLifecycleContributors();
         var context = new ModuleInitializationContext(_serviceProvider, _catalog, cancellationToken);
 
         foreach (var descriptor in _catalog.ConcreteModules)
@@ -37,6 +39,11 @@ public sealed class ModuleManager : IModuleManager
                 await descriptor.Instance.PreInitializeAsync(context);
                 await descriptor.Instance.InitializeAsync(context);
                 await descriptor.Instance.PostInitializeAsync(context);
+
+                foreach (var contributor in contributors)
+                {
+                    await contributor.InitializeAsync(context, descriptor, descriptor.Instance);
+                }
             }
             catch (OperationCanceledException)
             {
@@ -57,12 +64,18 @@ public sealed class ModuleManager : IModuleManager
             return;
         }
 
+        var contributors = ResolveLifecycleContributors();
         var context = new ModuleShutdownContext(_serviceProvider, _catalog, cancellationToken);
 
         foreach (var descriptor in _catalog.ConcreteModules.Reverse())
         {
             try
             {
+                foreach (var contributor in contributors)
+                {
+                    await contributor.ShutdownAsync(context, descriptor, descriptor.Instance);
+                }
+
                 await descriptor.Instance.ShutdownAsync(context);
             }
             catch (OperationCanceledException)
@@ -75,6 +88,19 @@ public sealed class ModuleManager : IModuleManager
                     $"An error occurred during shutdown of module '{descriptor.Name}'.", ex);
             }
         }
+    }
+
+    private IModuleLifecycleContributor[] ResolveLifecycleContributors()
+    {
+        var options = _serviceProvider.GetService<IOptions<ModuleLifecycleOptions>>()?.Value;
+        if (options is null || options.Contributors.Count == 0)
+        {
+            return [];
+        }
+
+        return options.Contributors
+            .Select(type => (IModuleLifecycleContributor)ActivatorUtilities.GetServiceOrCreateInstance(_serviceProvider, type))
+            .ToArray();
     }
 
     private void ReplayInitLogs()
