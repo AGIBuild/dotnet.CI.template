@@ -1,6 +1,6 @@
 using ChengYuan.Core.Data;
-using ChengYuan.EntityFrameworkCore;
 using ChengYuan.Core.Timing;
+using ChengYuan.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
 namespace ChengYuan.Identity;

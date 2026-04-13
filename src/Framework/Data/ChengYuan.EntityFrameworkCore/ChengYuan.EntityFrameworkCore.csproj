@@ -10,6 +10,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\Core\ChengYuan.Core.csproj" />
+    <ProjectReference Include="..\..\Auditing\ChengYuan.Auditing.Abstractions\ChengYuan.Auditing.Abstractions.csproj" />
   </ItemGroup>
 
 </Project>

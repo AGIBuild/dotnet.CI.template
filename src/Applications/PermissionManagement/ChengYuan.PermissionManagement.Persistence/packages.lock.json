@@ -35,6 +35,9 @@
         "resolved": "10.0.0",
         "contentHash": "inRnbpCS0nwO/RuoZIAqxQUuyjaknOOnCEZB55KSMMjRhl0RQDttSmLSGsUJN3RQ3ocf5NDLFd2mOQViHqMK5w=="
       },
+      "chengyuan.auditing.abstractions": {
+        "type": "Project"
+      },
       "chengyuan.authorization.abstractions": {
         "type": "Project"
       },
@@ -58,6 +61,7 @@
       "chengyuan.entityframeworkcore": {
         "type": "Project",
         "dependencies": {
+          "ChengYuan.Auditing.Abstractions": "[0.2.10-local, )",
           "ChengYuan.Core": "[0.2.10-local, )",
           "Microsoft.EntityFrameworkCore": "[10.0.0, )"
         }

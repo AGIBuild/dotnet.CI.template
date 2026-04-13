@@ -14,6 +14,7 @@ internal sealed class DefaultAuditScopeFactory(
     ICurrentTenant currentTenant,
     ICurrentUser currentUser,
     ICurrentCorrelation currentCorrelation,
+    IAuditScopeAccessor scopeAccessor,
     IEnumerable<IAuditLogContributor> contributors,
     IEnumerable<IAuditLogSink> sinks) : IAuditScopeFactory
 {
@@ -33,7 +34,7 @@ internal sealed class DefaultAuditScopeFactory(
             CorrelationId = currentCorrelation.CorrelationId
         };
 
-        return new DefaultAuditScope(entry, clock, _contributors, _sinks);
+        return new DefaultAuditScope(entry, clock, scopeAccessor, _contributors, _sinks);
     }
 
     public async ValueTask ExecuteAsync(string name, Func<CancellationToken, ValueTask> action, CancellationToken cancellationToken = default)

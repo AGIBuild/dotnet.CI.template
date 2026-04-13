@@ -1,6 +1,6 @@
 using ChengYuan.Core.Data;
-using ChengYuan.EntityFrameworkCore;
 using ChengYuan.Core.Modularity;
+using ChengYuan.EntityFrameworkCore;
 using ChengYuan.MultiTenancy;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;

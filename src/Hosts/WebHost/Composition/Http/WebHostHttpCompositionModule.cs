@@ -1,4 +1,7 @@
+using ChengYuan.AspNetCore;
 using ChengYuan.Core.Modularity;
+using ChengYuan.ExceptionHandling;
+using ChengYuan.HealthChecks;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace ChengYuan.WebHost;
@@ -12,5 +15,16 @@ internal sealed class WebHostHttpCompositionModule : HostModule
 
         new HttpTenantResolutionBuilder(context.Services)
             .AddDefaultSources();
+
+        context.Services
+            .AddControllers()
+            .AddAutoValidation()
+            .AddResultWrapper()
+            .AddChengYuanExceptionFilter()
+            .AddIdempotency();
+
+        context.Services
+            .AddHealthChecks()
+            .AddChengYuanCacheCheck();
     }
 }

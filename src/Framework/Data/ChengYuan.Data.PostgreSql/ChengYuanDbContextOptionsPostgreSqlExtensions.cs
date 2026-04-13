@@ -2,8 +2,8 @@ using System.Data.Common;
 using ChengYuan.Core.Modularity;
 using ChengYuan.EntityFrameworkCore.PostgreSql;
 using Microsoft.EntityFrameworkCore;
-using Npgsql.EntityFrameworkCore.PostgreSQL.Infrastructure;
 using Microsoft.Extensions.DependencyInjection;
+using Npgsql.EntityFrameworkCore.PostgreSQL.Infrastructure;
 
 namespace ChengYuan.EntityFrameworkCore;
 

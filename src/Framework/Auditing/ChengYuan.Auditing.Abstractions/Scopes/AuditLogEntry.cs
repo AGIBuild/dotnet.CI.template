@@ -40,6 +40,8 @@ public sealed class AuditLogEntry
 
     public IReadOnlyDictionary<string, object?> Properties => _properties;
 
+    public IList<EntityChangeInfo> EntityChanges { get; } = [];
+
     public bool TryGetProperty(string name, out object? value)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(name);

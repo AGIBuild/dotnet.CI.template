@@ -47,6 +47,9 @@
         "resolved": "10.0.0",
         "contentHash": "inRnbpCS0nwO/RuoZIAqxQUuyjaknOOnCEZB55KSMMjRhl0RQDttSmLSGsUJN3RQ3ocf5NDLFd2mOQViHqMK5w=="
       },
+      "chengyuan.auditing.abstractions": {
+        "type": "Project"
+      },
       "chengyuan.core": {
         "type": "Project",
         "dependencies": {

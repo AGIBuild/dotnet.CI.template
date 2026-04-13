@@ -10,6 +10,8 @@ public static class WebModularApplicationServiceCollectionExtensions
         Action<ModularApplicationOptions>? configure = null)
         where TStartupModule : ModuleBase, new()
     {
+        ArgumentNullException.ThrowIfNull(services);
+
         services.AddModularApplication<TStartupModule>(configure);
         services.AddHostedService<ModularApplicationHostedService>();
         return services;

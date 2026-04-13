@@ -1,3 +1,4 @@
+using ChengYuan.Core.Data;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace ChengYuan.Caching;
@@ -10,6 +11,7 @@ public static class CachingServiceCollectionExtensions
         services.AddSingleton<IChengYuanCacheSerializer, SystemTextJsonChengYuanCacheSerializer>();
         services.AddSingleton<IChengYuanCache, DefaultChengYuanCache>();
         services.AddSingleton(typeof(IChengYuanCache<>), typeof(DefaultChengYuanTypedCache<>));
+        services.AddTransient(typeof(IEntityCache<,>), typeof(CachingEntityCache<,>));
 
         return services;
     }

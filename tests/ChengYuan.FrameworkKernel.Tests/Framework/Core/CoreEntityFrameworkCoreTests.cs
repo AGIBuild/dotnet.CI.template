@@ -1,8 +1,8 @@
 using ChengYuan.Core.Data;
 using ChengYuan.Core.Entities;
-using ChengYuan.EntityFrameworkCore;
 using ChengYuan.Core.StronglyTypedIds;
 using ChengYuan.Core.Timing;
+using ChengYuan.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Shouldly;
@@ -119,6 +119,7 @@ public class CoreEntityFrameworkCoreTests
         var services = new ServiceCollection();
         services.AddDbContext<TestDbContext>(options =>
             options.UseInMemoryDatabase($"core-ef-di-{Guid.NewGuid():N}"));
+        services.AddSingleton<IDomainEventPublisher, NullDomainEventPublisher>();
         services.AddEntityFrameworkCoreDataAccess<TestDbContext>();
         services.AddEfRepository<TestDbContext, Workspace, WorkspaceId>();
 

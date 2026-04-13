@@ -80,6 +80,12 @@
           "SQLitePCLRaw.core": "2.1.11"
         }
       },
+      "chengyuan.aspnetcore": {
+        "type": "Project",
+        "dependencies": {
+          "ChengYuan.Core": "[0.2.10-local, )"
+        }
+      },
       "chengyuan.auditing.abstractions": {
         "type": "Project"
       },
@@ -122,6 +128,38 @@
           "ChengYuan.MultiTenancy.Runtime": "[0.2.10-local, )"
         }
       },
+      "chengyuan.backgroundjobs.abstractions": {
+        "type": "Project"
+      },
+      "chengyuan.backgroundjobs.runtime": {
+        "type": "Project",
+        "dependencies": {
+          "ChengYuan.BackgroundJobs.Abstractions": "[0.2.10-local, )",
+          "ChengYuan.BackgroundWorkers.Runtime": "[0.2.10-local, )",
+          "ChengYuan.Core": "[0.2.10-local, )"
+        }
+      },
+      "chengyuan.backgroundworkers.abstractions": {
+        "type": "Project"
+      },
+      "chengyuan.backgroundworkers.runtime": {
+        "type": "Project",
+        "dependencies": {
+          "ChengYuan.BackgroundWorkers.Abstractions": "[0.2.10-local, )",
+          "ChengYuan.Core": "[0.2.10-local, )",
+          "Cronos": "[0.8.4, )"
+        }
+      },
+      "chengyuan.blobstoring.abstractions": {
+        "type": "Project"
+      },
+      "chengyuan.blobstoring.runtime": {
+        "type": "Project",
+        "dependencies": {
+          "ChengYuan.BlobStoring.Abstractions": "[0.2.10-local, )",
+          "ChengYuan.Core": "[0.2.10-local, )"
+        }
+      },
       "chengyuan.caching.abstractions": {
         "type": "Project"
       },
@@ -149,11 +187,52 @@
           "Microsoft.EntityFrameworkCore.Sqlite": "[10.0.0, )"
         }
       },
-      "chengyuan.entityframeworkcore": {
+      "chengyuan.distributedlocking.abstractions": {
+        "type": "Project"
+      },
+      "chengyuan.distributedlocking.runtime": {
         "type": "Project",
         "dependencies": {
           "ChengYuan.Core": "[0.2.10-local, )",
+          "ChengYuan.DistributedLocking.Abstractions": "[0.2.10-local, )"
+        }
+      },
+      "chengyuan.emailing.abstractions": {
+        "type": "Project"
+      },
+      "chengyuan.emailing.runtime": {
+        "type": "Project",
+        "dependencies": {
+          "ChengYuan.Core": "[0.2.10-local, )",
+          "ChengYuan.Emailing.Abstractions": "[0.2.10-local, )"
+        }
+      },
+      "chengyuan.entityframeworkcore": {
+        "type": "Project",
+        "dependencies": {
+          "ChengYuan.Auditing.Abstractions": "[0.2.10-local, )",
+          "ChengYuan.Core": "[0.2.10-local, )",
           "Microsoft.EntityFrameworkCore": "[10.0.0, )"
+        }
+      },
+      "chengyuan.eventbus.abstractions": {
+        "type": "Project"
+      },
+      "chengyuan.eventbus.runtime": {
+        "type": "Project",
+        "dependencies": {
+          "ChengYuan.Core": "[0.2.10-local, )",
+          "ChengYuan.EventBus.Abstractions": "[0.2.10-local, )"
+        }
+      },
+      "chengyuan.exceptionhandling.abstractions": {
+        "type": "Project"
+      },
+      "chengyuan.exceptionhandling.runtime": {
+        "type": "Project",
+        "dependencies": {
+          "ChengYuan.Core": "[0.2.10-local, )",
+          "ChengYuan.ExceptionHandling.Abstractions": "[0.2.10-local, )"
         }
       },
       "chengyuan.executioncontext.abstractions": {
@@ -199,6 +278,14 @@
           "ChengYuan.MultiTenancy.Runtime": "[0.2.10-local, )"
         }
       },
+      "chengyuan.healthchecks": {
+        "type": "Project",
+        "dependencies": {
+          "ChengYuan.Caching.Abstractions": "[0.2.10-local, )",
+          "ChengYuan.Core": "[0.2.10-local, )",
+          "ChengYuan.EntityFrameworkCore": "[0.2.10-local, )"
+        }
+      },
       "chengyuan.identity.application": {
         "type": "Project",
         "dependencies": {
@@ -241,6 +328,26 @@
           "ChengYuan.Core": "[0.2.10-local, )",
           "ChengYuan.ExecutionContext.Runtime": "[0.2.10-local, )",
           "ChengYuan.MultiTenancy.Abstractions": "[0.2.10-local, )"
+        }
+      },
+      "chengyuan.notifications.abstractions": {
+        "type": "Project"
+      },
+      "chengyuan.notifications.runtime": {
+        "type": "Project",
+        "dependencies": {
+          "ChengYuan.Core": "[0.2.10-local, )",
+          "ChengYuan.Notifications.Abstractions": "[0.2.10-local, )"
+        }
+      },
+      "chengyuan.objectmapping.abstractions": {
+        "type": "Project"
+      },
+      "chengyuan.objectmapping.runtime": {
+        "type": "Project",
+        "dependencies": {
+          "ChengYuan.Core": "[0.2.10-local, )",
+          "ChengYuan.ObjectMapping.Abstractions": "[0.2.10-local, )"
         }
       },
       "chengyuan.permissionmanagement.application": {
@@ -297,6 +404,16 @@
           "ChengYuan.Settings.Abstractions": "[0.2.10-local, )"
         }
       },
+      "chengyuan.sms.abstractions": {
+        "type": "Project"
+      },
+      "chengyuan.sms.runtime": {
+        "type": "Project",
+        "dependencies": {
+          "ChengYuan.Core": "[0.2.10-local, )",
+          "ChengYuan.Sms.Abstractions": "[0.2.10-local, )"
+        }
+      },
       "chengyuan.tenantmanagement.application": {
         "type": "Project",
         "dependencies": {
@@ -317,6 +434,22 @@
           "ChengYuan.EntityFrameworkCore": "[0.2.10-local, )",
           "ChengYuan.TenantManagement.Application": "[0.2.10-local, )"
         }
+      },
+      "chengyuan.texttemplating.abstractions": {
+        "type": "Project"
+      },
+      "chengyuan.texttemplating.runtime": {
+        "type": "Project",
+        "dependencies": {
+          "ChengYuan.Core": "[0.2.10-local, )",
+          "ChengYuan.TextTemplating.Abstractions": "[0.2.10-local, )"
+        }
+      },
+      "Cronos": {
+        "type": "CentralTransitive",
+        "requested": "[0.8.4, )",
+        "resolved": "0.8.4",
+        "contentHash": "sTyvTH8hh5YWivinRGzL5QrfKKt59I/Hh+4m8j6vmtJdSOWA4I3B+AS9iJk3RdQqZ+i4E+0PlhYuY9iaxDLTcQ=="
       },
       "Microsoft.EntityFrameworkCore": {
         "type": "CentralTransitive",

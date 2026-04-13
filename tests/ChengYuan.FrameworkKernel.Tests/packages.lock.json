@@ -169,6 +169,15 @@
         "resolved": "10.0.0",
         "contentHash": "RFYJR7APio/BiqdQunRq6DB+nDB6nc2qhHr77mlvZ0q0BT8PubMXN7XicmfzCbrDE/dzhBnUKBRXLTcqUiZDGg=="
       },
+      "Microsoft.Extensions.Diagnostics.Abstractions": {
+        "type": "Transitive",
+        "resolved": "10.0.0",
+        "contentHash": "SfK89ytD61S7DgzorFljSkUeluC1ncn6dtZgwc0ot39f/BEYWBl5jpgvodxduoYAs1d9HG8faCDRZxE95UMo2A==",
+        "dependencies": {
+          "Microsoft.Extensions.DependencyInjection.Abstractions": "10.0.0",
+          "Microsoft.Extensions.Options": "10.0.0"
+        }
+      },
       "Microsoft.Extensions.Logging": {
         "type": "Transitive",
         "resolved": "10.0.0",
@@ -351,6 +360,12 @@
           "xunit.v3.runner.common": "[4.0.0-pre.33]"
         }
       },
+      "chengyuan.aspnetcore": {
+        "type": "Project",
+        "dependencies": {
+          "ChengYuan.Core": "[0.2.10-local, )"
+        }
+      },
       "chengyuan.auditing.abstractions": {
         "type": "Project"
       },
@@ -391,6 +406,43 @@
           "ChengYuan.Core": "[0.2.10-local, )",
           "ChengYuan.ExecutionContext.Runtime": "[0.2.10-local, )",
           "ChengYuan.MultiTenancy.Runtime": "[0.2.10-local, )"
+        }
+      },
+      "chengyuan.backgroundjobs.abstractions": {
+        "type": "Project"
+      },
+      "chengyuan.backgroundjobs.runtime": {
+        "type": "Project",
+        "dependencies": {
+          "ChengYuan.BackgroundJobs.Abstractions": "[0.2.10-local, )",
+          "ChengYuan.BackgroundWorkers.Runtime": "[0.2.10-local, )",
+          "ChengYuan.Core": "[0.2.10-local, )"
+        }
+      },
+      "chengyuan.backgroundworkers.abstractions": {
+        "type": "Project",
+        "dependencies": {
+          "Microsoft.Extensions.Hosting.Abstractions": "[10.0.0, )"
+        }
+      },
+      "chengyuan.backgroundworkers.runtime": {
+        "type": "Project",
+        "dependencies": {
+          "ChengYuan.BackgroundWorkers.Abstractions": "[0.2.10-local, )",
+          "ChengYuan.Core": "[0.2.10-local, )",
+          "Cronos": "[0.8.4, )"
+        }
+      },
+      "chengyuan.blobstoring.abstractions": {
+        "type": "Project"
+      },
+      "chengyuan.blobstoring.runtime": {
+        "type": "Project",
+        "dependencies": {
+          "ChengYuan.BlobStoring.Abstractions": "[0.2.10-local, )",
+          "ChengYuan.Core": "[0.2.10-local, )",
+          "Microsoft.Extensions.DependencyInjection.Abstractions": "[10.0.0, )",
+          "Microsoft.Extensions.Options": "[10.0.0, )"
         }
       },
       "chengyuan.caching.abstractions": {
@@ -444,11 +496,58 @@
           "Microsoft.EntityFrameworkCore.Sqlite": "[10.0.0, )"
         }
       },
-      "chengyuan.entityframeworkcore": {
+      "chengyuan.distributedlocking.abstractions": {
+        "type": "Project"
+      },
+      "chengyuan.distributedlocking.runtime": {
         "type": "Project",
         "dependencies": {
           "ChengYuan.Core": "[0.2.10-local, )",
+          "ChengYuan.DistributedLocking.Abstractions": "[0.2.10-local, )"
+        }
+      },
+      "chengyuan.emailing.abstractions": {
+        "type": "Project"
+      },
+      "chengyuan.emailing.runtime": {
+        "type": "Project",
+        "dependencies": {
+          "ChengYuan.Core": "[0.2.10-local, )",
+          "ChengYuan.Emailing.Abstractions": "[0.2.10-local, )",
+          "Microsoft.Extensions.DependencyInjection.Abstractions": "[10.0.0, )",
+          "Microsoft.Extensions.Logging.Abstractions": "[10.0.0, )",
+          "Microsoft.Extensions.Options": "[10.0.0, )"
+        }
+      },
+      "chengyuan.entityframeworkcore": {
+        "type": "Project",
+        "dependencies": {
+          "ChengYuan.Auditing.Abstractions": "[0.2.10-local, )",
+          "ChengYuan.Core": "[0.2.10-local, )",
           "Microsoft.EntityFrameworkCore": "[10.0.0, )"
+        }
+      },
+      "chengyuan.eventbus.abstractions": {
+        "type": "Project"
+      },
+      "chengyuan.eventbus.runtime": {
+        "type": "Project",
+        "dependencies": {
+          "ChengYuan.Core": "[0.2.10-local, )",
+          "ChengYuan.EventBus.Abstractions": "[0.2.10-local, )"
+        }
+      },
+      "chengyuan.exceptionhandling.abstractions": {
+        "type": "Project",
+        "dependencies": {
+          "Microsoft.Extensions.Logging.Abstractions": "[10.0.0, )"
+        }
+      },
+      "chengyuan.exceptionhandling.runtime": {
+        "type": "Project",
+        "dependencies": {
+          "ChengYuan.Core": "[0.2.10-local, )",
+          "ChengYuan.ExceptionHandling.Abstractions": "[0.2.10-local, )"
         }
       },
       "chengyuan.executioncontext.abstractions": {
@@ -494,6 +593,14 @@
           "ChengYuan.MultiTenancy.Runtime": "[0.2.10-local, )"
         }
       },
+      "chengyuan.healthchecks": {
+        "type": "Project",
+        "dependencies": {
+          "ChengYuan.Caching.Abstractions": "[0.2.10-local, )",
+          "ChengYuan.Core": "[0.2.10-local, )",
+          "ChengYuan.EntityFrameworkCore": "[0.2.10-local, )"
+        }
+      },
       "chengyuan.identity.application": {
         "type": "Project",
         "dependencies": {
@@ -527,6 +634,17 @@
           "ChengYuan.Identity.Application": "[0.2.10-local, )"
         }
       },
+      "chengyuan.interceptors.abstractions": {
+        "type": "Project"
+      },
+      "chengyuan.interceptors.runtime": {
+        "type": "Project",
+        "dependencies": {
+          "ChengYuan.Core": "[0.2.10-local, )",
+          "ChengYuan.Interceptors.Abstractions": "[0.2.10-local, )",
+          "Microsoft.Extensions.DependencyInjection.Abstractions": "[10.0.0, )"
+        }
+      },
       "chengyuan.multitenancy.abstractions": {
         "type": "Project"
       },
@@ -536,6 +654,29 @@
           "ChengYuan.Core": "[0.2.10-local, )",
           "ChengYuan.ExecutionContext.Runtime": "[0.2.10-local, )",
           "ChengYuan.MultiTenancy.Abstractions": "[0.2.10-local, )"
+        }
+      },
+      "chengyuan.notifications.abstractions": {
+        "type": "Project"
+      },
+      "chengyuan.notifications.runtime": {
+        "type": "Project",
+        "dependencies": {
+          "ChengYuan.Core": "[0.2.10-local, )",
+          "ChengYuan.Notifications.Abstractions": "[0.2.10-local, )",
+          "Microsoft.Extensions.DependencyInjection.Abstractions": "[10.0.0, )",
+          "Microsoft.Extensions.Logging.Abstractions": "[10.0.0, )"
+        }
+      },
+      "chengyuan.objectmapping.abstractions": {
+        "type": "Project"
+      },
+      "chengyuan.objectmapping.runtime": {
+        "type": "Project",
+        "dependencies": {
+          "ChengYuan.Core": "[0.2.10-local, )",
+          "ChengYuan.ObjectMapping.Abstractions": "[0.2.10-local, )",
+          "Microsoft.Extensions.DependencyInjection.Abstractions": "[10.0.0, )"
         }
       },
       "chengyuan.outbox.abstractions": {
@@ -560,6 +701,7 @@
       "chengyuan.outbox.worker": {
         "type": "Project",
         "dependencies": {
+          "ChengYuan.BackgroundWorkers.Runtime": "[0.2.10-local, )",
           "ChengYuan.Core": "[0.2.10-local, )",
           "ChengYuan.Outbox.Persistence": "[0.2.10-local, )"
         }
@@ -618,6 +760,18 @@
           "ChengYuan.Settings.Abstractions": "[0.2.10-local, )"
         }
       },
+      "chengyuan.sms.abstractions": {
+        "type": "Project"
+      },
+      "chengyuan.sms.runtime": {
+        "type": "Project",
+        "dependencies": {
+          "ChengYuan.Core": "[0.2.10-local, )",
+          "ChengYuan.Sms.Abstractions": "[0.2.10-local, )",
+          "Microsoft.Extensions.DependencyInjection.Abstractions": "[10.0.0, )",
+          "Microsoft.Extensions.Logging.Abstractions": "[10.0.0, )"
+        }
+      },
       "chengyuan.tenantmanagement.application": {
         "type": "Project",
         "dependencies": {
@@ -639,23 +793,70 @@
           "ChengYuan.TenantManagement.Application": "[0.2.10-local, )"
         }
       },
+      "chengyuan.texttemplating.abstractions": {
+        "type": "Project"
+      },
+      "chengyuan.texttemplating.runtime": {
+        "type": "Project",
+        "dependencies": {
+          "ChengYuan.Core": "[0.2.10-local, )",
+          "ChengYuan.TextTemplating.Abstractions": "[0.2.10-local, )",
+          "Microsoft.Extensions.DependencyInjection.Abstractions": "[10.0.0, )",
+          "Microsoft.Extensions.Options": "[10.0.0, )"
+        }
+      },
+      "chengyuan.virtualfilesystem.abstractions": {
+        "type": "Project",
+        "dependencies": {
+          "Microsoft.Extensions.FileProviders.Abstractions": "[10.0.0, )"
+        }
+      },
+      "chengyuan.virtualfilesystem.runtime": {
+        "type": "Project",
+        "dependencies": {
+          "ChengYuan.Core": "[0.2.10-local, )",
+          "ChengYuan.VirtualFileSystem.Abstractions": "[0.2.10-local, )",
+          "Microsoft.Extensions.DependencyInjection.Abstractions": "[10.0.0, )",
+          "Microsoft.Extensions.FileProviders.Composite": "[10.0.0, )",
+          "Microsoft.Extensions.FileProviders.Embedded": "[10.0.0, )",
+          "Microsoft.Extensions.Options": "[10.0.0, )"
+        }
+      },
       "chengyuan.webhost": {
         "type": "Project",
         "dependencies": {
+          "ChengYuan.AspNetCore": "[0.2.10-local, )",
           "ChengYuan.AuditLogging.Persistence": "[0.2.10-local, )",
+          "ChengYuan.BackgroundJobs.Runtime": "[0.2.10-local, )",
+          "ChengYuan.BlobStoring.Runtime": "[0.2.10-local, )",
           "ChengYuan.Caching.Memory": "[0.2.10-local, )",
           "ChengYuan.Core": "[0.2.10-local, )",
           "ChengYuan.Data.Sqlite": "[0.2.10-local, )",
+          "ChengYuan.DistributedLocking.Runtime": "[0.2.10-local, )",
+          "ChengYuan.Emailing.Runtime": "[0.2.10-local, )",
+          "ChengYuan.EventBus.Runtime": "[0.2.10-local, )",
+          "ChengYuan.ExceptionHandling.Runtime": "[0.2.10-local, )",
           "ChengYuan.ExecutionContext.Runtime": "[0.2.10-local, )",
           "ChengYuan.FeatureManagement.Persistence": "[0.2.10-local, )",
+          "ChengYuan.HealthChecks": "[0.2.10-local, )",
           "ChengYuan.Identity.Persistence": "[0.2.10-local, )",
           "ChengYuan.Identity.Web": "[0.2.10-local, )",
           "ChengYuan.MultiTenancy.Runtime": "[0.2.10-local, )",
+          "ChengYuan.Notifications.Runtime": "[0.2.10-local, )",
+          "ChengYuan.ObjectMapping.Runtime": "[0.2.10-local, )",
           "ChengYuan.PermissionManagement.Persistence": "[0.2.10-local, )",
           "ChengYuan.SettingManagement.Persistence": "[0.2.10-local, )",
+          "ChengYuan.Sms.Runtime": "[0.2.10-local, )",
           "ChengYuan.TenantManagement.Persistence": "[0.2.10-local, )",
+          "ChengYuan.TextTemplating.Runtime": "[0.2.10-local, )",
           "Microsoft.EntityFrameworkCore.InMemory": "[10.0.0, )"
         }
+      },
+      "Cronos": {
+        "type": "CentralTransitive",
+        "requested": "[0.8.4, )",
+        "resolved": "0.8.4",
+        "contentHash": "sTyvTH8hh5YWivinRGzL5QrfKKt59I/Hh+4m8j6vmtJdSOWA4I3B+AS9iJk3RdQqZ+i4E+0PlhYuY9iaxDLTcQ=="
       },
       "Microsoft.EntityFrameworkCore": {
         "type": "CentralTransitive",
@@ -689,6 +890,47 @@
         "requested": "[10.0.0, )",
         "resolved": "10.0.0",
         "contentHash": "L3AdmZ1WOK4XXT5YFPEwyt0ep6l8lGIPs7F5OOBZc77Zqeo01Of7XXICy47628sdVl0v/owxYJTe86DTgFwKCA=="
+      },
+      "Microsoft.Extensions.FileProviders.Abstractions": {
+        "type": "CentralTransitive",
+        "requested": "[10.0.0, )",
+        "resolved": "10.0.0",
+        "contentHash": "/ppSdehKk3fuXjlqCDgSOtjRK/pSHU8eWgzSHfHdwVm5BP4Dgejehkw+PtxKG2j98qTDEHDst2Y99aNsmJldmw==",
+        "dependencies": {
+          "Microsoft.Extensions.Primitives": "10.0.0"
+        }
+      },
+      "Microsoft.Extensions.FileProviders.Composite": {
+        "type": "CentralTransitive",
+        "requested": "[10.0.0, )",
+        "resolved": "10.0.0",
+        "contentHash": "oi6UKOtboSHd/sQRgiPN5BXMGHUWyBmgu/nC/khs+eJYdeitciqW7MWIvs9sZIG1rOTH2cuLjMu9VeK4bL0Jvg==",
+        "dependencies": {
+          "Microsoft.Extensions.FileProviders.Abstractions": "10.0.0",
+          "Microsoft.Extensions.Primitives": "10.0.0"
+        }
+      },
+      "Microsoft.Extensions.FileProviders.Embedded": {
+        "type": "CentralTransitive",
+        "requested": "[10.0.0, )",
+        "resolved": "10.0.0",
+        "contentHash": "ECaTMB4NdV9W1es9J6tN0yoXRPUHKMi5+2L7hcVZ5k9zVdxccIx6+vMllwEYcdTaO0mCETEmdH4F0KxCqgnPaw==",
+        "dependencies": {
+          "Microsoft.Extensions.FileProviders.Abstractions": "10.0.0"
+        }
+      },
+      "Microsoft.Extensions.Hosting.Abstractions": {
+        "type": "CentralTransitive",
+        "requested": "[10.0.0, )",
+        "resolved": "10.0.0",
+        "contentHash": "KrN6TGFwCwqOkLLk/idW/XtDQh+8In+CL9T4M1Dx+5ScsjTq4TlVbal8q532m82UYrMr6RiQJF2HvYCN0QwVsA==",
+        "dependencies": {
+          "Microsoft.Extensions.Configuration.Abstractions": "10.0.0",
+          "Microsoft.Extensions.DependencyInjection.Abstractions": "10.0.0",
+          "Microsoft.Extensions.Diagnostics.Abstractions": "10.0.0",
+          "Microsoft.Extensions.FileProviders.Abstractions": "10.0.0",
+          "Microsoft.Extensions.Logging.Abstractions": "10.0.0"
+        }
       },
       "Microsoft.Extensions.Logging.Abstractions": {
         "type": "CentralTransitive",

@@ -7,6 +7,7 @@ public static class AuditingServiceCollectionExtensions
 {
     public static IServiceCollection AddAuditing(this IServiceCollection services)
     {
+        services.TryAddSingleton<IAuditScopeAccessor, AmbientAuditScopeAccessor>();
         services.TryAddSingleton<IAuditScopeFactory, DefaultAuditScopeFactory>();
         return services;
     }

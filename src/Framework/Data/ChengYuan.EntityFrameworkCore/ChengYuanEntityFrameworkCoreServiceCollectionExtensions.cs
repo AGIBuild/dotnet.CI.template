@@ -14,10 +14,13 @@ public static class ChengYuanEntityFrameworkCoreServiceCollectionExtensions
     {
         ArgumentNullException.ThrowIfNull(services);
 
+        services.TryAddSingleton<IDomainEventPublisher, NullDomainEventPublisher>();
         services.AddScoped<IDbContextUnitOfWorkParticipant>(serviceProvider =>
             new DbContextUnitOfWork(serviceProvider.GetRequiredService<TDbContext>()));
         services.TryAddScoped<IUnitOfWork>(serviceProvider =>
-            new CompositeDbContextUnitOfWork(serviceProvider.GetServices<IDbContextUnitOfWorkParticipant>()));
+            new CompositeDbContextUnitOfWork(
+                serviceProvider.GetServices<IDbContextUnitOfWorkParticipant>(),
+                serviceProvider.GetRequiredService<IDomainEventPublisher>()));
 
         return services;
     }

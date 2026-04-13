@@ -3,6 +3,7 @@ using ChengYuan.ExecutionContext;
 using ChengYuan.Identity;
 using ChengYuan.MultiTenancy;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 
 namespace ChengYuan.WebHost;
 
@@ -21,6 +22,11 @@ public static class WebHostApplicationExtensions
     public static WebApplication MapWebHostEndpoints(this WebApplication app)
     {
         ArgumentNullException.ThrowIfNull(app);
+
+        app.MapHealthChecks("/healthz", new HealthCheckOptions
+        {
+            Predicate = check => check.Tags.Contains("ready"),
+        });
 
         app.MapGet("/health", (IModuleCatalog catalog, ICurrentCorrelation correlation, ICurrentTenant currentTenant) =>
             Results.Ok(new

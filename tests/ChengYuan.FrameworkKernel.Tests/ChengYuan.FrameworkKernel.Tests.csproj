@@ -42,6 +42,21 @@
     <ProjectReference Include="..\..\src\Framework\Authorization\ChengYuan.Authorization.Runtime\ChengYuan.Authorization.Runtime.csproj" />
     <ProjectReference Include="..\..\src\Framework\Features\ChengYuan.Features.Runtime\ChengYuan.Features.Runtime.csproj" />
     <ProjectReference Include="..\..\src\Framework\Settings\ChengYuan.Settings.Runtime\ChengYuan.Settings.Runtime.csproj" />
+    <ProjectReference Include="..\..\src\Framework\EventBus\ChengYuan.EventBus.Runtime\ChengYuan.EventBus.Runtime.csproj" />
+    <ProjectReference Include="..\..\src\Framework\ExceptionHandling\ChengYuan.ExceptionHandling.Runtime\ChengYuan.ExceptionHandling.Runtime.csproj" />
+    <ProjectReference Include="..\..\src\Framework\BackgroundWorkers\ChengYuan.BackgroundWorkers.Runtime\ChengYuan.BackgroundWorkers.Runtime.csproj" />
+    <ProjectReference Include="..\..\src\Framework\BackgroundJobs\ChengYuan.BackgroundJobs.Runtime\ChengYuan.BackgroundJobs.Runtime.csproj" />
+    <ProjectReference Include="..\..\src\Framework\DistributedLocking\ChengYuan.DistributedLocking.Runtime\ChengYuan.DistributedLocking.Runtime.csproj" />
+    <ProjectReference Include="..\..\src\Framework\BlobStoring\ChengYuan.BlobStoring.Runtime\ChengYuan.BlobStoring.Runtime.csproj" />
+    <ProjectReference Include="..\..\src\Framework\Emailing\ChengYuan.Emailing.Runtime\ChengYuan.Emailing.Runtime.csproj" />
+    <ProjectReference Include="..\..\src\Framework\Sms\ChengYuan.Sms.Runtime\ChengYuan.Sms.Runtime.csproj" />
+    <ProjectReference Include="..\..\src\Framework\ObjectMapping\ChengYuan.ObjectMapping.Runtime\ChengYuan.ObjectMapping.Runtime.csproj" />
+    <ProjectReference Include="..\..\src\Framework\TextTemplating\ChengYuan.TextTemplating.Runtime\ChengYuan.TextTemplating.Runtime.csproj" />
+    <ProjectReference Include="..\..\src\Framework\VirtualFileSystem\ChengYuan.VirtualFileSystem.Runtime\ChengYuan.VirtualFileSystem.Runtime.csproj" />
+    <ProjectReference Include="..\..\src\Framework\Interceptors\ChengYuan.Interceptors.Runtime\ChengYuan.Interceptors.Runtime.csproj" />
+    <ProjectReference Include="..\..\src\Framework\AspNetCore\ChengYuan.AspNetCore\ChengYuan.AspNetCore.csproj" />
+    <ProjectReference Include="..\..\src\Framework\AspNetCore\ChengYuan.HealthChecks\ChengYuan.HealthChecks.csproj" />
+    <ProjectReference Include="..\..\src\Framework\Notifications\ChengYuan.Notifications.Runtime\ChengYuan.Notifications.Runtime.csproj" />
     <ProjectReference Include="..\..\src\Hosts\CliHost\ChengYuan.CliHost.csproj" />
     <ProjectReference Include="..\..\src\Hosts\WebHost\ChengYuan.WebHost.csproj" />
   </ItemGroup>

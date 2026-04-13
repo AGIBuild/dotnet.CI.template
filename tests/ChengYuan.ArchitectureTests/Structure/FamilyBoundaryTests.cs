@@ -50,7 +50,7 @@ public class FamilyBoundaryTests
         var projectXml = File.ReadAllText(Path.Combine(repositoryRoot, "src", "Applications", "SettingManagement", "ChengYuan.SettingManagement.Persistence", "ChengYuan.SettingManagement.Persistence.csproj"));
 
         projectXml.ShouldContain("ChengYuan.SettingManagement.Application");
-        projectXml.ShouldContain("Core\\ChengYuan.Core.csproj");
+        projectXml.ShouldContain("ChengYuan.EntityFrameworkCore");
         projectXml.ShouldNotContain("ChengYuan.Hosting");
         projectXml.ShouldNotContain("ChengYuan.PermissionManagement");
         projectXml.ShouldNotContain("ChengYuan.FeatureManagement");
@@ -65,7 +65,7 @@ public class FamilyBoundaryTests
         var projectXml = File.ReadAllText(Path.Combine(repositoryRoot, "src", "Applications", "PermissionManagement", "ChengYuan.PermissionManagement.Persistence", "ChengYuan.PermissionManagement.Persistence.csproj"));
 
         projectXml.ShouldContain("ChengYuan.PermissionManagement.Application");
-        projectXml.ShouldContain("Core\\ChengYuan.Core.csproj");
+        projectXml.ShouldContain("ChengYuan.EntityFrameworkCore");
         projectXml.ShouldNotContain("ChengYuan.Hosting");
         projectXml.ShouldNotContain("ChengYuan.SettingManagement");
         projectXml.ShouldNotContain("ChengYuan.FeatureManagement");
@@ -80,7 +80,7 @@ public class FamilyBoundaryTests
         var projectXml = File.ReadAllText(Path.Combine(repositoryRoot, "src", "Applications", "FeatureManagement", "ChengYuan.FeatureManagement.Persistence", "ChengYuan.FeatureManagement.Persistence.csproj"));
 
         projectXml.ShouldContain("ChengYuan.FeatureManagement.Application");
-        projectXml.ShouldContain("Core\\ChengYuan.Core.csproj");
+        projectXml.ShouldContain("ChengYuan.EntityFrameworkCore");
         projectXml.ShouldNotContain("ChengYuan.Hosting");
         projectXml.ShouldNotContain("ChengYuan.SettingManagement");
         projectXml.ShouldNotContain("ChengYuan.PermissionManagement");
@@ -95,7 +95,7 @@ public class FamilyBoundaryTests
         var projectXml = File.ReadAllText(Path.Combine(repositoryRoot, "src", "Applications", "AuditLogging", "ChengYuan.AuditLogging.Persistence", "ChengYuan.AuditLogging.Persistence.csproj"));
 
         projectXml.ShouldContain("ChengYuan.AuditLogging.Application");
-        projectXml.ShouldContain("Core\\ChengYuan.Core.csproj");
+        projectXml.ShouldContain("ChengYuan.EntityFrameworkCore");
         projectXml.ShouldNotContain("ChengYuan.Hosting");
         projectXml.ShouldNotContain("ChengYuan.SettingManagement");
         projectXml.ShouldNotContain("ChengYuan.PermissionManagement");
@@ -149,7 +149,7 @@ public class FamilyBoundaryTests
 
         projectXml.ShouldContain("ChengYuan.Identity.Application");
         projectXml.ShouldContain("ChengYuan.Identity.Domain");
-        projectXml.ShouldContain("Core\\ChengYuan.Core.csproj");
+        projectXml.ShouldContain("ChengYuan.EntityFrameworkCore");
         projectXml.ShouldNotContain("ChengYuan.Hosting");
         projectXml.ShouldNotContain("ChengYuan.SettingManagement");
         projectXml.ShouldNotContain("ChengYuan.PermissionManagement");

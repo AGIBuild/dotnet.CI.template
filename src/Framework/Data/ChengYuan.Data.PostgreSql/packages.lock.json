@@ -73,6 +73,9 @@
           "Microsoft.Extensions.Logging.Abstractions": "10.0.0"
         }
       },
+      "chengyuan.auditing.abstractions": {
+        "type": "Project"
+      },
       "chengyuan.core": {
         "type": "Project",
         "dependencies": {
@@ -84,6 +87,7 @@
       "chengyuan.entityframeworkcore": {
         "type": "Project",
         "dependencies": {
+          "ChengYuan.Auditing.Abstractions": "[0.2.10-local, )",
           "ChengYuan.Core": "[0.2.10-local, )",
           "Microsoft.EntityFrameworkCore": "[10.0.0, )"
         }

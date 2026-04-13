@@ -1,0 +1,13 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\Core\ChengYuan.Core.csproj" />
+    <ProjectReference Include="..\..\BackgroundWorkers\ChengYuan.BackgroundWorkers.Runtime\ChengYuan.BackgroundWorkers.Runtime.csproj" />
+    <ProjectReference Include="..\ChengYuan.BackgroundJobs.Abstractions\ChengYuan.BackgroundJobs.Abstractions.csproj" />
+  </ItemGroup>
+
+</Project>

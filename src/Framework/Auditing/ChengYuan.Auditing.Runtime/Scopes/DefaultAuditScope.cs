@@ -6,16 +6,34 @@ using ChengYuan.Core.Timing;
 
 namespace ChengYuan.Auditing;
 
-internal sealed class DefaultAuditScope(
-    AuditLogEntry entry,
-    IClock clock,
-    IReadOnlyCollection<IAuditLogContributor> contributors,
-    IReadOnlyCollection<IAuditLogSink> sinks) : IAuditScope
+internal sealed class DefaultAuditScope : IAuditScope
 {
+    private readonly IClock _clock;
+    private readonly IAuditScopeAccessor _scopeAccessor;
+    private readonly IReadOnlyCollection<IAuditLogContributor> _contributors;
+    private readonly IReadOnlyCollection<IAuditLogSink> _sinks;
+    private readonly IAuditScope? _previousScope;
     private bool _completed;
     private bool _disposed;
 
-    public AuditLogEntry Entry { get; } = entry;
+    internal DefaultAuditScope(
+        AuditLogEntry entry,
+        IClock clock,
+        IAuditScopeAccessor scopeAccessor,
+        IReadOnlyCollection<IAuditLogContributor> contributors,
+        IReadOnlyCollection<IAuditLogSink> sinks)
+    {
+        Entry = entry;
+        _clock = clock;
+        _scopeAccessor = scopeAccessor;
+        _contributors = contributors;
+        _sinks = sinks;
+
+        _previousScope = scopeAccessor.Current;
+        ((AmbientAuditScopeAccessor)scopeAccessor).Current = this;
+    }
+
+    public AuditLogEntry Entry { get; }
 
     public void SetProperty(string name, object? value)
     {
@@ -55,6 +73,7 @@ internal sealed class DefaultAuditScope(
         }
 
         _disposed = true;
+        ((AmbientAuditScopeAccessor)_scopeAccessor).Current = _previousScope;
         await CompleteAsync(CancellationToken.None);
     }
 
@@ -66,16 +85,16 @@ internal sealed class DefaultAuditScope(
         }
 
         _completed = true;
-        var completedAtUtc = clock.UtcNow;
+        var completedAtUtc = _clock.UtcNow;
         Entry.CompletedAtUtc = completedAtUtc;
         Entry.Duration = completedAtUtc - Entry.StartedAtUtc;
 
-        foreach (var contributor in contributors)
+        foreach (var contributor in _contributors)
         {
             await contributor.ContributeAsync(Entry, cancellationToken);
         }
 
-        foreach (var sink in sinks)
+        foreach (var sink in _sinks)
         {
             await sink.WriteAsync(Entry, cancellationToken);
         }

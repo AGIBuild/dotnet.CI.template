@@ -16,6 +16,7 @@ public class CoreEntityFrameworkCoreUnitOfWorkTests
 
         services.AddDbContext<LeftTestDbContext>(options => options.UseInMemoryDatabase(databaseName));
         services.AddDbContext<RightTestDbContext>(options => options.UseInMemoryDatabase(databaseName));
+        services.AddSingleton<IDomainEventPublisher, NullDomainEventPublisher>();
         services.AddEntityFrameworkCoreDataAccess<LeftTestDbContext>();
         services.AddEntityFrameworkCoreDataAccess<RightTestDbContext>();
 
