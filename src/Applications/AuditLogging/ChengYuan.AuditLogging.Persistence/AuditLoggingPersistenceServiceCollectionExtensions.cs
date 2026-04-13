@@ -1,6 +1,5 @@
 using ChengYuan.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.DependencyInjection.Extensions;
 
 namespace ChengYuan.AuditLogging;
 
@@ -10,11 +9,7 @@ public static class AuditLoggingPersistenceServiceCollectionExtensions
     {
         ArgumentNullException.ThrowIfNull(services);
 
-        services.AddConfiguredDbContext<AuditLoggingDbContext>();
-        services.AddConfiguredDbContextFactory<AuditLoggingDbContext>();
-        services.AddEntityFrameworkCoreDataAccess<AuditLoggingDbContext>();
-        services.TryAddSingleton<IAuditLogStore, EfAuditLogStore>();
-        services.TryAddSingleton<IAuditLogReader>(serviceProvider => serviceProvider.GetRequiredService<IAuditLogStore>());
+        services.AddPersistenceModule<AuditLoggingDbContext, IAuditLogStore, IAuditLogReader, EfAuditLogStore>();
 
         return services;
     }

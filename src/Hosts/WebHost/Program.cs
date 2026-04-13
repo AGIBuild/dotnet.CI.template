@@ -14,7 +14,8 @@ try
         .ReadFrom.Configuration(context.Configuration)
         .ReadFrom.Services(services));
 
-    var connectionString = builder.Configuration.GetConnectionString("Default") ?? "Data Source=chengyuan-webhost.db";
+    var connectionString = builder.Configuration.GetConnectionString("Default")
+        ?? throw new InvalidOperationException("Connection string 'Default' is not configured. Set it in appsettings.json under ConnectionStrings:Default.");
     builder.Services.UseSqlite(connectionString);
     builder.Services.AddWebHostComposition();
 

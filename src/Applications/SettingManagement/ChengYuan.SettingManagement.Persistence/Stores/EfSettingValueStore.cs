@@ -30,13 +30,13 @@ public sealed class EfSettingValueStore(IDbContextFactory<SettingManagementDbCon
     {
         await using var dbContext = await dbContextFactory.CreateDbContextAsync(cancellationToken);
         var entities = await dbContext.SettingValues
+            .OrderBy(settingValue => settingValue.Scope)
+            .ThenBy(settingValue => settingValue.Name)
+            .ThenBy(settingValue => settingValue.TenantId)
+            .ThenBy(settingValue => settingValue.UserId)
             .ToArrayAsync(cancellationToken);
 
         return entities
-            .OrderBy(settingValue => settingValue.Scope)
-            .ThenBy(settingValue => settingValue.Name, StringComparer.Ordinal)
-            .ThenBy(settingValue => settingValue.TenantId)
-            .ThenBy(settingValue => settingValue.UserId, StringComparer.Ordinal)
             .Select(MapToRecord)
             .ToArray();
     }

@@ -25,6 +25,23 @@ public static class ChengYuanEntityFrameworkCoreServiceCollectionExtensions
         return services;
     }
 
+    public static IServiceCollection AddPersistenceModule<TDbContext, TStore, TReader, TImpl>(this IServiceCollection services)
+        where TDbContext : DbContext
+        where TReader : class
+        where TStore : class, TReader
+        where TImpl : class, TStore
+    {
+        ArgumentNullException.ThrowIfNull(services);
+
+        services.AddConfiguredDbContext<TDbContext>();
+        services.AddConfiguredDbContextFactory<TDbContext>();
+        services.AddEntityFrameworkCoreDataAccess<TDbContext>();
+        services.TryAddSingleton<TStore, TImpl>();
+        services.TryAddSingleton<TReader>(serviceProvider => serviceProvider.GetRequiredService<TStore>());
+
+        return services;
+    }
+
     public static IServiceCollection AddEfRepository<TDbContext, TEntity, TId>(this IServiceCollection services)
         where TDbContext : DbContext
         where TEntity : class, IAggregateRoot<TId>

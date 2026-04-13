@@ -80,4 +80,39 @@ public sealed class GlobalExceptionMiddlewareTests
 
         ((int)response.StatusCode).ShouldBe(400);
     }
+
+    [Fact]
+    public async Task UnauthorizedAccessException_returns_403()
+    {
+        using var host = await new HostBuilder()
+            .ConfigureWebHost(webBuilder =>
+            {
+                webBuilder.UseTestServer();
+                webBuilder.ConfigureServices(services =>
+                {
+                    services.AddRouting();
+                    services.AddExceptionHandling();
+                });
+                webBuilder.Configure(app =>
+                {
+                    app.UseMiddleware<ChengYuan.WebHost.GlobalExceptionMiddleware>();
+                    app.UseRouting();
+                    app.UseEndpoints(endpoints =>
+                        endpoints.MapGet("/forbidden", () =>
+                        {
+                            throw new UnauthorizedAccessException("access denied");
+#pragma warning disable CS0162
+                            return Results.Ok();
+#pragma warning restore CS0162
+                        }));
+                });
+            })
+            .StartAsync(TestContext.Current.CancellationToken);
+
+        var client = host.GetTestClient();
+        var response = await client.GetAsync(new Uri("/forbidden", UriKind.Relative), TestContext.Current.CancellationToken);
+
+        ((int)response.StatusCode).ShouldBe(403);
+        response.Content.Headers.ContentType?.MediaType.ShouldBe("application/json");
+    }
 }

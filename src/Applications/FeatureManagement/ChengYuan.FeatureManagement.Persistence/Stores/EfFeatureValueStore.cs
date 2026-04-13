@@ -30,13 +30,13 @@ public sealed class EfFeatureValueStore(IDbContextFactory<FeatureManagementDbCon
     {
         await using var dbContext = await dbContextFactory.CreateDbContextAsync(cancellationToken);
         var entities = await dbContext.FeatureValues
+            .OrderBy(featureValue => featureValue.Scope)
+            .ThenBy(featureValue => featureValue.Name)
+            .ThenBy(featureValue => featureValue.TenantId)
+            .ThenBy(featureValue => featureValue.UserId)
             .ToArrayAsync(cancellationToken);
 
         return entities
-            .OrderBy(featureValue => featureValue.Scope)
-            .ThenBy(featureValue => featureValue.Name, StringComparer.Ordinal)
-            .ThenBy(featureValue => featureValue.TenantId)
-            .ThenBy(featureValue => featureValue.UserId, StringComparer.Ordinal)
             .Select(MapToRecord)
             .ToArray();
     }

@@ -5,6 +5,9 @@ namespace ChengYuan.WebHost;
 
 internal sealed class CurrentUserMiddleware(RequestDelegate next)
 {
+    private const string JwtSubjectClaimType = "sub";
+    private const string JwtNameClaimType = "name";
+
     public async Task Invoke(HttpContext context, ICurrentUserAccessor currentUserAccessor)
     {
         var principal = context.User;
@@ -15,10 +18,10 @@ internal sealed class CurrentUserMiddleware(RequestDelegate next)
             return;
         }
 
-        var userId = principal.FindFirst("sub")?.Value
+        var userId = principal.FindFirst(JwtSubjectClaimType)?.Value
             ?? principal.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
 
-        var userName = principal.FindFirst("name")?.Value
+        var userName = principal.FindFirst(JwtNameClaimType)?.Value
             ?? principal.FindFirst(System.Security.Claims.ClaimTypes.Name)?.Value;
 
         using (currentUserAccessor.Change(new CurrentUserInfo(userId, userName, IsAuthenticated: true)))

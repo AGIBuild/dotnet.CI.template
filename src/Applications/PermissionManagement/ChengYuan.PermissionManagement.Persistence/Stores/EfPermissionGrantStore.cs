@@ -30,13 +30,13 @@ public sealed class EfPermissionGrantStore(IDbContextFactory<PermissionManagemen
     {
         await using var dbContext = await dbContextFactory.CreateDbContextAsync(cancellationToken);
         var entities = await dbContext.PermissionGrants
+            .OrderBy(permissionGrant => permissionGrant.Scope)
+            .ThenBy(permissionGrant => permissionGrant.Name)
+            .ThenBy(permissionGrant => permissionGrant.TenantId)
+            .ThenBy(permissionGrant => permissionGrant.UserId)
             .ToArrayAsync(cancellationToken);
 
         return entities
-            .OrderBy(permissionGrant => permissionGrant.Scope)
-            .ThenBy(permissionGrant => permissionGrant.Name, StringComparer.Ordinal)
-            .ThenBy(permissionGrant => permissionGrant.TenantId)
-            .ThenBy(permissionGrant => permissionGrant.UserId, StringComparer.Ordinal)
             .Select(MapToRecord)
             .ToArray();
     }
