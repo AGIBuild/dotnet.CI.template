@@ -1,15 +1,6 @@
 namespace ChengYuan.Core.DependencyInjection;
 
-public sealed class ObjectAccessor<T> : IObjectAccessor<T>
+public sealed class ObjectAccessor<T>(T? value = default) : IObjectAccessor<T>
 {
-    public T? Value { get; set; }
-
-    public ObjectAccessor()
-    {
-    }
-
-    public ObjectAccessor(T? value)
-    {
-        Value = value;
-    }
+    public T? Value { get; set; } = value;
 }

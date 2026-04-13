@@ -5,7 +5,7 @@ using ChengYuan.Core.StronglyTypedIds;
 
 namespace ChengYuan.Core.Json;
 
-public class StronglyTypedIdJsonConverter<TStronglyTypedId, TValue> : JsonConverter<TStronglyTypedId>
+public sealed class StronglyTypedIdJsonConverter<TStronglyTypedId, TValue> : JsonConverter<TStronglyTypedId>
     where TStronglyTypedId : StronglyTypedId<TValue>
     where TValue : notnull
 {

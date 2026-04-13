@@ -1,6 +1,6 @@
 namespace ChengYuan.TenantManagement;
 
-public sealed class TenantRecord
+public sealed record TenantRecord
 {
     public TenantRecord(Guid id, string name, bool isActive = true)
     {

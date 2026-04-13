@@ -2,9 +2,9 @@ namespace ChengYuan.Identity;
 
 public sealed class UpdateUserRequest
 {
-    public string UserName { get; init; } = string.Empty;
+    public required string UserName { get; init; }
 
-    public string Email { get; init; } = string.Empty;
+    public required string Email { get; init; }
 
-    public bool IsActive { get; init; }
+    public required bool IsActive { get; init; }
 }

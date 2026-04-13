@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace ChengYuan.SettingManagement;
 
-public sealed class EfSettingValueStore(IDbContextFactory<SettingManagementDbContext> dbContextFactory) : ISettingValueStore
+public sealed class SettingValueStore(IDbContextFactory<SettingManagementDbContext> dbContextFactory) : ISettingValueStore
 {
     public async ValueTask<SettingValueRecord?> FindAsync(
         string name,
@@ -96,9 +96,7 @@ public sealed class EfSettingValueStore(IDbContextFactory<SettingManagementDbCon
     }
 
     private static SettingValueRecord MapToRecord(SettingValueEntity entity)
-    {
-        return new SettingValueRecord(entity.Name, entity.Scope, entity.ReadValue(), entity.TenantId, entity.UserId);
-    }
+        => new(entity.Name, entity.Scope, entity.ReadValue(), entity.TenantId, entity.UserId);
 
     private static void ValidateArguments(string name, SettingScope scope, Guid? tenantId, string? userId)
     {

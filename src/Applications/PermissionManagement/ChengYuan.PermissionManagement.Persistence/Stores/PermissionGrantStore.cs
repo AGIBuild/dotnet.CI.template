@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace ChengYuan.PermissionManagement;
 
-public sealed class EfPermissionGrantStore(IDbContextFactory<PermissionManagementDbContext> dbContextFactory) : IPermissionGrantStore
+public sealed class PermissionGrantStore(IDbContextFactory<PermissionManagementDbContext> dbContextFactory) : IPermissionGrantStore
 {
     public async ValueTask<PermissionGrantRecord?> FindAsync(
         string name,
@@ -96,9 +96,7 @@ public sealed class EfPermissionGrantStore(IDbContextFactory<PermissionManagemen
     }
 
     private static PermissionGrantRecord MapToRecord(PermissionGrantEntity entity)
-    {
-        return new PermissionGrantRecord(entity.Name, entity.Scope, entity.IsGranted, entity.TenantId, entity.UserId);
-    }
+        => new(entity.Name, entity.Scope, entity.IsGranted, entity.TenantId, entity.UserId);
 
     private static void ValidateArguments(string name, PermissionScope scope, Guid? tenantId, string? userId)
     {

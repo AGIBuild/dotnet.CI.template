@@ -9,7 +9,7 @@ public static class PermissionManagementPersistenceServiceCollectionExtensions
     {
         ArgumentNullException.ThrowIfNull(services);
 
-        services.AddPersistenceModule<PermissionManagementDbContext, IPermissionGrantStore, IPermissionGrantReader, EfPermissionGrantStore>();
+        services.AddPersistenceModule<PermissionManagementDbContext, IPermissionGrantStore, IPermissionGrantReader, PermissionGrantStore>();
 
         return services;
     }

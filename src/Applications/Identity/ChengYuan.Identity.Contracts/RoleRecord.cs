@@ -1,6 +1,6 @@
 namespace ChengYuan.Identity;
 
-public sealed class RoleRecord
+public sealed record RoleRecord
 {
     public RoleRecord(Guid id, string name, bool isActive)
     {

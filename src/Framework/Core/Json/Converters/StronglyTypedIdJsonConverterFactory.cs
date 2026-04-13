@@ -5,7 +5,7 @@ using ChengYuan.Core.StronglyTypedIds;
 
 namespace ChengYuan.Core.Json;
 
-public class StronglyTypedIdJsonConverterFactory : JsonConverterFactory
+public sealed class StronglyTypedIdJsonConverterFactory : JsonConverterFactory
 {
     public override bool CanConvert(Type typeToConvert)
     {

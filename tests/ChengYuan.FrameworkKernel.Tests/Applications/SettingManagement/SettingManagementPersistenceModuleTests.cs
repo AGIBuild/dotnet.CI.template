@@ -25,8 +25,8 @@ public class SettingManagementPersistenceModuleTests
 
         using var scope = serviceProvider.CreateScope();
         scope.ServiceProvider.GetRequiredService<SettingManagementDbContext>().ShouldNotBeNull();
-        serviceProvider.GetRequiredService<ISettingValueStore>().ShouldBeOfType<EfSettingValueStore>();
-        serviceProvider.GetRequiredService<ISettingValueReader>().ShouldBeOfType<EfSettingValueStore>();
+        serviceProvider.GetRequiredService<ISettingValueStore>().ShouldBeOfType<SettingValueStore>();
+        serviceProvider.GetRequiredService<ISettingValueReader>().ShouldBeOfType<SettingValueStore>();
         serviceProvider.GetRequiredService<ISettingValueManager>().ShouldNotBeNull();
         serviceProvider.GetRequiredService<ISettingProvider>().ShouldNotBeNull();
     }

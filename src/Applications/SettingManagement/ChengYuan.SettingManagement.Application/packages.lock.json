@@ -40,6 +40,7 @@
       "chengyuan.settingmanagement.contracts": {
         "type": "Project",
         "dependencies": {
+          "ChengYuan.Core": "[0.2.10-local, )",
           "ChengYuan.Settings.Abstractions": "[0.2.10-local, )"
         }
       },

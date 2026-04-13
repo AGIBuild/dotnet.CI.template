@@ -25,8 +25,8 @@ public class FeatureManagementPersistenceModuleTests
 
         using var scope = serviceProvider.CreateScope();
         scope.ServiceProvider.GetRequiredService<FeatureManagementDbContext>().ShouldNotBeNull();
-        serviceProvider.GetRequiredService<IFeatureValueStore>().ShouldBeOfType<EfFeatureValueStore>();
-        serviceProvider.GetRequiredService<IFeatureValueReader>().ShouldBeOfType<EfFeatureValueStore>();
+        serviceProvider.GetRequiredService<IFeatureValueStore>().ShouldBeOfType<FeatureValueStore>();
+        serviceProvider.GetRequiredService<IFeatureValueReader>().ShouldBeOfType<FeatureValueStore>();
         serviceProvider.GetRequiredService<IFeatureValueManager>().ShouldNotBeNull();
         serviceProvider.GetRequiredService<IFeatureChecker>().ShouldNotBeNull();
     }

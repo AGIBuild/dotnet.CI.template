@@ -10,7 +10,7 @@ internal sealed class CompositeDbContextUnitOfWork(
 {
     public async ValueTask SaveChangesAsync(CancellationToken cancellationToken = default)
     {
-        var allEvents = new List<IDomainEvent>();
+        List<IDomainEvent> allEvents = [];
 
         foreach (var participant in participants)
         {

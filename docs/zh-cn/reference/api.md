@@ -197,7 +197,7 @@ Repository、工作单元与过滤器缝隙的 provider 无关数据契约。
 | `TenantManagementPersistenceModule` | 在 TenantManagement 应用模块之上注册基于 EF 的 tenant store。 |
 | `TenantManagementDbContext` | 面向共享物理数据库但独立模块边界的 tenant 目录 DbContext。 |
 | `TenantEntity` | 携带规范化名称与软删除状态的 EF tenant 持久化模型。 |
-| `EfTenantStore` | `ITenantStore` 的 EF Core 实现。 |
+| `TenantStore` | `ITenantStore` 的 EF Core 实现。 |
 | `AddTenantManagementPersistenceDbContext()` | 让调用方按自己的 provider 和连接方式注册模块 DbContext。 |
 | `AddTenantManagementPersistence()` | 注册基于 EF 的 tenant store 与 unit of work 服务。 |
 
@@ -237,8 +237,8 @@ Repository、工作单元与过滤器缝隙的 provider 无关数据契约。
 | `IdentityRoleConfiguration` | IdentityRole 聚合的 EF Core 模型配置。 |
 | `IdentityUserConfiguration` | IdentityUser 聚合的 EF Core 模型配置。 |
 | `IdentityUserRoleConfiguration` | 用户-角色分配表的 EF Core 模型配置。 |
-| `EfIdentityRoleRepository` | `IIdentityRoleRepository` 的 EF Core 实现。 |
-| `EfIdentityUserRepository` | `IIdentityUserRepository` 的 EF Core 实现。 |
+| `IdentityRoleRepository` | `IIdentityRoleRepository` 的 EF Core 实现。 |
+| `IdentityUserRepository` | `IIdentityUserRepository` 的 EF Core 实现。 |
 | `AddIdentityDbContext()` | 让调用方按自己的 provider 和连接方式注册模块 DbContext。 |
 | `AddIdentityPersistence()` | 注册基于 EF 的 identity 仓储与 unit of work 服务。 |
 
@@ -315,7 +315,7 @@ Identity 的最小 HTTP 管理 facet。
 | `AuditLoggingPersistenceModule` | 在 AuditLogging 应用模块之上注册基于 EF 的 audit log store。 |
 | `AuditLoggingDbContext` | 面向共享物理数据库但独立模块边界的 audit log DbContext。 |
 | `AuditLogEntity` | 包含自定义属性序列化结果的 EF audit log 持久化模型。 |
-| `EfAuditLogStore` | `IAuditLogStore` 的 EF Core 实现。 |
+| `AuditLogStore` | `IAuditLogStore` 的 EF Core 实现。 |
 | `AddAuditLoggingPersistenceDbContext()` | 让调用方按自己的 provider 和连接方式注册模块 DbContext 与 DbContext factory。 |
 | `AddAuditLoggingPersistence()` | 注册基于 EF 的 audit log store 与 unit of work 服务。 |
 
@@ -346,7 +346,7 @@ Identity 的最小 HTTP 管理 facet。
 | `FeatureManagementPersistenceModule` | 在 FeatureManagement 应用模块之上注册基于 EF 的 feature value store。 |
 | `FeatureManagementDbContext` | 面向共享物理数据库但独立模块边界的 feature value DbContext。 |
 | `FeatureValueEntity` | 面向全局、租户和用户范围的 EF feature value 持久化模型。 |
-| `EfFeatureValueStore` | `IFeatureValueStore` 的 EF Core 实现。 |
+| `FeatureValueStore` | `IFeatureValueStore` 的 EF Core 实现。 |
 | `AddFeatureManagementPersistenceDbContext()` | 让调用方按自己的 provider 和连接方式注册模块 DbContext 与 DbContext factory。 |
 | `AddFeatureManagementPersistence()` | 注册基于 EF 的 feature value store 与 unit of work 服务。 |
 
@@ -377,7 +377,7 @@ Identity 的最小 HTTP 管理 facet。
 | `PermissionManagementPersistenceModule` | 在 PermissionManagement 应用模块之上注册基于 EF 的 permission grant store。 |
 | `PermissionManagementDbContext` | 面向共享物理数据库但独立模块边界的 permission grant DbContext。 |
 | `PermissionGrantEntity` | 面向全局、租户和用户范围的 EF permission grant 持久化模型。 |
-| `EfPermissionGrantStore` | `IPermissionGrantStore` 的 EF Core 实现。 |
+| `PermissionGrantStore` | `IPermissionGrantStore` 的 EF Core 实现。 |
 | `AddPermissionManagementPersistenceDbContext()` | 让调用方按自己的 provider 和连接方式注册模块 DbContext 与 DbContext factory。 |
 | `AddPermissionManagementPersistence()` | 注册基于 EF 的 permission grant store 与 unit of work 服务。 |
 
@@ -408,7 +408,7 @@ Identity 的最小 HTTP 管理 facet。
 | `SettingManagementPersistenceModule` | 在 SettingManagement 应用模块之上注册基于 EF 的 setting value store。 |
 | `SettingManagementDbContext` | 面向共享物理数据库但独立模块边界的 setting 值 DbContext。 |
 | `SettingValueEntity` | 面向全局、租户和用户范围的 EF setting 值持久化模型。 |
-| `EfSettingValueStore` | `ISettingValueStore` 的 EF Core 实现。 |
+| `SettingValueStore` | `ISettingValueStore` 的 EF Core 实现。 |
 | `AddSettingManagementPersistenceDbContext()` | 让调用方按自己的 provider 和连接方式注册模块 DbContext 与 DbContext factory。 |
 | `AddSettingManagementPersistence()` | 注册基于 EF 的 setting store 与 unit of work 服务。 |
 

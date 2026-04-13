@@ -25,8 +25,8 @@ public class AuditLoggingPersistenceModuleTests
 
         using var scope = serviceProvider.CreateScope();
         scope.ServiceProvider.GetRequiredService<AuditLoggingDbContext>().ShouldNotBeNull();
-        serviceProvider.GetRequiredService<IAuditLogStore>().ShouldBeOfType<EfAuditLogStore>();
-        serviceProvider.GetRequiredService<IAuditLogReader>().ShouldBeOfType<EfAuditLogStore>();
+        serviceProvider.GetRequiredService<IAuditLogStore>().ShouldBeOfType<AuditLogStore>();
+        serviceProvider.GetRequiredService<IAuditLogReader>().ShouldBeOfType<AuditLogStore>();
         serviceProvider.GetRequiredService<IAuditScopeFactory>().ShouldNotBeNull();
     }
 

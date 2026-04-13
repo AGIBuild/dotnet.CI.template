@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace ChengYuan.FeatureManagement;
 
-public sealed class EfFeatureValueStore(IDbContextFactory<FeatureManagementDbContext> dbContextFactory) : IFeatureValueStore
+public sealed class FeatureValueStore(IDbContextFactory<FeatureManagementDbContext> dbContextFactory) : IFeatureValueStore
 {
     public async ValueTask<FeatureValueRecord?> FindAsync(
         string name,
@@ -96,9 +96,7 @@ public sealed class EfFeatureValueStore(IDbContextFactory<FeatureManagementDbCon
     }
 
     private static FeatureValueRecord MapToRecord(FeatureValueEntity entity)
-    {
-        return new FeatureValueRecord(entity.Name, entity.Scope, entity.ReadValue(), entity.TenantId, entity.UserId);
-    }
+        => new(entity.Name, entity.Scope, entity.ReadValue(), entity.TenantId, entity.UserId);
 
     private static void ValidateArguments(string name, FeatureScope scope, Guid? tenantId, string? userId)
     {

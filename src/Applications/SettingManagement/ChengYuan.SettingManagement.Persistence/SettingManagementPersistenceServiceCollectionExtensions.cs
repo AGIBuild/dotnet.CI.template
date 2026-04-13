@@ -9,7 +9,7 @@ public static class SettingManagementPersistenceServiceCollectionExtensions
     {
         ArgumentNullException.ThrowIfNull(services);
 
-        services.AddPersistenceModule<SettingManagementDbContext, ISettingValueStore, ISettingValueReader, EfSettingValueStore>();
+        services.AddPersistenceModule<SettingManagementDbContext, ISettingValueStore, ISettingValueReader, SettingValueStore>();
 
         return services;
     }

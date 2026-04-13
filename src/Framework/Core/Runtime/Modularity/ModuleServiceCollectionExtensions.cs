@@ -219,9 +219,9 @@ public static class ModuleServiceCollectionExtensions
         Type rootModuleType,
         IReadOnlyCollection<Type> additionalModuleTypes)
     {
-        var orderedNodes = new List<(Type ModuleType, Type[] DependencyTypes)>();
-        var visitingModules = new HashSet<Type>();
-        var visitedModules = new HashSet<Type>();
+        List<(Type ModuleType, Type[] DependencyTypes)> orderedNodes = [];
+        HashSet<Type> visitingModules = [];
+        HashSet<Type> visitedModules = [];
 
         foreach (var additionalModuleType in additionalModuleTypes)
         {
@@ -269,8 +269,8 @@ public static class ModuleServiceCollectionExtensions
         List<(Type ModuleType, Type[] DependencyTypes)> orderedNodes,
         Type rootModuleType)
     {
-        var descriptorMap = new Dictionary<Type, ModuleDescriptor>();
-        var descriptors = new List<ModuleDescriptor>();
+        Dictionary<Type, ModuleDescriptor> descriptorMap = [];
+        List<ModuleDescriptor> descriptors = [];
 
         foreach (var (moduleType, dependencyTypes) in orderedNodes)
         {

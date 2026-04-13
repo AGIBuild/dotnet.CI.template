@@ -9,7 +9,7 @@ public static class AuditLoggingPersistenceServiceCollectionExtensions
     {
         ArgumentNullException.ThrowIfNull(services);
 
-        services.AddPersistenceModule<AuditLoggingDbContext, IAuditLogStore, IAuditLogReader, EfAuditLogStore>();
+        services.AddPersistenceModule<AuditLoggingDbContext, IAuditLogStore, IAuditLogReader, AuditLogStore>();
 
         return services;
     }

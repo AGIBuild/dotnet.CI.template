@@ -2,7 +2,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace ChengYuan.TenantManagement;
 
-public sealed class EfTenantStore(IDbContextFactory<TenantManagementDbContext> dbContextFactory) : ITenantStore
+public sealed class TenantStore(IDbContextFactory<TenantManagementDbContext> dbContextFactory) : ITenantStore
 {
     public async ValueTask<TenantRecord?> FindByIdAsync(Guid tenantId, CancellationToken cancellationToken = default)
     {
@@ -96,7 +96,5 @@ public sealed class EfTenantStore(IDbContextFactory<TenantManagementDbContext> d
     }
 
     private static TenantRecord MapToRecord(TenantEntity tenant)
-    {
-        return new TenantRecord(tenant.Id, tenant.Name, tenant.IsActive);
-    }
+        => new(tenant.Id, tenant.Name, tenant.IsActive);
 }

@@ -22,8 +22,8 @@ public class IdentityPersistenceModuleTests
 
         using var scope = serviceProvider.CreateScope();
         scope.ServiceProvider.GetRequiredService<IdentityDbContext>().ShouldNotBeNull();
-        scope.ServiceProvider.GetRequiredService<IIdentityRoleRepository>().ShouldBeOfType<EfIdentityRoleRepository>();
-        scope.ServiceProvider.GetRequiredService<IIdentityUserRepository>().ShouldBeOfType<EfIdentityUserRepository>();
+        scope.ServiceProvider.GetRequiredService<IIdentityRoleRepository>().ShouldBeOfType<IdentityRoleRepository>();
+        scope.ServiceProvider.GetRequiredService<IIdentityUserRepository>().ShouldBeOfType<IdentityUserRepository>();
         scope.ServiceProvider.GetRequiredService<IRoleManager>().ShouldNotBeNull();
         scope.ServiceProvider.GetRequiredService<IRoleReader>().ShouldNotBeNull();
         scope.ServiceProvider.GetRequiredService<IUserManager>().ShouldNotBeNull();

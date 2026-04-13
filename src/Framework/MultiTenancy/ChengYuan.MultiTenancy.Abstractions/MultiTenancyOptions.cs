@@ -39,7 +39,7 @@ public sealed class MultiTenancyOptions
     /// Claim types to inspect when resolving tenant from an authenticated user.
     /// Checked in order; first match wins.
     /// </summary>
-    public IList<string> ClaimTypes { get; } = new List<string> { "tenant_id", "tenantId", "tenant" };
+    public IList<string> ClaimTypes { get; } = ["tenant_id", "tenantId", "tenant"];
 
     /// <summary>
     /// Header name used for HTTP header-based resolution.
@@ -66,5 +66,5 @@ public sealed class MultiTenancyOptions
     /// Each pattern should contain a <c>{0}</c> placeholder for the tenant segment.
     /// Example: <c>"{0}.myapp.com"</c>
     /// </summary>
-    public IList<string> DomainPatterns { get; } = new List<string>();
+    public IList<string> DomainPatterns { get; } = [];
 }

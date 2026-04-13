@@ -4,7 +4,7 @@ namespace ChengYuan.PermissionManagement;
 
 public sealed class InMemoryPermissionGrantStore : IPermissionGrantStore
 {
-    private readonly object _sync = new();
+    private readonly Lock _sync = new();
     private readonly Dictionary<string, PermissionGrantRecord> _globalRecords = new(StringComparer.Ordinal);
     private readonly Dictionary<(Guid TenantId, string Name), PermissionGrantRecord> _tenantRecords = new();
     private readonly Dictionary<(string UserId, string Name), PermissionGrantRecord> _userRecords = new();

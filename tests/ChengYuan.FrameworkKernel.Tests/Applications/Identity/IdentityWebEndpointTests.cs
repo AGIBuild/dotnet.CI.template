@@ -20,7 +20,7 @@ public class IdentityWebEndpointTests
         await using var app = await CreateApplicationAsync();
         var client = app.GetTestClient();
 
-        var createRoleResponse = await client.PostAsJsonAsync("/identity/roles", new CreateRoleRequest
+        var createRoleResponse = await client.PostAsJsonAsync("/api/v1/identity/roles", new CreateRoleRequest
         {
             Name = "Administrators"
         }, TestContext.Current.CancellationToken);
@@ -29,7 +29,7 @@ public class IdentityWebEndpointTests
         var createdRole = await createRoleResponse.Content.ReadFromJsonAsync<RoleRecord>(TestContext.Current.CancellationToken);
         createdRole.ShouldNotBeNull();
 
-        var createUserResponse = await client.PostAsJsonAsync("/identity/users", new CreateUserRequest
+        var createUserResponse = await client.PostAsJsonAsync("/api/v1/identity/users", new CreateUserRequest
         {
             UserName = "alice",
             Email = "alice@example.com"
@@ -40,24 +40,24 @@ public class IdentityWebEndpointTests
         createdUser.ShouldNotBeNull();
         createdUser.RoleIds.ShouldBeEmpty();
 
-        var assignRoleResponse = await client.PutAsync($"/identity/users/{createdUser.Id}/roles/{createdRole.Id}", content: null, TestContext.Current.CancellationToken);
+        var assignRoleResponse = await client.PutAsync($"/api/v1/identity/users/{createdUser.Id}/roles/{createdRole.Id}", content: null, TestContext.Current.CancellationToken);
         assignRoleResponse.StatusCode.ShouldBe(HttpStatusCode.OK);
 
         var assignedUser = await assignRoleResponse.Content.ReadFromJsonAsync<UserRecord>(TestContext.Current.CancellationToken);
         assignedUser.ShouldNotBeNull();
         assignedUser.RoleIds.ShouldBe([createdRole.Id]);
 
-        var getUserResponse = await client.GetAsync($"/identity/users/{createdUser.Id}", TestContext.Current.CancellationToken);
+        var getUserResponse = await client.GetAsync($"/api/v1/identity/users/{createdUser.Id}", TestContext.Current.CancellationToken);
         getUserResponse.StatusCode.ShouldBe(HttpStatusCode.OK);
 
         var loadedUser = await getUserResponse.Content.ReadFromJsonAsync<UserRecord>(TestContext.Current.CancellationToken);
         loadedUser.ShouldNotBeNull();
         loadedUser.RoleIds.ShouldBe([createdRole.Id]);
 
-        var deleteRoleResponse = await client.DeleteAsync($"/identity/roles/{createdRole.Id}", TestContext.Current.CancellationToken);
+        var deleteRoleResponse = await client.DeleteAsync($"/api/v1/identity/roles/{createdRole.Id}", TestContext.Current.CancellationToken);
         deleteRoleResponse.StatusCode.ShouldBe(HttpStatusCode.NoContent);
 
-        var getUserAfterRoleDeleteResponse = await client.GetAsync($"/identity/users/{createdUser.Id}", TestContext.Current.CancellationToken);
+        var getUserAfterRoleDeleteResponse = await client.GetAsync($"/api/v1/identity/users/{createdUser.Id}", TestContext.Current.CancellationToken);
         getUserAfterRoleDeleteResponse.StatusCode.ShouldBe(HttpStatusCode.OK);
 
         var userAfterRoleDelete = await getUserAfterRoleDeleteResponse.Content.ReadFromJsonAsync<UserRecord>(TestContext.Current.CancellationToken);
@@ -71,21 +71,21 @@ public class IdentityWebEndpointTests
         await using var app = await CreateApplicationAsync();
         var client = app.GetTestClient();
 
-        var firstRoleResponse = await client.PostAsJsonAsync("/identity/roles", new CreateRoleRequest
+        var firstRoleResponse = await client.PostAsJsonAsync("/api/v1/identity/roles", new CreateRoleRequest
         {
             Name = "Administrators"
         }, TestContext.Current.CancellationToken);
 
         firstRoleResponse.EnsureSuccessStatusCode();
 
-        var duplicateRoleResponse = await client.PostAsJsonAsync("/identity/roles", new CreateRoleRequest
+        var duplicateRoleResponse = await client.PostAsJsonAsync("/api/v1/identity/roles", new CreateRoleRequest
         {
             Name = " administrators "
         }, TestContext.Current.CancellationToken);
 
         duplicateRoleResponse.StatusCode.ShouldBe(HttpStatusCode.Conflict);
 
-        var firstUserResponse = await client.PostAsJsonAsync("/identity/users", new CreateUserRequest
+        var firstUserResponse = await client.PostAsJsonAsync("/api/v1/identity/users", new CreateUserRequest
         {
             UserName = "alice",
             Email = "alice@example.com"
@@ -93,7 +93,7 @@ public class IdentityWebEndpointTests
 
         firstUserResponse.EnsureSuccessStatusCode();
 
-        var duplicateUserResponse = await client.PostAsJsonAsync("/identity/users", new CreateUserRequest
+        var duplicateUserResponse = await client.PostAsJsonAsync("/api/v1/identity/users", new CreateUserRequest
         {
             UserName = " ALICE ",
             Email = "other@example.com"

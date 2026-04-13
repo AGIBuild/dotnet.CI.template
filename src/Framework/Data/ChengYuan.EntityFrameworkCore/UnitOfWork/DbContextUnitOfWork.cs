@@ -16,7 +16,7 @@ public sealed class DbContextUnitOfWork(DbContext dbContext) : IUnitOfWork, IDbC
             .Select(entry => entry.Entity)
             .ToList();
 
-        var events = new List<IDomainEvent>();
+        List<IDomainEvent> events = [];
 
         foreach (var entity in trackedEntities)
         {

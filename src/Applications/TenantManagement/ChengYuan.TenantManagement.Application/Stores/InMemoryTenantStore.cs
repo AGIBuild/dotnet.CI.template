@@ -2,7 +2,7 @@ namespace ChengYuan.TenantManagement;
 
 public sealed class InMemoryTenantStore : ITenantStore
 {
-    private readonly object _sync = new();
+    private readonly Lock _sync = new();
     private readonly Dictionary<Guid, TenantRecord> _tenantsById = new();
     private readonly Dictionary<string, Guid> _tenantIdsByName = new(StringComparer.OrdinalIgnoreCase);
 

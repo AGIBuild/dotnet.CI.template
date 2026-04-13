@@ -4,7 +4,7 @@ namespace ChengYuan.FeatureManagement;
 
 public sealed class InMemoryFeatureValueStore : IFeatureValueStore
 {
-    private readonly object _sync = new();
+    private readonly Lock _sync = new();
     private readonly Dictionary<string, FeatureValueRecord> _globalRecords = new(StringComparer.Ordinal);
     private readonly Dictionary<(Guid TenantId, string Name), FeatureValueRecord> _tenantRecords = new();
     private readonly Dictionary<(string UserId, string Name), FeatureValueRecord> _userRecords = new();

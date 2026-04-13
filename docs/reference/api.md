@@ -253,7 +253,7 @@ Persistence facet for tenant catalog management backed by EF Core.
 | `TenantManagementPersistenceModule` | Registers the EF-backed tenant store on top of the TenantManagement application module. |
 | `TenantManagementDbContext` | Independent module DbContext for tenant catalog tables within the shared physical database. |
 | `TenantEntity` | EF-mapped tenant persistence model with normalized name and soft-delete state. |
-| `EfTenantStore` | EF Core implementation of `ITenantStore`. |
+| `TenantStore` | EF Core implementation of `ITenantStore`. |
 | `AddTenantManagementPersistenceDbContext()` | Registers the module DbContext against a caller-provided provider and connection. |
 | `AddTenantManagementPersistence()` | Registers the EF-backed tenant store and unit of work services. |
 
@@ -293,8 +293,8 @@ Persistence facet for identity-user storage backed by EF Core.
 | `IdentityRoleConfiguration` | EF Core model configuration for the identity-role aggregate. |
 | `IdentityUserConfiguration` | EF Core model configuration for the identity-user aggregate. |
 | `IdentityUserRoleConfiguration` | EF Core model configuration for the user-role assignment table. |
-| `EfIdentityRoleRepository` | EF Core implementation of `IIdentityRoleRepository`. |
-| `EfIdentityUserRepository` | EF Core implementation of `IIdentityUserRepository`. |
+| `IdentityRoleRepository` | EF Core implementation of `IIdentityRoleRepository`. |
+| `IdentityUserRepository` | EF Core implementation of `IIdentityUserRepository`. |
 | `AddIdentityDbContext()` | Registers the module DbContext against a caller-provided provider and connection. |
 | `AddIdentityPersistence()` | Registers the EF-backed identity repository and unit of work services. |
 
@@ -371,7 +371,7 @@ Persistence facet for audit log storage backed by EF Core.
 | `AuditLoggingPersistenceModule` | Registers the EF-backed audit log store on top of the AuditLogging application module. |
 | `AuditLoggingDbContext` | Independent module DbContext for audit log tables within the shared physical database. |
 | `AuditLogEntity` | EF-mapped audit log persistence model including serialized custom properties. |
-| `EfAuditLogStore` | EF Core implementation of `IAuditLogStore`. |
+| `AuditLogStore` | EF Core implementation of `IAuditLogStore`. |
 | `AddAuditLoggingPersistenceDbContext()` | Registers the module DbContext and DbContext factory against a caller-provided provider and connection. |
 | `AddAuditLoggingPersistence()` | Registers the EF-backed audit log store and unit of work services. |
 
@@ -402,7 +402,7 @@ Persistence facet for feature value storage backed by EF Core.
 | `FeatureManagementPersistenceModule` | Registers the EF-backed feature value store on top of the FeatureManagement application module. |
 | `FeatureManagementDbContext` | Independent module DbContext for feature value tables within the shared physical database. |
 | `FeatureValueEntity` | EF-mapped feature value persistence model for global, tenant, and user scopes. |
-| `EfFeatureValueStore` | EF Core implementation of `IFeatureValueStore`. |
+| `FeatureValueStore` | EF Core implementation of `IFeatureValueStore`. |
 | `AddFeatureManagementPersistenceDbContext()` | Registers the module DbContext and DbContext factory against a caller-provided provider and connection. |
 | `AddFeatureManagementPersistence()` | Registers the EF-backed feature value store and unit of work services. |
 
@@ -433,7 +433,7 @@ Persistence facet for permission grant storage backed by EF Core.
 | `PermissionManagementPersistenceModule` | Registers the EF-backed permission grant store on top of the PermissionManagement application module. |
 | `PermissionManagementDbContext` | Independent module DbContext for permission grant tables within the shared physical database. |
 | `PermissionGrantEntity` | EF-mapped permission grant persistence model for global, tenant, and user scopes. |
-| `EfPermissionGrantStore` | EF Core implementation of `IPermissionGrantStore`. |
+| `PermissionGrantStore` | EF Core implementation of `IPermissionGrantStore`. |
 | `AddPermissionManagementPersistenceDbContext()` | Registers the module DbContext and DbContext factory against a caller-provided provider and connection. |
 | `AddPermissionManagementPersistence()` | Registers the EF-backed permission grant store and unit of work services. |
 
@@ -464,7 +464,7 @@ Persistence facet for setting value storage backed by EF Core.
 | `SettingManagementPersistenceModule` | Registers the EF-backed setting value store on top of the SettingManagement application module. |
 | `SettingManagementDbContext` | Independent module DbContext for setting value tables within the shared physical database. |
 | `SettingValueEntity` | EF-mapped setting value persistence model for global, tenant, and user scopes. |
-| `EfSettingValueStore` | EF Core implementation of `ISettingValueStore`. |
+| `SettingValueStore` | EF Core implementation of `ISettingValueStore`. |
 | `AddSettingManagementPersistenceDbContext()` | Registers the module DbContext and DbContext factory against a caller-provided provider and connection. |
 | `AddSettingManagementPersistence()` | Registers the EF-backed setting store and unit of work services. |
 

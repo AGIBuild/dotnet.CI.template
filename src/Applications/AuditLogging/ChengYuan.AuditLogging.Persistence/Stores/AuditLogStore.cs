@@ -2,7 +2,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace ChengYuan.AuditLogging;
 
-public sealed class EfAuditLogStore(IDbContextFactory<AuditLoggingDbContext> dbContextFactory) : IAuditLogStore
+public sealed class AuditLogStore(IDbContextFactory<AuditLoggingDbContext> dbContextFactory) : IAuditLogStore
 {
     public async ValueTask AppendAsync(AuditLogRecord record, CancellationToken cancellationToken = default)
     {
@@ -42,20 +42,17 @@ public sealed class EfAuditLogStore(IDbContextFactory<AuditLoggingDbContext> dbC
             .ToArray();
     }
 
-    private static AuditLogRecord MapToRecord(AuditLogEntity entity)
-    {
-        return new AuditLogRecord(
-            entity.Name,
-            entity.StartedAtUtc,
-            entity.CompletedAtUtc,
-            entity.Duration,
-            entity.TenantId,
-            entity.UserId,
-            entity.UserName,
-            entity.IsAuthenticated,
-            entity.CorrelationId,
-            entity.Succeeded,
-            entity.ErrorMessage,
-            entity.ReadProperties());
-    }
+    private static AuditLogRecord MapToRecord(AuditLogEntity entity) => new(
+        entity.Name,
+        entity.StartedAtUtc,
+        entity.CompletedAtUtc,
+        entity.Duration,
+        entity.TenantId,
+        entity.UserId,
+        entity.UserName,
+        entity.IsAuthenticated,
+        entity.CorrelationId,
+        entity.Succeeded,
+        entity.ErrorMessage,
+        entity.ReadProperties());
 }

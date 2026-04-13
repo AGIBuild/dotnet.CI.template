@@ -2,7 +2,7 @@ using System.Linq;
 
 namespace ChengYuan.Identity;
 
-public sealed class UserRecord
+public sealed record UserRecord
 {
     public UserRecord(Guid id, string userName, string email, bool isActive, IReadOnlyList<Guid>? roleIds = null)
     {

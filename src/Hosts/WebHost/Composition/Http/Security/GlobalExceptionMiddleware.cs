@@ -38,6 +38,9 @@ internal sealed partial class GlobalExceptionMiddleware(RequestDelegate next, IH
             {
                 BusinessException => StatusCodes.Status400BadRequest,
                 UnauthorizedAccessException => StatusCodes.Status403Forbidden,
+                ArgumentException => StatusCodes.Status400BadRequest,
+                TimeoutException => StatusCodes.Status504GatewayTimeout,
+                OperationCanceledException => StatusCodes.Status499ClientClosedRequest,
                 _ => StatusCodes.Status500InternalServerError,
             };
 

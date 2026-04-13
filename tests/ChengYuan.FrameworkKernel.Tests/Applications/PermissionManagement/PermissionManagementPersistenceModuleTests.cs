@@ -25,8 +25,8 @@ public class PermissionManagementPersistenceModuleTests
 
         using var scope = serviceProvider.CreateScope();
         scope.ServiceProvider.GetRequiredService<PermissionManagementDbContext>().ShouldNotBeNull();
-        serviceProvider.GetRequiredService<IPermissionGrantStore>().ShouldBeOfType<EfPermissionGrantStore>();
-        serviceProvider.GetRequiredService<IPermissionGrantReader>().ShouldBeOfType<EfPermissionGrantStore>();
+        serviceProvider.GetRequiredService<IPermissionGrantStore>().ShouldBeOfType<PermissionGrantStore>();
+        serviceProvider.GetRequiredService<IPermissionGrantReader>().ShouldBeOfType<PermissionGrantStore>();
         serviceProvider.GetRequiredService<IPermissionGrantManager>().ShouldNotBeNull();
         serviceProvider.GetRequiredService<IPermissionChecker>().ShouldNotBeNull();
     }

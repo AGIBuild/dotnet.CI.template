@@ -12,7 +12,7 @@ public sealed class TenantResolveOptions
     /// Ordered list of contributor types. The resolver runs them in order;
     /// the first contributor that sets <see cref="TenantResolveContext.HasResolved"/> wins.
     /// </summary>
-    public IList<Type> Contributors { get; } = new List<Type>();
+    public IList<Type> Contributors { get; } = [];
 
     /// <summary>
     /// The fallback tenant id to use when no contributor resolves a tenant.

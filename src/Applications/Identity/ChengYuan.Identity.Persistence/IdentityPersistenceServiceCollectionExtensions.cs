@@ -14,8 +14,8 @@ public static class IdentityPersistenceServiceCollectionExtensions
         services.AddEntityFrameworkCoreDataAccess<IdentityDbContext>();
         services.AddEfRepository<IdentityDbContext, IdentityRole, Guid>();
         services.AddEfRepository<IdentityDbContext, IdentityUser, Guid>();
-        services.TryAddScoped<IIdentityRoleRepository, EfIdentityRoleRepository>();
-        services.TryAddScoped<IIdentityUserRepository, EfIdentityUserRepository>();
+        services.TryAddScoped<IIdentityRoleRepository, IdentityRoleRepository>();
+        services.TryAddScoped<IIdentityUserRepository, IdentityUserRepository>();
 
         return services;
     }

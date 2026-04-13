@@ -12,7 +12,7 @@ public sealed class DomainEventDispatcher(ILocalEventBus eventBus)
     {
         ArgumentNullException.ThrowIfNull(entities);
 
-        var events = new List<IDomainEvent>();
+        List<IDomainEvent> events = [];
 
         foreach (var entity in entities)
         {

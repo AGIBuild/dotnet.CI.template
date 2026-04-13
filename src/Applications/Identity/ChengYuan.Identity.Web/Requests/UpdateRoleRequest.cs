@@ -2,7 +2,7 @@ namespace ChengYuan.Identity;
 
 public sealed class UpdateRoleRequest
 {
-    public string Name { get; init; } = string.Empty;
+    public required string Name { get; init; }
 
-    public bool IsActive { get; init; }
+    public required bool IsActive { get; init; }
 }

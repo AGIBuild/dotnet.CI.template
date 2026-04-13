@@ -62,7 +62,7 @@ public static class ConventionalRegistrationExtensions
             return [.. attribute.ServiceTypes];
         }
 
-        var serviceTypes = new List<Type>();
+        List<Type> serviceTypes = [];
 
         foreach (var interfaceType in implementationType.GetInterfaces())
         {

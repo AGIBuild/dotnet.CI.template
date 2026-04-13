@@ -23,8 +23,8 @@ public class TenantManagementPersistenceModuleTests
 
         using var scope = serviceProvider.CreateScope();
         scope.ServiceProvider.GetRequiredService<TenantManagementDbContext>().ShouldNotBeNull();
-        scope.ServiceProvider.GetRequiredService<ITenantStore>().ShouldBeOfType<EfTenantStore>();
-        scope.ServiceProvider.GetRequiredService<ITenantReader>().ShouldBeOfType<EfTenantStore>();
+        scope.ServiceProvider.GetRequiredService<ITenantStore>().ShouldBeOfType<TenantStore>();
+        scope.ServiceProvider.GetRequiredService<ITenantReader>().ShouldBeOfType<TenantStore>();
         scope.ServiceProvider.GetRequiredService<IUnitOfWork>().ShouldNotBeNull();
     }
 

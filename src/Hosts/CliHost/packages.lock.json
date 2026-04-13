@@ -489,6 +489,7 @@
       "chengyuan.featuremanagement.contracts": {
         "type": "Project",
         "dependencies": {
+          "ChengYuan.Core": "[0.2.10-local, )",
           "ChengYuan.Features.Abstractions": "[0.2.10-local, )"
         }
       },
@@ -561,7 +562,8 @@
       "chengyuan.permissionmanagement.contracts": {
         "type": "Project",
         "dependencies": {
-          "ChengYuan.Authorization.Abstractions": "[0.2.10-local, )"
+          "ChengYuan.Authorization.Abstractions": "[0.2.10-local, )",
+          "ChengYuan.Core": "[0.2.10-local, )"
         }
       },
       "chengyuan.permissionmanagement.persistence": {
@@ -583,6 +585,7 @@
       "chengyuan.settingmanagement.contracts": {
         "type": "Project",
         "dependencies": {
+          "ChengYuan.Core": "[0.2.10-local, )",
           "ChengYuan.Settings.Abstractions": "[0.2.10-local, )"
         }
       },

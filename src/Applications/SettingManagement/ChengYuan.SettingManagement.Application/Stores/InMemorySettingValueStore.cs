@@ -4,7 +4,7 @@ namespace ChengYuan.SettingManagement;
 
 public sealed class InMemorySettingValueStore : ISettingValueStore
 {
-    private readonly object _sync = new();
+    private readonly Lock _sync = new();
     private readonly Dictionary<string, SettingValueRecord> _globalRecords = new(StringComparer.Ordinal);
     private readonly Dictionary<(Guid TenantId, string Name), SettingValueRecord> _tenantRecords = new();
     private readonly Dictionary<(string UserId, string Name), SettingValueRecord> _userRecords = new();

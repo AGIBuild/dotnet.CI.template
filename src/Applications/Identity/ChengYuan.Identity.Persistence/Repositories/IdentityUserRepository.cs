@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace ChengYuan.Identity;
 
-public sealed class EfIdentityUserRepository(
+public sealed class IdentityUserRepository(
     IdentityDbContext dbContext,
     IDataFilter<SoftDeleteFilter>? softDeleteFilter = null,
     IDataFilter<MultiTenantFilter>? multiTenantFilter = null,

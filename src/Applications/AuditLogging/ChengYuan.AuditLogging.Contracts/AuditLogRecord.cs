@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace ChengYuan.AuditLogging;
 
-public sealed class AuditLogRecord
+public sealed record AuditLogRecord
 {
     public AuditLogRecord(
         string name,

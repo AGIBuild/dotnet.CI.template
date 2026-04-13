@@ -82,7 +82,6 @@
     <Project Path="src/Hosts/CliHost/ChengYuan.CliHost.csproj" />
   </Folder>
   <Folder Name="/tests/">
-    <Project Path="tests/ChengYuan.ArchitectureTests/ChengYuan.ArchitectureTests.csproj" />
     <Project Path="tests/ChengYuan.FrameworkKernel.Tests/ChengYuan.FrameworkKernel.Tests.csproj" />
   </Folder>
   <Project Path="build/_build.csproj" />

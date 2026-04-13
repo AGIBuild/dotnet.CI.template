@@ -52,7 +52,8 @@
       "chengyuan.permissionmanagement.contracts": {
         "type": "Project",
         "dependencies": {
-          "ChengYuan.Authorization.Abstractions": "[0.2.10-local, )"
+          "ChengYuan.Authorization.Abstractions": "[0.2.10-local, )",
+          "ChengYuan.Core": "[0.2.10-local, )"
         }
       },
       "Microsoft.Extensions.Configuration.Abstractions": {

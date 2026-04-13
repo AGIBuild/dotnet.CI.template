@@ -11,7 +11,7 @@ public static class TenantManagementPersistenceServiceCollectionExtensions
     {
         ArgumentNullException.ThrowIfNull(services);
 
-        services.AddPersistenceModule<TenantManagementDbContext, ITenantStore, ITenantReader, EfTenantStore>();
+        services.AddPersistenceModule<TenantManagementDbContext, ITenantStore, ITenantReader, TenantStore>();
         services.Replace(ServiceDescriptor.Singleton<ITenantResolutionStore>(serviceProvider =>
             new TenantResolutionStoreAdapter(serviceProvider.GetRequiredService<ITenantReader>())));
 

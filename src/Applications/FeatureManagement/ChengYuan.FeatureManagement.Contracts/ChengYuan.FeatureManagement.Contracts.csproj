@@ -5,6 +5,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\..\Framework\Core\ChengYuan.Core.csproj" />
     <ProjectReference Include="..\..\..\Framework\Features\ChengYuan.Features.Abstractions\ChengYuan.Features.Abstractions.csproj" />
   </ItemGroup>
 

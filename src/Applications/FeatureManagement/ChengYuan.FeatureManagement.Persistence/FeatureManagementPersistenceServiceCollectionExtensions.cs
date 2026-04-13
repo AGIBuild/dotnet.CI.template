@@ -9,7 +9,7 @@ public static class FeatureManagementPersistenceServiceCollectionExtensions
     {
         ArgumentNullException.ThrowIfNull(services);
 
-        services.AddPersistenceModule<FeatureManagementDbContext, IFeatureValueStore, IFeatureValueReader, EfFeatureValueStore>();
+        services.AddPersistenceModule<FeatureManagementDbContext, IFeatureValueStore, IFeatureValueReader, FeatureValueStore>();
 
         return services;
     }

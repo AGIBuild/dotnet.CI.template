@@ -1,3 +1,5 @@
+using Asp.Versioning;
+using Asp.Versioning.Builder;
 using ChengYuan.Core.Modularity;
 using ChengYuan.ExecutionContext;
 using ChengYuan.Identity;
@@ -23,8 +25,9 @@ public static class WebHostApplicationExtensions
 
         app.UseCors();
         app.UseAuthentication();
-        app.UseMiddleware<CurrentUserMiddleware>();
         app.UseMultiTenancy();
+        app.UseRateLimiter();
+        app.UseMiddleware<CurrentUserMiddleware>();
         app.UseAuthorization();
 
         app.MapWebHostEndpoints();
@@ -52,7 +55,15 @@ public static class WebHostApplicationExtensions
                 modules = catalog.ModuleTypes.Select(moduleType => moduleType.Name)
             }));
 
-        app.MapIdentityManagementEndpoints();
+        var versionSet = app.NewApiVersionSet()
+            .HasApiVersion(new ApiVersion(1, 0))
+            .Build();
+
+        var api = app.MapGroup("/api/v{version:apiVersion}")
+            .WithApiVersionSet(versionSet)
+            .RequireRateLimiting("per-tenant");
+
+        api.MapIdentityManagementEndpoints();
         return app;
     }
 }
