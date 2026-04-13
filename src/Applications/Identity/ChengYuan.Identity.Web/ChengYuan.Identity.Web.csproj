@@ -11,6 +11,7 @@
   <ItemGroup>
     <ProjectReference Include="..\..\..\Framework\Core\ChengYuan.Core.csproj" />
     <ProjectReference Include="..\ChengYuan.Identity.Application\ChengYuan.Identity.Application.csproj" />
+    <ProjectReference Include="..\ChengYuan.Identity.Persistence\ChengYuan.Identity.Persistence.csproj" />
   </ItemGroup>
 
 </Project>

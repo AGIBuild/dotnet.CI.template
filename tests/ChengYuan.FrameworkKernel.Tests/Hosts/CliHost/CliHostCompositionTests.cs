@@ -1,5 +1,6 @@
 using ChengYuan.CliHost;
 using ChengYuan.EntityFrameworkCore;
+using ChengYuan.Hosting;
 using ChengYuan.Identity;
 using ChengYuan.TenantManagement;
 using Microsoft.Extensions.DependencyInjection;
@@ -14,14 +15,18 @@ public class CliHostCompositionTests
     {
         var connectionString = $"Data Source={Path.Combine(Path.GetTempPath(), $"chengyuan-cli-{Guid.NewGuid():N}.db")}";
         var services = new ServiceCollection();
-        services.UseSqlite(connectionString);
-        services.AddCliHostComposition();
+        services.AddChengYuan<CliHostModule>(cy => cy
+            .UseSqlite(connectionString)
+            .DisableMultiTenancy()
+            .AddModule<IdentityPersistenceModule>()
+            .AddModule<TenantManagementPersistenceModule>()
+        );
 
         using var serviceProvider = services.BuildServiceProvider();
         var moduleCatalog = serviceProvider.GetRequiredService<ChengYuan.Core.Modularity.ModuleCatalog>();
         var moduleNames = moduleCatalog.ModuleTypes.Select(moduleType => moduleType.Name).ToArray();
 
-        moduleNames.ShouldContain("CliHostModule");
+        moduleNames.ShouldContain(nameof(CliHostModule));
         moduleNames.ShouldContain("ChengYuanEntityFrameworkCoreSqliteModule");
 
         using var scope = serviceProvider.CreateScope();

@@ -11,6 +11,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\ChengYuan.EntityFrameworkCore\ChengYuan.EntityFrameworkCore.csproj" />
+    <ProjectReference Include="..\..\Hosting\ChengYuan.Hosting.csproj" />
   </ItemGroup>
 
 </Project>

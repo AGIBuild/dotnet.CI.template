@@ -539,7 +539,8 @@
       "chengyuan.aspnetcore": {
         "type": "Project",
         "dependencies": {
-          "ChengYuan.Core": "[0.2.10-local, )"
+          "ChengYuan.Core": "[0.2.10-local, )",
+          "ChengYuan.Hosting": "[0.2.10-local, )"
         }
       },
       "chengyuan.auditing.abstractions": {
@@ -641,6 +642,7 @@
         "type": "Project",
         "dependencies": {
           "ChengYuan.EntityFrameworkCore": "[0.2.10-local, )",
+          "ChengYuan.Hosting": "[0.2.10-local, )",
           "Microsoft.EntityFrameworkCore.Sqlite": "[10.0.0, )"
         }
       },
@@ -746,6 +748,13 @@
           "ChengYuan.EntityFrameworkCore": "[0.2.10-local, )"
         }
       },
+      "chengyuan.hosting": {
+        "type": "Project",
+        "dependencies": {
+          "ChengYuan.Core": "[0.2.10-local, )",
+          "ChengYuan.MultiTenancy.Runtime": "[0.2.10-local, )"
+        }
+      },
       "chengyuan.identity.application": {
         "type": "Project",
         "dependencies": {
@@ -777,7 +786,8 @@
         "type": "Project",
         "dependencies": {
           "ChengYuan.Core": "[0.2.10-local, )",
-          "ChengYuan.Identity.Application": "[0.2.10-local, )"
+          "ChengYuan.Identity.Application": "[0.2.10-local, )",
+          "ChengYuan.Identity.Persistence": "[0.2.10-local, )"
         }
       },
       "chengyuan.multitenancy.abstractions": {

@@ -1,9 +1,9 @@
 using ChengYuan.Core.Modularity;
 using Microsoft.Extensions.Hosting;
 
-namespace ChengYuan.WebHost;
+namespace ChengYuan.Hosting;
 
-internal sealed class ModularApplicationHostedService(IModularApplication application) : IHostedService
+public sealed class ModularApplicationHostedService(IModularApplication application) : IHostedService
 {
     public Task StartAsync(CancellationToken cancellationToken)
     {

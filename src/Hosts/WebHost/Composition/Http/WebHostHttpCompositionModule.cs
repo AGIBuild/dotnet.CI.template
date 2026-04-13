@@ -13,7 +13,8 @@ using OpenTelemetry.Trace;
 
 namespace ChengYuan.WebHost;
 
-[DependsOn(typeof(WebHostFrameworkCompositionModule))]
+[DependsOn(typeof(MultiTenancyModule))]
+[DependsOn(typeof(ExceptionHandlingModule))]
 internal sealed class WebHostHttpCompositionModule : HostModule
 {
     public override void ConfigureServices(ServiceConfigurationContext context)

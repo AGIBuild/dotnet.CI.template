@@ -10,6 +10,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\Core\ChengYuan.Core.csproj" />
+    <ProjectReference Include="..\..\Hosting\ChengYuan.Hosting.csproj" />
   </ItemGroup>
 
 </Project>

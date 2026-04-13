@@ -242,7 +242,7 @@ public class TenantResolutionMiddlewareTests
         var builder = WebApplication.CreateBuilder();
         builder.WebHost.UseTestServer();
         builder.Services.UseDbContextOptions(options => options.UseInMemoryDatabase(databaseName));
-        builder.Services.AddWebHostComposition(configure);
+        builder.AddTestWebHost(configure);
         configureServices?.Invoke(builder.Services);
 
         var app = builder.Build();

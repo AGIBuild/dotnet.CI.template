@@ -3,6 +3,7 @@ using ChengYuan.Core.Data;
 using ChengYuan.Core.Modularity;
 using ChengYuan.EntityFrameworkCore;
 using ChengYuan.FeatureManagement;
+using ChengYuan.Hosting;
 using ChengYuan.Identity;
 using ChengYuan.MultiTenancy;
 using ChengYuan.PermissionManagement;
@@ -23,13 +24,13 @@ public class WebHostCompositionTests
         var connectionString = $"Data Source={Path.Combine(Path.GetTempPath(), $"chengyuan-web-{Guid.NewGuid():N}.db")}";
         var services = new ServiceCollection();
         services.UseSqlite(connectionString);
-        services.AddWebHostComposition();
+        services.AddTestWebHost();
 
         using var serviceProvider = services.BuildServiceProvider();
         var moduleCatalog = serviceProvider.GetRequiredService<ChengYuan.Core.Modularity.ModuleCatalog>();
         var moduleNames = moduleCatalog.ModuleTypes.Select(moduleType => moduleType.Name).ToArray();
 
-        moduleNames.ShouldContain("WebHostModule");
+        moduleNames.ShouldContain(nameof(WebHostHttpCompositionModule));
         moduleNames.ShouldContain("ChengYuanEntityFrameworkCoreSqliteModule");
 
         using var scope = serviceProvider.CreateScope();
@@ -48,13 +49,13 @@ public class WebHostCompositionTests
         var databaseName = $"composition-{Guid.NewGuid():N}";
         var services = new ServiceCollection();
         services.UseDbContextOptions(options => options.UseInMemoryDatabase(databaseName));
-        services.AddWebHostComposition();
+        services.AddTestWebHost();
 
         using var serviceProvider = services.BuildServiceProvider();
         var moduleCatalog = serviceProvider.GetRequiredService<ChengYuan.Core.Modularity.ModuleCatalog>();
         var moduleNames = moduleCatalog.ModuleTypes.Select(moduleType => moduleType.Name).ToArray();
 
-        moduleNames.ShouldContain("WebHostModule");
+        moduleNames.ShouldContain(nameof(WebHostHttpCompositionModule));
         moduleNames.ShouldContain(nameof(IdentityWebModule));
         moduleNames.ShouldContain(nameof(IdentityPersistenceModule));
         moduleNames.ShouldContain(nameof(TenantManagementPersistenceModule));
@@ -80,7 +81,7 @@ public class WebHostCompositionTests
         var databaseName = $"composition-uow-{Guid.NewGuid():N}";
         var services = new ServiceCollection();
         services.UseDbContextOptions(options => options.UseInMemoryDatabase(databaseName));
-        services.AddWebHostComposition();
+        services.AddTestWebHost();
 
         await using var serviceProvider = services.BuildServiceProvider();
 
@@ -115,7 +116,7 @@ public class WebHostCompositionTests
         var databaseName = $"composition-resolution-store-{Guid.NewGuid():N}";
         var services = new ServiceCollection();
         services.UseDbContextOptions(options => options.UseInMemoryDatabase(databaseName));
-        services.AddWebHostComposition();
+        services.AddTestWebHost();
 
         await using var serviceProvider = services.BuildServiceProvider();
         var tenantId = Guid.NewGuid();

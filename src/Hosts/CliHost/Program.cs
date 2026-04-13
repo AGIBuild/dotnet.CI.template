@@ -1,10 +1,25 @@
+using ChengYuan.AuditLogging;
 using ChengYuan.CliHost;
 using ChengYuan.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
+using ChengYuan.FeatureManagement;
+using ChengYuan.Hosting;
+using ChengYuan.Identity;
+using ChengYuan.PermissionManagement;
+using ChengYuan.SettingManagement;
+using ChengYuan.TenantManagement;
+using Microsoft.Extensions.Hosting;
 
-var services = new ServiceCollection();
-services.UseSqlite("Data Source=chengyuan-clihost.db");
-services.AddCliHostComposition();
+var builder = Host.CreateApplicationBuilder(args);
 
-await using var serviceProvider = services.BuildServiceProvider();
-await serviceProvider.RunCliHostCompositionAsync();
+builder.AddChengYuan<CliHostModule>(cy => cy
+    .UseSqlite("Data Source=chengyuan-clihost.db")
+    .DisableMultiTenancy()
+    .AddModule<IdentityPersistenceModule>()
+    .AddModule<TenantManagementPersistenceModule>()
+    .AddModule<SettingManagementPersistenceModule>()
+    .AddModule<PermissionManagementPersistenceModule>()
+    .AddModule<FeatureManagementPersistenceModule>()
+    .AddModule<AuditLoggingPersistenceModule>()
+);
+
+await builder.Build().RunAsync();

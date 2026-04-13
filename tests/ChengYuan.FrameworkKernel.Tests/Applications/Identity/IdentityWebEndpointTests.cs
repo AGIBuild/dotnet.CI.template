@@ -115,7 +115,7 @@ public class IdentityWebEndpointTests
         payload.ShouldNotBeNull();
         payload.Status.ShouldBe("ok");
         payload.Modules.ShouldContain(nameof(IdentityWebModule));
-        payload.Modules.ShouldContain("WebHostModule");
+        payload.Modules.ShouldContain("WebHostHttpCompositionModule");
     }
 
     private static async Task<WebApplication> CreateApplicationAsync()
@@ -124,7 +124,7 @@ public class IdentityWebEndpointTests
         var builder = WebApplication.CreateBuilder();
         builder.WebHost.UseTestServer();
         builder.Services.UseDbContextOptions(options => options.UseInMemoryDatabase(databaseName));
-        builder.Services.AddWebHostComposition();
+        builder.AddTestWebHost();
 
         var app = builder.Build();
         app.UseWebHostComposition();

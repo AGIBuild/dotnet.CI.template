@@ -4,6 +4,34 @@
     "net10.0": {
       "chengyuan.core": {
         "type": "Project"
+      },
+      "chengyuan.executioncontext.abstractions": {
+        "type": "Project"
+      },
+      "chengyuan.executioncontext.runtime": {
+        "type": "Project",
+        "dependencies": {
+          "ChengYuan.Core": "[0.2.10-local, )",
+          "ChengYuan.ExecutionContext.Abstractions": "[0.2.10-local, )"
+        }
+      },
+      "chengyuan.hosting": {
+        "type": "Project",
+        "dependencies": {
+          "ChengYuan.Core": "[0.2.10-local, )",
+          "ChengYuan.MultiTenancy.Runtime": "[0.2.10-local, )"
+        }
+      },
+      "chengyuan.multitenancy.abstractions": {
+        "type": "Project"
+      },
+      "chengyuan.multitenancy.runtime": {
+        "type": "Project",
+        "dependencies": {
+          "ChengYuan.Core": "[0.2.10-local, )",
+          "ChengYuan.ExecutionContext.Runtime": "[0.2.10-local, )",
+          "ChengYuan.MultiTenancy.Abstractions": "[0.2.10-local, )"
+        }
       }
     }
   }

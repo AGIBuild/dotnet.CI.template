@@ -1,4 +1,11 @@
+using ChengYuan.AuditLogging;
+using ChengYuan.AspNetCore;
 using ChengYuan.EntityFrameworkCore;
+using ChengYuan.FeatureManagement;
+using ChengYuan.Identity;
+using ChengYuan.PermissionManagement;
+using ChengYuan.SettingManagement;
+using ChengYuan.TenantManagement;
 using ChengYuan.WebHost;
 using Serilog;
 
@@ -16,8 +23,16 @@ try
 
     var connectionString = builder.Configuration.GetConnectionString("Default")
         ?? throw new InvalidOperationException("Connection string 'Default' is not configured. Set it in appsettings.json under ConnectionStrings:Default.");
-    builder.Services.UseSqlite(connectionString);
-    builder.Services.AddWebHostComposition();
+
+    builder.AddChengYuan<WebHostHttpCompositionModule>(cy => cy
+        .UseSqlite(connectionString)
+        .AddModule<IdentityWebModule>()
+        .AddModule<TenantManagementPersistenceModule>()
+        .AddModule<SettingManagementPersistenceModule>()
+        .AddModule<PermissionManagementPersistenceModule>()
+        .AddModule<FeatureManagementPersistenceModule>()
+        .AddModule<AuditLoggingPersistenceModule>()
+    );
 
     var app = builder.Build();
 
