@@ -1,11 +1,11 @@
-using ChengYuan.Auditing;
+using ChengYuan.Core.Data.Auditing;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 
 namespace ChengYuan.EntityFrameworkCore;
 
-public sealed class AuditEntityChangeInterceptor(IAuditScopeAccessor scopeAccessor) : SaveChangesInterceptor
+public sealed class AuditEntityChangeInterceptor(IEntityChangeCollector collector) : SaveChangesInterceptor
 {
     public override ValueTask<InterceptionResult<int>> SavingChangesAsync(
         DbContextEventData eventData,
@@ -26,7 +26,7 @@ public sealed class AuditEntityChangeInterceptor(IAuditScopeAccessor scopeAccess
 
     private void CollectChanges(DbContext? context)
     {
-        if (context is null || scopeAccessor.Current is not { } scope)
+        if (context is null || !collector.IsActive)
         {
             return;
         }
@@ -52,7 +52,7 @@ public sealed class AuditEntityChangeInterceptor(IAuditScopeAccessor scopeAccess
                 PropertyChanges = CollectPropertyChanges(entry),
             };
 
-            scope.Entry.EntityChanges.Add(changeInfo);
+            collector.Collect(changeInfo);
         }
     }
 

@@ -1,4 +1,5 @@
 using ChengYuan.Core.Results;
+using Microsoft.Extensions.Logging;
 
 namespace ChengYuan.Core.Exceptions;
 
@@ -17,6 +18,16 @@ public sealed class BusinessException : ChengYuanException
     }
 
     public ResultErrorType ErrorType { get; }
+
+    public string? Details { get; init; }
+
+    public LogLevel LogLevel { get; init; } = LogLevel.Warning;
+
+    public BusinessException WithData(string name, object value)
+    {
+        Data[name] = value;
+        return this;
+    }
 
     public ResultError ToResultError()
     {

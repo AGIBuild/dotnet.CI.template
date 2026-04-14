@@ -28,20 +28,20 @@
     <ProjectReference Include="..\..\Applications\SettingManagement\ChengYuan.SettingManagement.Persistence\ChengYuan.SettingManagement.Persistence.csproj" />
     <ProjectReference Include="..\..\Applications\TenantManagement\ChengYuan.TenantManagement.Persistence\ChengYuan.TenantManagement.Persistence.csproj" />
     <ProjectReference Include="..\..\Framework\Caching\ChengYuan.Caching.Memory\ChengYuan.Caching.Memory.csproj" />
-    <ProjectReference Include="..\..\Framework\ExecutionContext\ChengYuan.ExecutionContext.Runtime\ChengYuan.ExecutionContext.Runtime.csproj" />
-    <ProjectReference Include="..\..\Framework\MultiTenancy\ChengYuan.MultiTenancy.Runtime\ChengYuan.MultiTenancy.Runtime.csproj" />
-    <ProjectReference Include="..\..\Framework\EventBus\ChengYuan.EventBus.Runtime\ChengYuan.EventBus.Runtime.csproj" />
-    <ProjectReference Include="..\..\Framework\ExceptionHandling\ChengYuan.ExceptionHandling.Runtime\ChengYuan.ExceptionHandling.Runtime.csproj" />
-    <ProjectReference Include="..\..\Framework\DistributedLocking\ChengYuan.DistributedLocking.Runtime\ChengYuan.DistributedLocking.Runtime.csproj" />
-    <ProjectReference Include="..\..\Framework\BackgroundJobs\ChengYuan.BackgroundJobs.Runtime\ChengYuan.BackgroundJobs.Runtime.csproj" />
-    <ProjectReference Include="..\..\Framework\BlobStoring\ChengYuan.BlobStoring.Runtime\ChengYuan.BlobStoring.Runtime.csproj" />
-    <ProjectReference Include="..\..\Framework\Emailing\ChengYuan.Emailing.Runtime\ChengYuan.Emailing.Runtime.csproj" />
-    <ProjectReference Include="..\..\Framework\Sms\ChengYuan.Sms.Runtime\ChengYuan.Sms.Runtime.csproj" />
-    <ProjectReference Include="..\..\Framework\ObjectMapping\ChengYuan.ObjectMapping.Runtime\ChengYuan.ObjectMapping.Runtime.csproj" />
-    <ProjectReference Include="..\..\Framework\TextTemplating\ChengYuan.TextTemplating.Runtime\ChengYuan.TextTemplating.Runtime.csproj" />
+    <ProjectReference Include="..\..\Framework\ExecutionContext\ChengYuan.ExecutionContext\ChengYuan.ExecutionContext.csproj" />
+    <ProjectReference Include="..\..\Framework\MultiTenancy\ChengYuan.MultiTenancy\ChengYuan.MultiTenancy.csproj" />
+    <ProjectReference Include="..\..\Framework\EventBus\ChengYuan.EventBus\ChengYuan.EventBus.csproj" />
+    <ProjectReference Include="..\..\Framework\ExceptionHandling\ChengYuan.ExceptionHandling\ChengYuan.ExceptionHandling.csproj" />
+    <ProjectReference Include="..\..\Framework\DistributedLocking\ChengYuan.DistributedLocking\ChengYuan.DistributedLocking.csproj" />
+    <ProjectReference Include="..\..\Framework\BackgroundJobs\ChengYuan.BackgroundJobs\ChengYuan.BackgroundJobs.csproj" />
+    <ProjectReference Include="..\..\Framework\BlobStoring\ChengYuan.BlobStoring\ChengYuan.BlobStoring.csproj" />
+    <ProjectReference Include="..\..\Framework\Emailing\ChengYuan.Emailing\ChengYuan.Emailing.csproj" />
+    <ProjectReference Include="..\..\Framework\Sms\ChengYuan.Sms\ChengYuan.Sms.csproj" />
+    <ProjectReference Include="..\..\Framework\ObjectMapping\ChengYuan.ObjectMapping\ChengYuan.ObjectMapping.csproj" />
+    <ProjectReference Include="..\..\Framework\TextTemplating\ChengYuan.TextTemplating\ChengYuan.TextTemplating.csproj" />
     <ProjectReference Include="..\..\Framework\AspNetCore\ChengYuan.AspNetCore\ChengYuan.AspNetCore.csproj" />
     <ProjectReference Include="..\..\Framework\AspNetCore\ChengYuan.HealthChecks\ChengYuan.HealthChecks.csproj" />
-    <ProjectReference Include="..\..\Framework\Notifications\ChengYuan.Notifications.Runtime\ChengYuan.Notifications.Runtime.csproj" />
+    <ProjectReference Include="..\..\Framework\Notifications\ChengYuan.Notifications\ChengYuan.Notifications.csproj" />
   </ItemGroup>
 
 </Project>

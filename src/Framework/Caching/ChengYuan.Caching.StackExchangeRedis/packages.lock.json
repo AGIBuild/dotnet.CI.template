@@ -41,15 +41,11 @@
           "Pipelines.Sockets.Unofficial": "2.2.8"
         }
       },
-      "chengyuan.caching.abstractions": {
-        "type": "Project"
-      },
-      "chengyuan.caching.runtime": {
+      "chengyuan.caching": {
         "type": "Project",
         "dependencies": {
-          "ChengYuan.Caching.Abstractions": "[0.2.10-local, )",
           "ChengYuan.Core": "[0.2.10-local, )",
-          "ChengYuan.MultiTenancy.Runtime": "[0.2.10-local, )"
+          "ChengYuan.MultiTenancy": "[0.2.10-local, )"
         }
       },
       "chengyuan.core": {
@@ -61,25 +57,17 @@
           "Microsoft.Extensions.Options": "[10.0.0, )"
         }
       },
-      "chengyuan.executioncontext.abstractions": {
-        "type": "Project"
-      },
-      "chengyuan.executioncontext.runtime": {
+      "chengyuan.executioncontext": {
         "type": "Project",
         "dependencies": {
-          "ChengYuan.Core": "[0.2.10-local, )",
-          "ChengYuan.ExecutionContext.Abstractions": "[0.2.10-local, )"
+          "ChengYuan.Core": "[0.2.10-local, )"
         }
       },
-      "chengyuan.multitenancy.abstractions": {
-        "type": "Project"
-      },
-      "chengyuan.multitenancy.runtime": {
+      "chengyuan.multitenancy": {
         "type": "Project",
         "dependencies": {
           "ChengYuan.Core": "[0.2.10-local, )",
-          "ChengYuan.ExecutionContext.Runtime": "[0.2.10-local, )",
-          "ChengYuan.MultiTenancy.Abstractions": "[0.2.10-local, )"
+          "ChengYuan.ExecutionContext": "[0.2.10-local, )"
         }
       },
       "Microsoft.Extensions.Configuration.Abstractions": {

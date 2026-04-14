@@ -543,23 +543,19 @@
           "ChengYuan.Hosting": "[0.2.10-local, )"
         }
       },
-      "chengyuan.auditing.abstractions": {
-        "type": "Project"
-      },
-      "chengyuan.auditing.runtime": {
+      "chengyuan.auditing": {
         "type": "Project",
         "dependencies": {
-          "ChengYuan.Auditing.Abstractions": "[0.2.10-local, )",
           "ChengYuan.Core": "[0.2.10-local, )",
-          "ChengYuan.ExecutionContext.Runtime": "[0.2.10-local, )",
-          "ChengYuan.MultiTenancy.Runtime": "[0.2.10-local, )"
+          "ChengYuan.ExecutionContext": "[0.2.10-local, )",
+          "ChengYuan.MultiTenancy": "[0.2.10-local, )"
         }
       },
       "chengyuan.auditlogging.application": {
         "type": "Project",
         "dependencies": {
           "ChengYuan.AuditLogging.Contracts": "[0.2.10-local, )",
-          "ChengYuan.Auditing.Runtime": "[0.2.10-local, )",
+          "ChengYuan.Auditing": "[0.2.10-local, )",
           "ChengYuan.Core": "[0.2.10-local, )"
         }
       },
@@ -574,65 +570,45 @@
           "ChengYuan.EntityFrameworkCore": "[0.2.10-local, )"
         }
       },
-      "chengyuan.authorization.abstractions": {
-        "type": "Project"
-      },
-      "chengyuan.authorization.runtime": {
+      "chengyuan.authorization": {
         "type": "Project",
         "dependencies": {
-          "ChengYuan.Authorization.Abstractions": "[0.2.10-local, )",
           "ChengYuan.Core": "[0.2.10-local, )",
-          "ChengYuan.ExecutionContext.Runtime": "[0.2.10-local, )",
-          "ChengYuan.MultiTenancy.Runtime": "[0.2.10-local, )"
+          "ChengYuan.ExecutionContext": "[0.2.10-local, )",
+          "ChengYuan.MultiTenancy": "[0.2.10-local, )"
         }
       },
-      "chengyuan.backgroundjobs.abstractions": {
-        "type": "Project"
-      },
-      "chengyuan.backgroundjobs.runtime": {
+      "chengyuan.backgroundjobs": {
         "type": "Project",
         "dependencies": {
-          "ChengYuan.BackgroundJobs.Abstractions": "[0.2.10-local, )",
-          "ChengYuan.BackgroundWorkers.Runtime": "[0.2.10-local, )",
+          "ChengYuan.BackgroundWorkers": "[0.2.10-local, )",
           "ChengYuan.Core": "[0.2.10-local, )"
         }
       },
-      "chengyuan.backgroundworkers.abstractions": {
-        "type": "Project"
-      },
-      "chengyuan.backgroundworkers.runtime": {
+      "chengyuan.backgroundworkers": {
         "type": "Project",
         "dependencies": {
-          "ChengYuan.BackgroundWorkers.Abstractions": "[0.2.10-local, )",
           "ChengYuan.Core": "[0.2.10-local, )",
           "Cronos": "[0.8.4, )"
         }
       },
-      "chengyuan.blobstoring.abstractions": {
-        "type": "Project"
-      },
-      "chengyuan.blobstoring.runtime": {
+      "chengyuan.blobstoring": {
         "type": "Project",
         "dependencies": {
-          "ChengYuan.BlobStoring.Abstractions": "[0.2.10-local, )",
           "ChengYuan.Core": "[0.2.10-local, )"
         }
       },
-      "chengyuan.caching.abstractions": {
-        "type": "Project"
+      "chengyuan.caching": {
+        "type": "Project",
+        "dependencies": {
+          "ChengYuan.Core": "[0.2.10-local, )",
+          "ChengYuan.MultiTenancy": "[0.2.10-local, )"
+        }
       },
       "chengyuan.caching.memory": {
         "type": "Project",
         "dependencies": {
-          "ChengYuan.Caching.Runtime": "[0.2.10-local, )"
-        }
-      },
-      "chengyuan.caching.runtime": {
-        "type": "Project",
-        "dependencies": {
-          "ChengYuan.Caching.Abstractions": "[0.2.10-local, )",
-          "ChengYuan.Core": "[0.2.10-local, )",
-          "ChengYuan.MultiTenancy.Runtime": "[0.2.10-local, )"
+          "ChengYuan.Caching": "[0.2.10-local, )"
         }
       },
       "chengyuan.core": {
@@ -646,63 +622,43 @@
           "Microsoft.EntityFrameworkCore.Sqlite": "[10.0.0, )"
         }
       },
-      "chengyuan.distributedlocking.abstractions": {
-        "type": "Project"
-      },
-      "chengyuan.distributedlocking.runtime": {
+      "chengyuan.distributedlocking": {
         "type": "Project",
         "dependencies": {
-          "ChengYuan.Core": "[0.2.10-local, )",
-          "ChengYuan.DistributedLocking.Abstractions": "[0.2.10-local, )"
+          "ChengYuan.Core": "[0.2.10-local, )"
         }
       },
-      "chengyuan.emailing.abstractions": {
-        "type": "Project"
-      },
-      "chengyuan.emailing.runtime": {
+      "chengyuan.emailing": {
         "type": "Project",
         "dependencies": {
-          "ChengYuan.Core": "[0.2.10-local, )",
-          "ChengYuan.Emailing.Abstractions": "[0.2.10-local, )"
+          "ChengYuan.Core": "[0.2.10-local, )"
         }
       },
       "chengyuan.entityframeworkcore": {
         "type": "Project",
         "dependencies": {
-          "ChengYuan.Auditing.Abstractions": "[0.2.10-local, )",
+          "ChengYuan.Auditing": "[0.2.10-local, )",
           "ChengYuan.Core": "[0.2.10-local, )",
           "Microsoft.EntityFrameworkCore": "[10.0.0, )",
           "Microsoft.EntityFrameworkCore.Design": "[10.0.0, )"
         }
       },
-      "chengyuan.eventbus.abstractions": {
-        "type": "Project"
-      },
-      "chengyuan.eventbus.runtime": {
+      "chengyuan.eventbus": {
         "type": "Project",
         "dependencies": {
-          "ChengYuan.Core": "[0.2.10-local, )",
-          "ChengYuan.EventBus.Abstractions": "[0.2.10-local, )"
+          "ChengYuan.Core": "[0.2.10-local, )"
         }
       },
-      "chengyuan.exceptionhandling.abstractions": {
-        "type": "Project"
-      },
-      "chengyuan.exceptionhandling.runtime": {
+      "chengyuan.exceptionhandling": {
         "type": "Project",
         "dependencies": {
-          "ChengYuan.Core": "[0.2.10-local, )",
-          "ChengYuan.ExceptionHandling.Abstractions": "[0.2.10-local, )"
+          "ChengYuan.Core": "[0.2.10-local, )"
         }
       },
-      "chengyuan.executioncontext.abstractions": {
-        "type": "Project"
-      },
-      "chengyuan.executioncontext.runtime": {
+      "chengyuan.executioncontext": {
         "type": "Project",
         "dependencies": {
-          "ChengYuan.Core": "[0.2.10-local, )",
-          "ChengYuan.ExecutionContext.Abstractions": "[0.2.10-local, )"
+          "ChengYuan.Core": "[0.2.10-local, )"
         }
       },
       "chengyuan.featuremanagement.application": {
@@ -710,14 +666,14 @@
         "dependencies": {
           "ChengYuan.Core": "[0.2.10-local, )",
           "ChengYuan.FeatureManagement.Contracts": "[0.2.10-local, )",
-          "ChengYuan.Features.Runtime": "[0.2.10-local, )"
+          "ChengYuan.Features": "[0.2.10-local, )"
         }
       },
       "chengyuan.featuremanagement.contracts": {
         "type": "Project",
         "dependencies": {
           "ChengYuan.Core": "[0.2.10-local, )",
-          "ChengYuan.Features.Abstractions": "[0.2.10-local, )"
+          "ChengYuan.Features": "[0.2.10-local, )"
         }
       },
       "chengyuan.featuremanagement.persistence": {
@@ -728,22 +684,18 @@
           "ChengYuan.FeatureManagement.Application": "[0.2.10-local, )"
         }
       },
-      "chengyuan.features.abstractions": {
-        "type": "Project"
-      },
-      "chengyuan.features.runtime": {
+      "chengyuan.features": {
         "type": "Project",
         "dependencies": {
           "ChengYuan.Core": "[0.2.10-local, )",
-          "ChengYuan.ExecutionContext.Runtime": "[0.2.10-local, )",
-          "ChengYuan.Features.Abstractions": "[0.2.10-local, )",
-          "ChengYuan.MultiTenancy.Runtime": "[0.2.10-local, )"
+          "ChengYuan.ExecutionContext": "[0.2.10-local, )",
+          "ChengYuan.MultiTenancy": "[0.2.10-local, )"
         }
       },
       "chengyuan.healthchecks": {
         "type": "Project",
         "dependencies": {
-          "ChengYuan.Caching.Abstractions": "[0.2.10-local, )",
+          "ChengYuan.Caching": "[0.2.10-local, )",
           "ChengYuan.Core": "[0.2.10-local, )",
           "ChengYuan.EntityFrameworkCore": "[0.2.10-local, )"
         }
@@ -752,7 +704,7 @@
         "type": "Project",
         "dependencies": {
           "ChengYuan.Core": "[0.2.10-local, )",
-          "ChengYuan.MultiTenancy.Runtime": "[0.2.10-local, )"
+          "ChengYuan.MultiTenancy": "[0.2.10-local, )"
         }
       },
       "chengyuan.identity.application": {
@@ -790,41 +742,29 @@
           "ChengYuan.Identity.Persistence": "[0.2.10-local, )"
         }
       },
-      "chengyuan.multitenancy.abstractions": {
-        "type": "Project"
-      },
-      "chengyuan.multitenancy.runtime": {
+      "chengyuan.multitenancy": {
         "type": "Project",
         "dependencies": {
           "ChengYuan.Core": "[0.2.10-local, )",
-          "ChengYuan.ExecutionContext.Runtime": "[0.2.10-local, )",
-          "ChengYuan.MultiTenancy.Abstractions": "[0.2.10-local, )"
+          "ChengYuan.ExecutionContext": "[0.2.10-local, )"
         }
       },
-      "chengyuan.notifications.abstractions": {
-        "type": "Project"
-      },
-      "chengyuan.notifications.runtime": {
+      "chengyuan.notifications": {
         "type": "Project",
         "dependencies": {
-          "ChengYuan.Core": "[0.2.10-local, )",
-          "ChengYuan.Notifications.Abstractions": "[0.2.10-local, )"
+          "ChengYuan.Core": "[0.2.10-local, )"
         }
       },
-      "chengyuan.objectmapping.abstractions": {
-        "type": "Project"
-      },
-      "chengyuan.objectmapping.runtime": {
+      "chengyuan.objectmapping": {
         "type": "Project",
         "dependencies": {
-          "ChengYuan.Core": "[0.2.10-local, )",
-          "ChengYuan.ObjectMapping.Abstractions": "[0.2.10-local, )"
+          "ChengYuan.Core": "[0.2.10-local, )"
         }
       },
       "chengyuan.permissionmanagement.application": {
         "type": "Project",
         "dependencies": {
-          "ChengYuan.Authorization.Runtime": "[0.2.10-local, )",
+          "ChengYuan.Authorization": "[0.2.10-local, )",
           "ChengYuan.Core": "[0.2.10-local, )",
           "ChengYuan.PermissionManagement.Contracts": "[0.2.10-local, )"
         }
@@ -832,7 +772,7 @@
       "chengyuan.permissionmanagement.contracts": {
         "type": "Project",
         "dependencies": {
-          "ChengYuan.Authorization.Abstractions": "[0.2.10-local, )",
+          "ChengYuan.Authorization": "[0.2.10-local, )",
           "ChengYuan.Core": "[0.2.10-local, )"
         }
       },
@@ -849,14 +789,14 @@
         "dependencies": {
           "ChengYuan.Core": "[0.2.10-local, )",
           "ChengYuan.SettingManagement.Contracts": "[0.2.10-local, )",
-          "ChengYuan.Settings.Runtime": "[0.2.10-local, )"
+          "ChengYuan.Settings": "[0.2.10-local, )"
         }
       },
       "chengyuan.settingmanagement.contracts": {
         "type": "Project",
         "dependencies": {
           "ChengYuan.Core": "[0.2.10-local, )",
-          "ChengYuan.Settings.Abstractions": "[0.2.10-local, )"
+          "ChengYuan.Settings": "[0.2.10-local, )"
         }
       },
       "chengyuan.settingmanagement.persistence": {
@@ -867,40 +807,32 @@
           "ChengYuan.SettingManagement.Application": "[0.2.10-local, )"
         }
       },
-      "chengyuan.settings.abstractions": {
-        "type": "Project"
-      },
-      "chengyuan.settings.runtime": {
+      "chengyuan.settings": {
         "type": "Project",
         "dependencies": {
           "ChengYuan.Core": "[0.2.10-local, )",
-          "ChengYuan.ExecutionContext.Runtime": "[0.2.10-local, )",
-          "ChengYuan.MultiTenancy.Runtime": "[0.2.10-local, )",
-          "ChengYuan.Settings.Abstractions": "[0.2.10-local, )"
+          "ChengYuan.ExecutionContext": "[0.2.10-local, )",
+          "ChengYuan.MultiTenancy": "[0.2.10-local, )"
         }
       },
-      "chengyuan.sms.abstractions": {
-        "type": "Project"
-      },
-      "chengyuan.sms.runtime": {
+      "chengyuan.sms": {
         "type": "Project",
         "dependencies": {
-          "ChengYuan.Core": "[0.2.10-local, )",
-          "ChengYuan.Sms.Abstractions": "[0.2.10-local, )"
+          "ChengYuan.Core": "[0.2.10-local, )"
         }
       },
       "chengyuan.tenantmanagement.application": {
         "type": "Project",
         "dependencies": {
           "ChengYuan.Core": "[0.2.10-local, )",
-          "ChengYuan.MultiTenancy.Runtime": "[0.2.10-local, )",
+          "ChengYuan.MultiTenancy": "[0.2.10-local, )",
           "ChengYuan.TenantManagement.Contracts": "[0.2.10-local, )"
         }
       },
       "chengyuan.tenantmanagement.contracts": {
         "type": "Project",
         "dependencies": {
-          "ChengYuan.MultiTenancy.Abstractions": "[0.2.10-local, )"
+          "ChengYuan.MultiTenancy": "[0.2.10-local, )"
         }
       },
       "chengyuan.tenantmanagement.persistence": {
@@ -911,14 +843,10 @@
           "ChengYuan.TenantManagement.Application": "[0.2.10-local, )"
         }
       },
-      "chengyuan.texttemplating.abstractions": {
-        "type": "Project"
-      },
-      "chengyuan.texttemplating.runtime": {
+      "chengyuan.texttemplating": {
         "type": "Project",
         "dependencies": {
-          "ChengYuan.Core": "[0.2.10-local, )",
-          "ChengYuan.TextTemplating.Abstractions": "[0.2.10-local, )"
+          "ChengYuan.Core": "[0.2.10-local, )"
         }
       },
       "Cronos": {

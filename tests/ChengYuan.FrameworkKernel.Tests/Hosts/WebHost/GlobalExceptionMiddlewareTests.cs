@@ -1,3 +1,4 @@
+using ChengYuan.Core.Exceptions;
 using ChengYuan.ExceptionHandling;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -66,7 +67,7 @@ public sealed class GlobalExceptionMiddlewareTests
                     app.UseEndpoints(endpoints =>
                         endpoints.MapGet("/business", () =>
                         {
-                            throw new BusinessException("TEST", "business error");
+                            throw new BusinessException("business error", new ErrorCode("TEST"));
 #pragma warning disable CS0162
                             return Results.Ok();
 #pragma warning restore CS0162

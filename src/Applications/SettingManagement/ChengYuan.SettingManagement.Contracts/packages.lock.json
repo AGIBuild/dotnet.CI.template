@@ -16,8 +16,26 @@
           "Microsoft.Extensions.Options": "[10.0.0, )"
         }
       },
-      "chengyuan.settings.abstractions": {
-        "type": "Project"
+      "chengyuan.executioncontext": {
+        "type": "Project",
+        "dependencies": {
+          "ChengYuan.Core": "[0.2.10-local, )"
+        }
+      },
+      "chengyuan.multitenancy": {
+        "type": "Project",
+        "dependencies": {
+          "ChengYuan.Core": "[0.2.10-local, )",
+          "ChengYuan.ExecutionContext": "[0.2.10-local, )"
+        }
+      },
+      "chengyuan.settings": {
+        "type": "Project",
+        "dependencies": {
+          "ChengYuan.Core": "[0.2.10-local, )",
+          "ChengYuan.ExecutionContext": "[0.2.10-local, )",
+          "ChengYuan.MultiTenancy": "[0.2.10-local, )"
+        }
       },
       "Microsoft.Extensions.Configuration.Abstractions": {
         "type": "CentralTransitive",

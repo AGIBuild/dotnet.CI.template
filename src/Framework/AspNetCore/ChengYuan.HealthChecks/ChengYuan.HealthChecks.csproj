@@ -11,7 +11,7 @@
   <ItemGroup>
     <ProjectReference Include="..\..\Core\ChengYuan.Core.csproj" />
     <ProjectReference Include="..\..\Data\ChengYuan.EntityFrameworkCore\ChengYuan.EntityFrameworkCore.csproj" />
-    <ProjectReference Include="..\..\Caching\ChengYuan.Caching.Abstractions\ChengYuan.Caching.Abstractions.csproj" />
+    <ProjectReference Include="..\..\Caching\ChengYuan.Caching\ChengYuan.Caching.csproj" />
   </ItemGroup>
 
 </Project>

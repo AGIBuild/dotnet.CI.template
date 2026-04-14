@@ -1,5 +1,6 @@
 using System.Net.Mime;
 using System.Text.Json;
+using ChengYuan.Core.Exceptions;
 using ChengYuan.ExceptionHandling;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;

@@ -16,18 +16,12 @@
         "resolved": "10.0.0",
         "contentHash": "inRnbpCS0nwO/RuoZIAqxQUuyjaknOOnCEZB55KSMMjRhl0RQDttSmLSGsUJN3RQ3ocf5NDLFd2mOQViHqMK5w=="
       },
-      "chengyuan.backgroundworkers.abstractions": {
+      "chengyuan.backgroundworkers": {
         "type": "Project",
         "dependencies": {
-          "Microsoft.Extensions.Hosting.Abstractions": "[10.0.0, )"
-        }
-      },
-      "chengyuan.backgroundworkers.runtime": {
-        "type": "Project",
-        "dependencies": {
-          "ChengYuan.BackgroundWorkers.Abstractions": "[0.2.10-local, )",
           "ChengYuan.Core": "[0.2.10-local, )",
-          "Cronos": "[0.8.4, )"
+          "Cronos": "[0.8.4, )",
+          "Microsoft.Extensions.Hosting.Abstractions": "[10.0.0, )"
         }
       },
       "chengyuan.core": {
@@ -39,44 +33,32 @@
           "Microsoft.Extensions.Options": "[10.0.0, )"
         }
       },
-      "chengyuan.executioncontext.abstractions": {
-        "type": "Project"
+      "chengyuan.executioncontext": {
+        "type": "Project",
+        "dependencies": {
+          "ChengYuan.Core": "[0.2.10-local, )"
+        }
       },
-      "chengyuan.executioncontext.runtime": {
+      "chengyuan.multitenancy": {
         "type": "Project",
         "dependencies": {
           "ChengYuan.Core": "[0.2.10-local, )",
-          "ChengYuan.ExecutionContext.Abstractions": "[0.2.10-local, )"
+          "ChengYuan.ExecutionContext": "[0.2.10-local, )"
         }
       },
-      "chengyuan.multitenancy.abstractions": {
-        "type": "Project"
-      },
-      "chengyuan.multitenancy.runtime": {
+      "chengyuan.outbox": {
         "type": "Project",
         "dependencies": {
           "ChengYuan.Core": "[0.2.10-local, )",
-          "ChengYuan.ExecutionContext.Runtime": "[0.2.10-local, )",
-          "ChengYuan.MultiTenancy.Abstractions": "[0.2.10-local, )"
+          "ChengYuan.ExecutionContext": "[0.2.10-local, )",
+          "ChengYuan.MultiTenancy": "[0.2.10-local, )"
         }
-      },
-      "chengyuan.outbox.abstractions": {
-        "type": "Project"
       },
       "chengyuan.outbox.persistence": {
         "type": "Project",
         "dependencies": {
           "ChengYuan.Core": "[0.2.10-local, )",
-          "ChengYuan.Outbox.Runtime": "[0.2.10-local, )"
-        }
-      },
-      "chengyuan.outbox.runtime": {
-        "type": "Project",
-        "dependencies": {
-          "ChengYuan.Core": "[0.2.10-local, )",
-          "ChengYuan.ExecutionContext.Runtime": "[0.2.10-local, )",
-          "ChengYuan.MultiTenancy.Runtime": "[0.2.10-local, )",
-          "ChengYuan.Outbox.Abstractions": "[0.2.10-local, )"
+          "ChengYuan.Outbox": "[0.2.10-local, )"
         }
       },
       "Cronos": {

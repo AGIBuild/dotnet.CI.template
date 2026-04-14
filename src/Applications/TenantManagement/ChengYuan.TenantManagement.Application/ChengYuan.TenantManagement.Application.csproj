@@ -7,7 +7,7 @@
   <ItemGroup>
     <ProjectReference Include="..\..\..\Framework\Core\ChengYuan.Core.csproj" />
     <ProjectReference Include="..\ChengYuan.TenantManagement.Contracts\ChengYuan.TenantManagement.Contracts.csproj" />
-    <ProjectReference Include="..\..\..\Framework\MultiTenancy\ChengYuan.MultiTenancy.Runtime\ChengYuan.MultiTenancy.Runtime.csproj" />
+    <ProjectReference Include="..\..\..\Framework\MultiTenancy\ChengYuan.MultiTenancy\ChengYuan.MultiTenancy.csproj" />
   </ItemGroup>
 
 </Project>

@@ -7,7 +7,7 @@
   <ItemGroup>
     <ProjectReference Include="..\..\..\Framework\Core\ChengYuan.Core.csproj" />
     <ProjectReference Include="..\ChengYuan.FeatureManagement.Contracts\ChengYuan.FeatureManagement.Contracts.csproj" />
-    <ProjectReference Include="..\..\..\Framework\Features\ChengYuan.Features.Runtime\ChengYuan.Features.Runtime.csproj" />
+    <ProjectReference Include="..\..\..\Framework\Features\ChengYuan.Features\ChengYuan.Features.csproj" />
   </ItemGroup>
 
 </Project>

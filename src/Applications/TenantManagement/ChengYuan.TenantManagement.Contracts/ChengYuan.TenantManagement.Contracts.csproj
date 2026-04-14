@@ -5,7 +5,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\..\Framework\MultiTenancy\ChengYuan.MultiTenancy.Abstractions\ChengYuan.MultiTenancy.Abstractions.csproj" />
+    <ProjectReference Include="..\..\..\Framework\MultiTenancy\ChengYuan.MultiTenancy\ChengYuan.MultiTenancy.csproj" />
   </ItemGroup>
 
 </Project>

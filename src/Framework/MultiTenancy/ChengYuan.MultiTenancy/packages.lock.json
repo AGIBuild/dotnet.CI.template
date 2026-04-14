@@ -1,0 +1,16 @@
+{
+  "version": 2,
+  "dependencies": {
+    "net10.0": {
+      "chengyuan.core": {
+        "type": "Project"
+      },
+      "chengyuan.executioncontext": {
+        "type": "Project",
+        "dependencies": {
+          "ChengYuan.Core": "[0.2.10-local, )"
+        }
+      }
+    }
+  }
+}

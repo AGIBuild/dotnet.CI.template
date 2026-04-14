@@ -1,4 +1,4 @@
-using ChengYuan.ExceptionHandling;
+using ChengYuan.Core.Exceptions;
 using Microsoft.Extensions.Logging;
 using Shouldly;
 
@@ -10,9 +10,13 @@ public sealed class BusinessExceptionTests
     public void Constructor_SetsAllProperties()
     {
         var inner = new InvalidOperationException("inner");
-        var ex = new BusinessException("ERR001", "Something failed", "Detail info", inner, LogLevel.Error);
+        var ex = new BusinessException("Something failed", new ErrorCode("ERR001"), inner)
+        {
+            Details = "Detail info",
+            LogLevel = LogLevel.Error,
+        };
 
-        ex.Code.ShouldBe("ERR001");
+        ex.ErrorCode!.Value.Value.ShouldBe("ERR001");
         ex.Message.ShouldBe("Something failed");
         ex.Details.ShouldBe("Detail info");
         ex.InnerException.ShouldBe(inner);
@@ -22,17 +26,16 @@ public sealed class BusinessExceptionTests
     [Fact]
     public void Constructor_Defaults_LogLevelToWarning()
     {
-        var ex = new BusinessException();
+        var ex = new BusinessException("fail", new ErrorCode("ERR"));
 
         ex.LogLevel.ShouldBe(LogLevel.Warning);
-        ex.Code.ShouldBeNull();
         ex.Details.ShouldBeNull();
     }
 
     [Fact]
     public void WithData_ChainsFluentlyAndStoresData()
     {
-        var ex = new BusinessException("ERR002", "fail")
+        var ex = new BusinessException("fail", new ErrorCode("ERR002"))
             .WithData("userId", 42)
             .WithData("action", "delete");
 
@@ -41,12 +44,13 @@ public sealed class BusinessExceptionTests
     }
 
     [Fact]
-    public void Implements_InterfaceContracts()
+    public void ToResultError_ReturnsCorrectResult()
     {
-        var ex = new BusinessException("CODE", "msg", "details");
+        var ex = new BusinessException("fail", new ErrorCode("ERR003"));
 
-        (ex is IHasErrorCode).ShouldBeTrue();
-        (ex is IHasErrorDetails).ShouldBeTrue();
-        (ex is IHasLogLevel).ShouldBeTrue();
+        var error = ex.ToResultError();
+
+        error.Code.ShouldBe("ERR003");
+        error.Message.ShouldBe("fail");
     }
 }
