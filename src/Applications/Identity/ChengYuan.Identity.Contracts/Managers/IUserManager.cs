@@ -2,7 +2,11 @@ namespace ChengYuan.Identity;
 
 public interface IUserManager
 {
-    ValueTask<UserRecord> CreateAsync(string userName, string email, CancellationToken cancellationToken = default);
+    ValueTask<UserRecord> CreateAsync(string userName, string email, string password, CancellationToken cancellationToken = default);
+
+    ValueTask<UserRecord?> VerifyPasswordAsync(string userName, string password, CancellationToken cancellationToken = default);
+
+    ValueTask ChangePasswordAsync(Guid userId, string currentPassword, string newPassword, CancellationToken cancellationToken = default);
 
     ValueTask<UserRecord> UpdateAsync(Guid userId, string userName, string email, bool isActive, CancellationToken cancellationToken = default);
 

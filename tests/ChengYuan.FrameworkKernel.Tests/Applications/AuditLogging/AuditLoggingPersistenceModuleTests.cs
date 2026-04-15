@@ -109,7 +109,8 @@ public class AuditLoggingPersistenceModuleTests
                 null,
                 true,
                 null,
-                new Dictionary<string, object?>()),
+                new Dictionary<string, object?>(),
+                []),
             TestContext.Current.CancellationToken);
 
         var records = await auditLogStore.GetListAsync(TestContext.Current.CancellationToken);

@@ -1,5 +1,6 @@
 using ChengYuan.AspNetCore;
 using ChengYuan.AuditLogging;
+using ChengYuan.BackgroundJobs;
 using ChengYuan.EntityFrameworkCore;
 using ChengYuan.FeatureManagement;
 using ChengYuan.Hosting;
@@ -15,6 +16,8 @@ namespace ChengYuan.FrameworkKernel.Tests;
 
 internal static class TestHostBuilder
 {
+    internal const string TestJwtSecretKey = "TestSecretKeyThatIsAtLeast32CharactersLongForTesting!!";
+
     /// <summary>
     /// Registers the standard Web host composition used by integration tests.
     /// Equivalent to what WebHost/Program.cs does, but without a real DB provider
@@ -22,6 +25,10 @@ internal static class TestHostBuilder
     /// </summary>
     public static WebApplicationBuilder AddTestWebHost(this WebApplicationBuilder builder)
     {
+        builder.Configuration["Jwt:SecretKey"] = TestJwtSecretKey;
+        builder.Configuration["Jwt:Issuer"] = "test";
+        builder.Configuration["Jwt:Audience"] = "test";
+
         builder.AddChengYuan<WebHostHttpCompositionModule>(cy => cy
             .AddModule<IdentityWebModule>()
             .AddModule<TenantManagementPersistenceModule>()
@@ -29,6 +36,7 @@ internal static class TestHostBuilder
             .AddModule<PermissionManagementPersistenceModule>()
             .AddModule<FeatureManagementPersistenceModule>()
             .AddModule<AuditLoggingPersistenceModule>()
+            .AddModule<BackgroundJobPersistenceModule>()
         );
         return builder;
     }
@@ -46,6 +54,7 @@ internal static class TestHostBuilder
             .AddModule<PermissionManagementPersistenceModule>()
             .AddModule<FeatureManagementPersistenceModule>()
             .AddModule<AuditLoggingPersistenceModule>()
+            .AddModule<BackgroundJobPersistenceModule>()
         );
         return services;
     }
@@ -57,6 +66,10 @@ internal static class TestHostBuilder
         this WebApplicationBuilder builder,
         Action<MultiTenancy.MultiTenancyBuilder>? configureMultiTenancy)
     {
+        builder.Configuration["Jwt:SecretKey"] = TestJwtSecretKey;
+        builder.Configuration["Jwt:Issuer"] = "test";
+        builder.Configuration["Jwt:Audience"] = "test";
+
         builder.AddChengYuan<WebHostHttpCompositionModule>(cy =>
         {
             if (configureMultiTenancy is not null)
@@ -69,7 +82,8 @@ internal static class TestHostBuilder
               .AddModule<SettingManagementPersistenceModule>()
               .AddModule<PermissionManagementPersistenceModule>()
               .AddModule<FeatureManagementPersistenceModule>()
-              .AddModule<AuditLoggingPersistenceModule>();
+              .AddModule<AuditLoggingPersistenceModule>()
+              .AddModule<BackgroundJobPersistenceModule>();
         });
         return builder;
     }

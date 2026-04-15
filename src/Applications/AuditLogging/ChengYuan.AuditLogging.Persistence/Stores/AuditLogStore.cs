@@ -1,3 +1,4 @@
+using ChengYuan.Core.Data.Auditing;
 using Microsoft.EntityFrameworkCore;
 
 namespace ChengYuan.AuditLogging;
@@ -9,23 +10,36 @@ public sealed class AuditLogStore(IDbContextFactory<AuditLoggingDbContext> dbCon
         ArgumentNullException.ThrowIfNull(record);
 
         await using var dbContext = await dbContextFactory.CreateDbContextAsync(cancellationToken);
-        await dbContext.AuditLogs.AddAsync(
-            new AuditLogEntity(
-                Guid.NewGuid(),
-                record.Name,
-                record.StartedAtUtc,
-                record.CompletedAtUtc,
-                record.Duration,
-                record.TenantId,
-                record.UserId,
-                record.UserName,
-                record.IsAuthenticated,
-                record.CorrelationId,
-                record.Succeeded,
-                record.ErrorMessage,
-                record.Properties),
-            cancellationToken);
 
+        var auditLogId = Guid.NewGuid();
+        var auditLogEntity = new AuditLogEntity(
+            auditLogId,
+            record.Name,
+            record.StartedAtUtc,
+            record.CompletedAtUtc,
+            record.Duration,
+            record.TenantId,
+            record.UserId,
+            record.UserName,
+            record.IsAuthenticated,
+            record.CorrelationId,
+            record.Succeeded,
+            record.ErrorMessage,
+            record.Properties);
+
+        foreach (var entityChange in record.EntityChanges)
+        {
+            auditLogEntity.EntityChanges.Add(new AuditLogEntityChangeEntity(
+                Guid.NewGuid(),
+                auditLogId,
+                entityChange.EntityTypeFullName,
+                entityChange.EntityId,
+                entityChange.ChangeType,
+                entityChange.ChangeTime,
+                entityChange.PropertyChanges));
+        }
+
+        await dbContext.AuditLogs.AddAsync(auditLogEntity, cancellationToken);
         await dbContext.SaveChangesAsync(cancellationToken);
     }
 
@@ -54,5 +68,6 @@ public sealed class AuditLogStore(IDbContextFactory<AuditLoggingDbContext> dbCon
         entity.CorrelationId,
         entity.Succeeded,
         entity.ErrorMessage,
-        entity.ReadProperties());
+        entity.ReadProperties(),
+        []);
 }

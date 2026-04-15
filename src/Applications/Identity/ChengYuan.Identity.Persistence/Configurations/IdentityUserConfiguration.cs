@@ -30,6 +30,9 @@ public sealed class IdentityUserConfiguration : IEntityTypeConfiguration<Identit
         builder.Property(user => user.IsActive)
             .IsRequired();
 
+        builder.Property(user => user.PasswordHash)
+            .HasMaxLength(128);
+
         builder.Property(user => user.IsDeleted)
             .IsRequired();
 

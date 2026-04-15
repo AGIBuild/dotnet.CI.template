@@ -11,6 +11,13 @@ public class ChengYuanDbContextConfigurationContext(
 
     public DbContextOptionsBuilder DbContextOptions { get; } = dbContextOptions
         ?? throw new ArgumentNullException(nameof(dbContextOptions));
+
+    /// <summary>
+    /// The resolved connection string for the current DbContext.
+    /// Set by <see cref="DbContextOptionsFactory"/> before the configure action is invoked.
+    /// Provider extensions (e.g. UseSqlite) should use this value when available.
+    /// </summary>
+    public string? ConnectionString { get; internal set; }
 }
 
 public sealed class ChengYuanDbContextConfigurationContext<TDbContext>(

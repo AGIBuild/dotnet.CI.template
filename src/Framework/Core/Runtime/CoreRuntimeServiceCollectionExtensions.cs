@@ -1,4 +1,5 @@
 using ChengYuan.Core.Extensions;
+using ChengYuan.Core.Json;
 using ChengYuan.Core.Security;
 using ChengYuan.Core.SimpleStateChecking;
 using Microsoft.Extensions.DependencyInjection;
@@ -14,6 +15,7 @@ public static class CoreRuntimeServiceCollectionExtensions
         services.AddOptions<StringEncryptionOptions>();
         services.TryAddSingleton<IStringEncryptionService, AesStringEncryptionService>();
         services.TryAddTransient<ISimpleStateCheckerManager, SimpleStateCheckerManager>();
+        services.AddOptions<ChengYuanJsonOptions>();
         return services;
     }
 }

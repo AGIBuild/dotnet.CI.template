@@ -1,5 +1,6 @@
 using ChengYuan.Core.Data;
 using ChengYuan.Core.DependencyInjection;
+using ChengYuan.Core.Exceptions;
 
 namespace ChengYuan.Identity;
 
@@ -73,7 +74,9 @@ public sealed class RoleManager(
         var existingRole = await roleRepository.FindByNormalizedNameAsync(IdentityRole.NormalizeName(name), cancellationToken);
         if (existingRole is not null && existingRole.Id != roleIdToIgnore)
         {
-            throw new InvalidOperationException($"A role named '{name}' already exists.");
+            throw new BusinessException(
+                $"A role named '{name}' already exists.",
+                new ErrorCode("Identity.DuplicateRoleName"));
         }
     }
 

@@ -4,4 +4,8 @@
     <IsPackable>false</IsPackable>
   </PropertyGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\Framework\Core\ChengYuan.Core.csproj" />
+  </ItemGroup>
+
 </Project>

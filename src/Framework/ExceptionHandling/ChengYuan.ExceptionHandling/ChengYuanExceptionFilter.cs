@@ -1,5 +1,4 @@
 using System;
-using ChengYuan.Core.Exceptions;
 using ChengYuan.Core.Logging;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -10,7 +9,7 @@ using Microsoft.Extensions.Logging;
 namespace ChengYuan.ExceptionHandling;
 
 public sealed partial class ChengYuanExceptionFilter(
-    IExceptionToErrorInfoConverter converter,
+    IExceptionToProblemDetailsMapper mapper,
     IHostEnvironment environment,
     ILogger<ChengYuanExceptionFilter> logger) : IExceptionFilter
 {
@@ -24,33 +23,19 @@ public sealed partial class ChengYuanExceptionFilter(
         }
 
         var exception = context.Exception;
-        var statusCode = GetStatusCode(exception);
         var includeSensitiveDetails = environment.IsDevelopment();
-        var errorInfo = converter.Convert(exception, includeSensitiveDetails);
+        var problemDetails = mapper.Map(exception, includeSensitiveDetails);
+        var statusCode = problemDetails.Status ?? StatusCodes.Status500InternalServerError;
 
         LogException(exception, statusCode);
 
-        context.Result = new ObjectResult(new ErrorResponse(errorInfo))
+        context.Result = new ObjectResult(problemDetails)
         {
-            StatusCode = statusCode
+            StatusCode = statusCode,
+            ContentTypes = { "application/problem+json" },
         };
 
         context.ExceptionHandled = true;
-    }
-
-    private static int GetStatusCode(Exception exception)
-    {
-        if (exception is IHasHttpStatusCode hasStatusCode)
-        {
-            return hasStatusCode.StatusCode;
-        }
-
-        return exception switch
-        {
-            BusinessException => StatusCodes.Status400BadRequest,
-            UnauthorizedAccessException => StatusCodes.Status403Forbidden,
-            _ => StatusCodes.Status500InternalServerError,
-        };
     }
 
     private void LogException(Exception exception, int statusCode)

@@ -1,3 +1,4 @@
+using System.Text.Json;
 using ChengYuan.Core.Exceptions;
 using ChengYuan.ExceptionHandling;
 using Microsoft.AspNetCore.Builder;
@@ -14,7 +15,7 @@ namespace ChengYuan.FrameworkKernel.Tests.Hosts.WebHost;
 public sealed class GlobalExceptionMiddlewareTests
 {
     [Fact]
-    public async Task Unhandled_exception_returns_500_json()
+    public async Task Unhandled_exception_returns_500_problem_details()
     {
         using var host = await new HostBuilder()
             .ConfigureWebHost(webBuilder =>
@@ -45,11 +46,16 @@ public sealed class GlobalExceptionMiddlewareTests
         var response = await client.GetAsync(new Uri("/throws", UriKind.Relative), TestContext.Current.CancellationToken);
 
         ((int)response.StatusCode).ShouldBe(500);
-        response.Content.Headers.ContentType?.MediaType.ShouldBe("application/json");
+        response.Content.Headers.ContentType?.MediaType.ShouldBe("application/problem+json");
+
+        var json = await response.Content.ReadAsStringAsync(TestContext.Current.CancellationToken);
+        using var doc = JsonDocument.Parse(json);
+        doc.RootElement.GetProperty("status").GetInt32().ShouldBe(500);
+        doc.RootElement.GetProperty("title").GetString().ShouldNotBeNullOrWhiteSpace();
     }
 
     [Fact]
-    public async Task Business_exception_returns_400()
+    public async Task Business_exception_returns_400_with_error_code()
     {
         using var host = await new HostBuilder()
             .ConfigureWebHost(webBuilder =>
@@ -80,6 +86,14 @@ public sealed class GlobalExceptionMiddlewareTests
         var response = await client.GetAsync(new Uri("/business", UriKind.Relative), TestContext.Current.CancellationToken);
 
         ((int)response.StatusCode).ShouldBe(400);
+        response.Content.Headers.ContentType?.MediaType.ShouldBe("application/problem+json");
+
+        var json = await response.Content.ReadAsStringAsync(TestContext.Current.CancellationToken);
+        using var doc = JsonDocument.Parse(json);
+        doc.RootElement.GetProperty("status").GetInt32().ShouldBe(400);
+        doc.RootElement.GetProperty("title").GetString().ShouldBe("Business Rule Violation");
+        doc.RootElement.GetProperty("detail").GetString().ShouldBe("business error");
+        doc.RootElement.GetProperty("errorCode").GetString().ShouldBe("TEST");
     }
 
     [Fact]
@@ -114,6 +128,48 @@ public sealed class GlobalExceptionMiddlewareTests
         var response = await client.GetAsync(new Uri("/forbidden", UriKind.Relative), TestContext.Current.CancellationToken);
 
         ((int)response.StatusCode).ShouldBe(403);
-        response.Content.Headers.ContentType?.MediaType.ShouldBe("application/json");
+        response.Content.Headers.ContentType?.MediaType.ShouldBe("application/problem+json");
+    }
+
+    [Fact]
+    public async Task EntityNotFoundException_returns_404_with_entity_info()
+    {
+        using var host = await new HostBuilder()
+            .ConfigureWebHost(webBuilder =>
+            {
+                webBuilder.UseTestServer();
+                webBuilder.ConfigureServices(services =>
+                {
+                    services.AddRouting();
+                    services.AddExceptionHandling();
+                });
+                webBuilder.Configure(app =>
+                {
+                    app.UseMiddleware<ChengYuan.WebHost.GlobalExceptionMiddleware>();
+                    app.UseRouting();
+                    app.UseEndpoints(endpoints =>
+                        endpoints.MapGet("/not-found", () =>
+                        {
+                            throw new EntityNotFoundException(typeof(string), 42);
+#pragma warning disable CS0162
+                            return Results.Ok();
+#pragma warning restore CS0162
+                        }));
+                });
+            })
+            .StartAsync(TestContext.Current.CancellationToken);
+
+        var client = host.GetTestClient();
+        var response = await client.GetAsync(new Uri("/not-found", UriKind.Relative), TestContext.Current.CancellationToken);
+
+        ((int)response.StatusCode).ShouldBe(404);
+        response.Content.Headers.ContentType?.MediaType.ShouldBe("application/problem+json");
+
+        var json = await response.Content.ReadAsStringAsync(TestContext.Current.CancellationToken);
+        using var doc = JsonDocument.Parse(json);
+        doc.RootElement.GetProperty("status").GetInt32().ShouldBe(404);
+        doc.RootElement.GetProperty("title").GetString().ShouldBe("Not Found");
+        doc.RootElement.GetProperty("entityType").GetString().ShouldBe("System.String");
+        doc.RootElement.GetProperty("entityId").GetString().ShouldBe("42");
     }
 }

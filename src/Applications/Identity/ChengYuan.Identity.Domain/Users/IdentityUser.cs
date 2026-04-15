@@ -11,6 +11,7 @@ public sealed class IdentityUser : AggregateRoot<Guid>, ISoftDelete
     private string _normalizedUserName = string.Empty;
     private string _email = string.Empty;
     private string _normalizedEmail = string.Empty;
+    private string? _passwordHash;
 
     private IdentityUser()
     {
@@ -46,6 +47,12 @@ public sealed class IdentityUser : AggregateRoot<Guid>, ISoftDelete
         private set => _normalizedEmail = value;
     }
 
+    public string? PasswordHash
+    {
+        get => _passwordHash;
+        private set => _passwordHash = value;
+    }
+
     public bool IsActive { get; private set; }
 
     public bool IsDeleted { get; private set; }
@@ -62,6 +69,12 @@ public sealed class IdentityUser : AggregateRoot<Guid>, ISoftDelete
         Email = email.Trim();
         NormalizedEmail = NormalizeEmail(email);
         IsActive = isActive;
+    }
+
+    public void SetPasswordHash(string passwordHash)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(passwordHash);
+        PasswordHash = passwordHash;
     }
 
     public void MarkDeleted()

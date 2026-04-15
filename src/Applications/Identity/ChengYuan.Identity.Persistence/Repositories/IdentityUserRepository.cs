@@ -1,6 +1,7 @@
 using ChengYuan.Core.Data;
 using ChengYuan.Core.Timing;
 using ChengYuan.EntityFrameworkCore;
+using ChengYuan.ExceptionHandling;
 using Microsoft.EntityFrameworkCore;
 
 namespace ChengYuan.Identity;
@@ -30,7 +31,7 @@ public sealed class IdentityUserRepository(
     public async ValueTask<IdentityUser> GetDetailsAsync(Guid id, CancellationToken cancellationToken = default)
     {
         var user = await FindDetailsAsync(id, cancellationToken);
-        return user ?? throw new InvalidOperationException($"Identity user '{id}' was not found.");
+        return user ?? throw new EntityNotFoundException(typeof(IdentityUser), id);
     }
 
     public async ValueTask<IdentityUser?> FindByNormalizedUserNameAsync(string normalizedUserName, CancellationToken cancellationToken = default)

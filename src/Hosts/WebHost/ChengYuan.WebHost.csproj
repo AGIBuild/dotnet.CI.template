@@ -34,6 +34,7 @@
     <ProjectReference Include="..\..\Framework\ExceptionHandling\ChengYuan.ExceptionHandling\ChengYuan.ExceptionHandling.csproj" />
     <ProjectReference Include="..\..\Framework\DistributedLocking\ChengYuan.DistributedLocking\ChengYuan.DistributedLocking.csproj" />
     <ProjectReference Include="..\..\Framework\BackgroundJobs\ChengYuan.BackgroundJobs\ChengYuan.BackgroundJobs.csproj" />
+    <ProjectReference Include="..\..\Framework\BackgroundJobs\ChengYuan.BackgroundJobs.Persistence\ChengYuan.BackgroundJobs.Persistence.csproj" />
     <ProjectReference Include="..\..\Framework\BlobStoring\ChengYuan.BlobStoring\ChengYuan.BlobStoring.csproj" />
     <ProjectReference Include="..\..\Framework\Emailing\ChengYuan.Emailing\ChengYuan.Emailing.csproj" />
     <ProjectReference Include="..\..\Framework\Sms\ChengYuan.Sms\ChengYuan.Sms.csproj" />

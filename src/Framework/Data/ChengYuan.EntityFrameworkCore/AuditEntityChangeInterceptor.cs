@@ -1,11 +1,16 @@
+using System;
 using ChengYuan.Core.Data.Auditing;
+using ChengYuan.Core.Timing;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 
 namespace ChengYuan.EntityFrameworkCore;
 
-public sealed class AuditEntityChangeInterceptor(IEntityChangeCollector collector) : SaveChangesInterceptor
+public sealed class AuditEntityChangeInterceptor(
+    IEntityChangeCollector collector,
+    IAuditableEntityTypeResolver auditableResolver,
+    IClock clock) : SaveChangesInterceptor
 {
     public override ValueTask<InterceptionResult<int>> SavingChangesAsync(
         DbContextEventData eventData,
@@ -31,6 +36,8 @@ public sealed class AuditEntityChangeInterceptor(IEntityChangeCollector collecto
             return;
         }
 
+        var now = clock.UtcNow;
+
         foreach (var entry in context.ChangeTracker.Entries())
         {
             if (entry.State is not (EntityState.Added or EntityState.Modified or EntityState.Deleted))
@@ -38,9 +45,16 @@ public sealed class AuditEntityChangeInterceptor(IEntityChangeCollector collecto
                 continue;
             }
 
+            var entityType = entry.Metadata.ClrType;
+
+            if (!auditableResolver.IsAuditable(entityType))
+            {
+                continue;
+            }
+
             var changeInfo = new EntityChangeInfo
             {
-                EntityTypeFullName = entry.Metadata.ClrType.FullName!,
+                EntityTypeFullName = entityType.FullName!,
                 EntityId = GetPrimaryKeyValue(entry),
                 ChangeType = entry.State switch
                 {
@@ -49,7 +63,8 @@ public sealed class AuditEntityChangeInterceptor(IEntityChangeCollector collecto
                     EntityState.Deleted => EntityChangeType.Deleted,
                     _ => EntityChangeType.Updated,
                 },
-                PropertyChanges = CollectPropertyChanges(entry),
+                ChangeTime = now,
+                PropertyChanges = CollectPropertyChanges(entry, entityType),
             };
 
             collector.Collect(changeInfo);
@@ -69,13 +84,18 @@ public sealed class AuditEntityChangeInterceptor(IEntityChangeCollector collecto
             : string.Join(',', keyProperties.Select(p => entry.Property(p.Name).CurrentValue));
     }
 
-    private static List<PropertyChangeInfo> CollectPropertyChanges(EntityEntry entry)
+    private List<PropertyChangeInfo> CollectPropertyChanges(EntityEntry entry, Type entityType)
     {
         List<PropertyChangeInfo> changes = [];
 
         foreach (var property in entry.Properties)
         {
             if (property.Metadata.IsPrimaryKey())
+            {
+                continue;
+            }
+
+            if (!auditableResolver.IsPropertyAuditable(entityType, property.Metadata.Name))
             {
                 continue;
             }

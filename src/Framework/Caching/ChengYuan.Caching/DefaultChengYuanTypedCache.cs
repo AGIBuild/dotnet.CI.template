@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Concurrent;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
@@ -17,7 +18,7 @@ internal sealed partial class DefaultChengYuanTypedCache<TCacheItem> : IChengYua
     private readonly ILogger _logger;
     private readonly string _cacheName;
     private readonly ChengYuanCacheEntryOptions _defaultEntryOptions;
-    private readonly SemaphoreSlim _syncSemaphore = new(1, 1);
+    private readonly ConcurrentDictionary<string, SemaphoreSlim> _keyLocks = new(StringComparer.Ordinal);
 
     public DefaultChengYuanTypedCache(
         IChengYuanCacheStore store,
@@ -115,7 +116,8 @@ internal sealed partial class DefaultChengYuanTypedCache<TCacheItem> : IChengYua
             return value;
         }
 
-        await _syncSemaphore.WaitAsync(cancellationToken);
+        var keyLock = _keyLocks.GetOrAdd(key, static _ => new SemaphoreSlim(1, 1));
+        await keyLock.WaitAsync(cancellationToken);
         try
         {
             value = await GetAsync(key, cancellationToken);
@@ -130,7 +132,7 @@ internal sealed partial class DefaultChengYuanTypedCache<TCacheItem> : IChengYua
         }
         finally
         {
-            _syncSemaphore.Release();
+            keyLock.Release();
         }
     }
 
@@ -173,6 +175,11 @@ internal sealed partial class DefaultChengYuanTypedCache<TCacheItem> : IChengYua
 
     public void Dispose()
     {
-        _syncSemaphore.Dispose();
+        foreach (var semaphore in _keyLocks.Values)
+        {
+            semaphore.Dispose();
+        }
+
+        _keyLocks.Clear();
     }
 }

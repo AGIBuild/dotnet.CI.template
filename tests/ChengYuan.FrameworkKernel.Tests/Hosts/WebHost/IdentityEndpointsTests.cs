@@ -1,14 +1,18 @@
 using System.Net;
 using System.Net.Http.Json;
+using System.Security.Claims;
+using System.Text.Encodings.Web;
 using ChengYuan.Core.Data;
 using ChengYuan.Identity;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using Shouldly;
-using Xunit;
 
 namespace ChengYuan.FrameworkKernel.Tests.Hosts.WebHost;
 
@@ -21,6 +25,16 @@ public sealed class IdentityEndpointsTests
             webBuilder.ConfigureServices(services =>
             {
                 services.AddRouting();
+                services.AddAuthentication("Test")
+                    .AddScheme<AuthenticationSchemeOptions, AutoAuthHandler>("Test", null);
+                services.AddAuthorization();
+                services.Configure<JwtOptions>(o =>
+                {
+                    o.SecretKey = "TestKey-At-Least-32-Characters-Long!!!";
+                    o.Issuer = "test";
+                    o.Audience = "test";
+                });
+                services.AddSingleton<JwtTokenService>();
                 services.AddIdentityApplication();
                 services.AddSingleton<InMemoryIdentityRoleRepository>();
                 services.AddSingleton<InMemoryIdentityUserRepository>();
@@ -31,6 +45,8 @@ public sealed class IdentityEndpointsTests
             webBuilder.Configure(app =>
             {
                 app.UseRouting();
+                app.UseAuthentication();
+                app.UseAuthorization();
                 app.UseEndpoints(endpoints => endpoints.MapIdentityManagementEndpoints());
             });
         });
@@ -54,7 +70,7 @@ public sealed class IdentityEndpointsTests
 
         var response = await client.PostAsJsonAsync(
             new Uri("/identity/users", UriKind.Relative),
-            new { userName = "testuser", email = "test@example.com" },
+            new { userName = "testuser", email = "test@example.com", password = "Password123!" },
             TestContext.Current.CancellationToken);
 
         response.StatusCode.ShouldBe(HttpStatusCode.Created);
@@ -83,7 +99,7 @@ public sealed class IdentityEndpointsTests
 
         var createResponse = await client.PostAsJsonAsync(
             new Uri("/identity/users", UriKind.Relative),
-            new { userName = "roundtrip", email = "roundtrip@example.com" },
+            new { userName = "roundtrip", email = "roundtrip@example.com", password = "Password123!" },
             TestContext.Current.CancellationToken);
 
         createResponse.StatusCode.ShouldBe(HttpStatusCode.Created);
@@ -128,7 +144,7 @@ public sealed class IdentityEndpointsTests
 
         var createResponse = await client.PostAsJsonAsync(
             new Uri("/identity/users", UriKind.Relative),
-            new { userName = "todelete", email = "del@example.com" },
+            new { userName = "todelete", email = "del@example.com", password = "Password123!" },
             TestContext.Current.CancellationToken);
 
         var location = createResponse.Headers.Location!;
@@ -136,5 +152,22 @@ public sealed class IdentityEndpointsTests
         var deleteResponse = await client.DeleteAsync(location, TestContext.Current.CancellationToken);
 
         deleteResponse.StatusCode.ShouldBe(HttpStatusCode.NoContent);
+    }
+
+    private sealed class AutoAuthHandler(
+        IOptionsMonitor<AuthenticationSchemeOptions> options,
+        ILoggerFactory logger,
+        UrlEncoder encoder)
+        : AuthenticationHandler<AuthenticationSchemeOptions>(options, logger, encoder)
+    {
+        protected override Task<AuthenticateResult> HandleAuthenticateAsync()
+        {
+            var identity = new ClaimsIdentity(
+                [new Claim(ClaimTypes.NameIdentifier, Guid.NewGuid().ToString()), new Claim(ClaimTypes.Name, "testadmin")],
+                "Test");
+            var principal = new ClaimsPrincipal(identity);
+            var ticket = new AuthenticationTicket(principal, "Test");
+            return Task.FromResult(AuthenticateResult.Success(ticket));
+        }
     }
 }

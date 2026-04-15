@@ -51,6 +51,8 @@
     <ProjectReference Include="..\..\src\Framework\Emailing\ChengYuan.Emailing\ChengYuan.Emailing.csproj" />
     <ProjectReference Include="..\..\src\Framework\Sms\ChengYuan.Sms\ChengYuan.Sms.csproj" />
     <ProjectReference Include="..\..\src\Framework\ObjectMapping\ChengYuan.ObjectMapping\ChengYuan.ObjectMapping.csproj" />
+    <ProjectReference Include="..\..\src\Framework\ObjectMapping\ChengYuan.ObjectMapping.Mapster\ChengYuan.ObjectMapping.Mapster.csproj" />
+    <ProjectReference Include="..\..\src\Framework\Application\ChengYuan.Application\ChengYuan.Application.csproj" />
     <ProjectReference Include="..\..\src\Framework\TextTemplating\ChengYuan.TextTemplating\ChengYuan.TextTemplating.csproj" />
     <ProjectReference Include="..\..\src\Framework\VirtualFileSystem\ChengYuan.VirtualFileSystem\ChengYuan.VirtualFileSystem.csproj" />
     <ProjectReference Include="..\..\src\Framework\Interceptors\ChengYuan.Interceptors\ChengYuan.Interceptors.csproj" />

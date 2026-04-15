@@ -2,6 +2,8 @@
 
   <PropertyGroup>
     <IsPackable>false</IsPackable>
+    <!-- Workaround: RouteHandlerAnalyzer crashes on complex generic endpoint delegates in .NET 10 preview -->
+    <NoWarn>$(NoWarn);AD0001</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>
@@ -11,6 +13,7 @@
   <ItemGroup>
     <ProjectReference Include="..\..\Core\ChengYuan.Core.csproj" />
     <ProjectReference Include="..\..\Hosting\ChengYuan.Hosting.csproj" />
+    <ProjectReference Include="..\..\Application\ChengYuan.Application\ChengYuan.Application.csproj" />
   </ItemGroup>
 
 </Project>

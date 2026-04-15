@@ -8,9 +8,13 @@ public static class AuditingServiceCollectionExtensions
 {
     public static IServiceCollection AddAuditing(this IServiceCollection services)
     {
+        services.AddOptions<AuditingOptions>();
+        services.AddOptions<AuditMiddlewareOptions>();
         services.TryAddSingleton<IAuditScopeAccessor, AmbientAuditScopeAccessor>();
         services.TryAddSingleton<IAuditScopeFactory, DefaultAuditScopeFactory>();
         services.TryAddSingleton<IEntityChangeCollector, AuditScopeEntityChangeCollector>();
+        services.TryAddSingleton<IAuditableEntityTypeResolver, AuditableEntityTypeResolver>();
+        services.TryAddSingleton<IAuditUserProvider, CurrentUserAuditUserProvider>();
         return services;
     }
 

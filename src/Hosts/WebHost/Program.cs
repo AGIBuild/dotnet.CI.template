@@ -1,5 +1,6 @@
 using ChengYuan.AspNetCore;
 using ChengYuan.AuditLogging;
+using ChengYuan.BackgroundJobs;
 using ChengYuan.EntityFrameworkCore;
 using ChengYuan.FeatureManagement;
 using ChengYuan.Identity;
@@ -32,7 +33,11 @@ try
         .AddModule<PermissionManagementPersistenceModule>()
         .AddModule<FeatureManagementPersistenceModule>()
         .AddModule<AuditLoggingPersistenceModule>()
+        .AddModule<BackgroundJobPersistenceModule>()
     );
+
+    builder.Services.AddDatabaseMigration();
+    builder.Services.AddHostedService<DataSeedingHostedService>();
 
     var app = builder.Build();
 

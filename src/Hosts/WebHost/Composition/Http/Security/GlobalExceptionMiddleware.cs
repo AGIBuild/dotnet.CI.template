@@ -1,17 +1,19 @@
-using System.Net.Mime;
 using System.Text.Json;
-using ChengYuan.Core.Exceptions;
 using ChengYuan.ExceptionHandling;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
 namespace ChengYuan.WebHost;
 
-internal sealed partial class GlobalExceptionMiddleware(RequestDelegate next, IHostEnvironment environment, ILogger<GlobalExceptionMiddleware> logger)
+internal sealed partial class GlobalExceptionMiddleware(
+    RequestDelegate next,
+    IHostEnvironment environment,
+    ILogger<GlobalExceptionMiddleware> logger)
 {
-    private static readonly JsonSerializerOptions JsonOptions = new(JsonSerializerDefaults.Web);
+    private static readonly JsonSerializerOptions ProblemJsonOptions = new(JsonSerializerDefaults.Web);
 
     public async Task Invoke(HttpContext context)
     {
@@ -28,27 +30,22 @@ internal sealed partial class GlobalExceptionMiddleware(RequestDelegate next, IH
                 return;
             }
 
-            var converter = context.RequestServices.GetService<IExceptionToErrorInfoConverter>();
+            var mapper = context.RequestServices.GetService<IExceptionToProblemDetailsMapper>();
             var includeSensitiveDetails = environment.IsDevelopment();
 
-            var errorInfo = converter is not null
-                ? converter.Convert(exception, includeSensitiveDetails)
-                : new ErrorInfo(message: includeSensitiveDetails ? exception.Message : "An internal error occurred during your request.");
+            var problemDetails = mapper is not null
+                ? mapper.Map(exception, includeSensitiveDetails)
+                : new ProblemDetails
+                {
+                    Status = StatusCodes.Status500InternalServerError,
+                    Title = "An error occurred while processing your request.",
+                    Detail = includeSensitiveDetails ? exception.Message : null,
+                };
 
-            var statusCode = exception switch
-            {
-                BusinessException => StatusCodes.Status400BadRequest,
-                UnauthorizedAccessException => StatusCodes.Status403Forbidden,
-                ArgumentException => StatusCodes.Status400BadRequest,
-                TimeoutException => StatusCodes.Status504GatewayTimeout,
-                OperationCanceledException => StatusCodes.Status499ClientClosedRequest,
-                _ => StatusCodes.Status500InternalServerError,
-            };
+            context.Response.StatusCode = problemDetails.Status ?? StatusCodes.Status500InternalServerError;
+            context.Response.ContentType = "application/problem+json; charset=utf-8";
 
-            context.Response.StatusCode = statusCode;
-            context.Response.ContentType = MediaTypeNames.Application.Json;
-
-            await JsonSerializer.SerializeAsync(context.Response.Body, new ErrorResponse(errorInfo), JsonOptions, context.RequestAborted);
+            await JsonSerializer.SerializeAsync(context.Response.Body, problemDetails, ProblemJsonOptions, context.RequestAborted);
         }
     }
 

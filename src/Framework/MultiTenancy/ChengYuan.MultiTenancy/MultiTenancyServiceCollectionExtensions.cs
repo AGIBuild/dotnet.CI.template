@@ -48,6 +48,9 @@ public static class MultiTenancyServiceCollectionExtensions
         services.Replace(ServiceDescriptor.Singleton<IDataTenantProvider>(
             serviceProvider => new CurrentTenantDataTenantProvider(serviceProvider.GetRequiredService<ICurrentTenant>())));
 
+        // Override default connection string resolver with tenant-aware version
+        services.Replace(ServiceDescriptor.Transient<IConnectionStringResolver, MultiTenantConnectionStringResolver>());
+
         // Resolution pipeline
         services.AddOptions<TenantResolveOptions>();
         services.TryAddTransient<ITenantResolver, TenantResolver>();

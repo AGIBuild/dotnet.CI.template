@@ -58,6 +58,29 @@ internal sealed class InMemoryIdentityRoleRepository : IIdentityRoleRepository
         }
     }
 
+    public ValueTask<List<IdentityRole>> GetPagedListAsync(int skipCount, int maxResultCount, string? sorting = null, CancellationToken cancellationToken = default)
+    {
+        lock (_sync)
+        {
+            var result = _roles.Values
+                .Where(role => !role.IsDeleted)
+                .OrderBy(role => role.NormalizedName)
+                .Skip(skipCount)
+                .Take(maxResultCount)
+                .ToList();
+
+            return ValueTask.FromResult(result);
+        }
+    }
+
+    public ValueTask<long> GetCountAsync(CancellationToken cancellationToken = default)
+    {
+        lock (_sync)
+        {
+            return ValueTask.FromResult((long)_roles.Values.Count(role => !role.IsDeleted));
+        }
+    }
+
     public ValueTask<IReadOnlyList<IdentityRole>> GetListAsync(CancellationToken cancellationToken = default)
     {
         lock (_sync)

@@ -1,0 +1,14 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\Core\ChengYuan.Core.csproj" />
+    <ProjectReference Include="..\..\ExecutionContext\ChengYuan.ExecutionContext\ChengYuan.ExecutionContext.csproj" />
+    <ProjectReference Include="..\..\MultiTenancy\ChengYuan.MultiTenancy\ChengYuan.MultiTenancy.csproj" />
+    <ProjectReference Include="..\..\ObjectMapping\ChengYuan.ObjectMapping\ChengYuan.ObjectMapping.csproj" />
+  </ItemGroup>
+
+</Project>

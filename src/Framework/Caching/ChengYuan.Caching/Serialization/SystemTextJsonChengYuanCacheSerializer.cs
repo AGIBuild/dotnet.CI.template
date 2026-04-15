@@ -1,11 +1,13 @@
 using System;
 using System.Text.Json;
+using ChengYuan.Core.Json;
+using Microsoft.Extensions.Options;
 
 namespace ChengYuan.Caching;
 
-internal sealed class SystemTextJsonChengYuanCacheSerializer : IChengYuanCacheSerializer
+internal sealed class SystemTextJsonChengYuanCacheSerializer(IOptions<ChengYuanJsonOptions> jsonOptions) : IChengYuanCacheSerializer
 {
-    private static readonly JsonSerializerOptions SerializerOptions = new(JsonSerializerDefaults.Web);
+    private readonly JsonSerializerOptions _serializerOptions = jsonOptions.Value.JsonSerializerOptions;
 
     public ChengYuanCacheItem Serialize<T>(T value)
     {
@@ -13,12 +15,12 @@ internal sealed class SystemTextJsonChengYuanCacheSerializer : IChengYuanCacheSe
 
         var type = typeof(T);
         return new ChengYuanCacheItem(
-            JsonSerializer.SerializeToUtf8Bytes(value, SerializerOptions),
+            JsonSerializer.SerializeToUtf8Bytes(value, _serializerOptions),
             type.AssemblyQualifiedName ?? type.FullName ?? type.Name);
     }
 
     public T? Deserialize<T>(ChengYuanCacheItem item)
     {
-        return JsonSerializer.Deserialize<T>(item.Payload, SerializerOptions);
+        return JsonSerializer.Deserialize<T>(item.Payload, _serializerOptions);
     }
 }

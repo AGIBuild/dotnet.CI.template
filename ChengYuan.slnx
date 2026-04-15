@@ -8,14 +8,17 @@
     <Project Path="src/Framework/Auditing/ChengYuan.Auditing/ChengYuan.Auditing.csproj" />
     <Project Path="src/Framework/Authorization/ChengYuan.Authorization/ChengYuan.Authorization.csproj" />
     <Project Path="src/Framework/BackgroundJobs/ChengYuan.BackgroundJobs/ChengYuan.BackgroundJobs.csproj" />
+    <Project Path="src/Framework/BackgroundJobs/ChengYuan.BackgroundJobs.Persistence/ChengYuan.BackgroundJobs.Persistence.csproj" />
     <Project Path="src/Framework/BackgroundWorkers/ChengYuan.BackgroundWorkers/ChengYuan.BackgroundWorkers.csproj" />
     <Project Path="src/Framework/BlobStoring/ChengYuan.BlobStoring/ChengYuan.BlobStoring.csproj" />
     <Project Path="src/Framework/Caching/ChengYuan.Caching/ChengYuan.Caching.csproj" />
     <Project Path="src/Framework/Caching/ChengYuan.Caching.Memory/ChengYuan.Caching.Memory.csproj" />
     <Project Path="src/Framework/Caching/ChengYuan.Caching.StackExchangeRedis/ChengYuan.Caching.StackExchangeRedis.csproj" />
     <Project Path="src/Framework/DistributedLocking/ChengYuan.DistributedLocking/ChengYuan.DistributedLocking.csproj" />
+    <Project Path="src/Framework/DistributedLocking/ChengYuan.DistributedLocking.Redis/ChengYuan.DistributedLocking.Redis.csproj" />
     <Project Path="src/Framework/Emailing/ChengYuan.Emailing/ChengYuan.Emailing.csproj" />
     <Project Path="src/Framework/EventBus/ChengYuan.EventBus/ChengYuan.EventBus.csproj" />
+    <Project Path="src/Framework/EventBus/ChengYuan.EventBus.Outbox/ChengYuan.EventBus.Outbox.csproj" />
     <Project Path="src/Framework/ExceptionHandling/ChengYuan.ExceptionHandling/ChengYuan.ExceptionHandling.csproj" />
     <Project Path="src/Framework/ExecutionContext/ChengYuan.ExecutionContext/ChengYuan.ExecutionContext.csproj" />
     <Project Path="src/Framework/Features/ChengYuan.Features/ChengYuan.Features.csproj" />
@@ -23,6 +26,7 @@
     <Project Path="src/Framework/MultiTenancy/ChengYuan.MultiTenancy/ChengYuan.MultiTenancy.csproj" />
     <Project Path="src/Framework/Notifications/ChengYuan.Notifications/ChengYuan.Notifications.csproj" />
     <Project Path="src/Framework/ObjectMapping/ChengYuan.ObjectMapping/ChengYuan.ObjectMapping.csproj" />
+    <Project Path="src/Framework/ObjectMapping/ChengYuan.ObjectMapping.Mapster/ChengYuan.ObjectMapping.Mapster.csproj" />
     <Project Path="src/Framework/Outbox/ChengYuan.Outbox/ChengYuan.Outbox.csproj" />
     <Project Path="src/Framework/Outbox/ChengYuan.Outbox.Persistence/ChengYuan.Outbox.Persistence.csproj" />
     <Project Path="src/Framework/Outbox/ChengYuan.Outbox.Worker/ChengYuan.Outbox.Worker.csproj" />
@@ -33,6 +37,7 @@
     <Project Path="src/Framework/AspNetCore/ChengYuan.AspNetCore/ChengYuan.AspNetCore.csproj" />
     <Project Path="src/Framework/AspNetCore/ChengYuan.HealthChecks/ChengYuan.HealthChecks.csproj" />
     <Project Path="src/Framework/HttpResilience/ChengYuan.HttpResilience/ChengYuan.HttpResilience.csproj" />
+    <Project Path="src/Framework/Application/ChengYuan.Application/ChengYuan.Application.csproj" />
   </Folder>
   <Folder Name="/src/Applications/">
     <Project Path="src/Applications/AuditLogging/ChengYuan.AuditLogging.Contracts/ChengYuan.AuditLogging.Contracts.csproj" />

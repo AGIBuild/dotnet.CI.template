@@ -1,5 +1,6 @@
 using ChengYuan.Core.Data;
 using ChengYuan.Core.DependencyInjection;
+using ChengYuan.Core.Exceptions;
 
 namespace ChengYuan.Identity;
 
@@ -7,17 +8,61 @@ namespace ChengYuan.Identity;
 public sealed class UserManager(
     IIdentityUserRepository userRepository,
     IIdentityRoleRepository roleRepository,
+    IPasswordHasher passwordHasher,
     IUnitOfWork unitOfWork) : IUserManager, IUserReader, IScopedService
 {
-    public async ValueTask<UserRecord> CreateAsync(string userName, string email, CancellationToken cancellationToken = default)
+    public async ValueTask<UserRecord> CreateAsync(string userName, string email, string password, CancellationToken cancellationToken = default)
     {
+        ArgumentException.ThrowIfNullOrWhiteSpace(password);
+
         await EnsureUniqueAsync(userName, email, userIdToIgnore: null, cancellationToken);
 
         var user = new IdentityUser(Guid.NewGuid(), userName, email);
+        user.SetPasswordHash(passwordHasher.HashPassword(password));
         await userRepository.InsertAsync(user, cancellationToken);
         await unitOfWork.SaveChangesAsync(cancellationToken);
 
         return MapToRecord(user);
+    }
+
+    public async ValueTask<UserRecord?> VerifyPasswordAsync(string userName, string password, CancellationToken cancellationToken = default)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(userName);
+        ArgumentException.ThrowIfNullOrWhiteSpace(password);
+
+        var user = await userRepository.FindByNormalizedUserNameAsync(
+            IdentityUser.NormalizeUserName(userName), cancellationToken);
+
+        if (user is null || user.IsDeleted || !user.IsActive)
+        {
+            return null;
+        }
+
+        if (user.PasswordHash is null || !passwordHasher.VerifyPassword(password, user.PasswordHash))
+        {
+            return null;
+        }
+
+        return MapToRecord(user);
+    }
+
+    public async ValueTask ChangePasswordAsync(Guid userId, string currentPassword, string newPassword, CancellationToken cancellationToken = default)
+    {
+        EnsureId(userId, nameof(userId), "User");
+        ArgumentException.ThrowIfNullOrWhiteSpace(currentPassword);
+        ArgumentException.ThrowIfNullOrWhiteSpace(newPassword);
+
+        var user = await userRepository.GetDetailsAsync(userId, cancellationToken);
+
+        if (user.PasswordHash is null || !passwordHasher.VerifyPassword(currentPassword, user.PasswordHash))
+        {
+            throw new BusinessException(
+                "The current password is incorrect.",
+                new ErrorCode("Identity.InvalidPassword"));
+        }
+
+        user.SetPasswordHash(passwordHasher.HashPassword(newPassword));
+        await unitOfWork.SaveChangesAsync(cancellationToken);
     }
 
     public async ValueTask<UserRecord> UpdateAsync(Guid userId, string userName, string email, bool isActive, CancellationToken cancellationToken = default)
@@ -43,7 +88,9 @@ public sealed class UserManager(
 
         if (!role.IsActive)
         {
-            throw new InvalidOperationException($"Role '{role.Name}' is inactive and cannot be assigned.");
+            throw new BusinessException(
+                $"Role '{role.Name}' is inactive and cannot be assigned.",
+                new ErrorCode("Identity.InactiveRole"));
         }
 
         user.AssignRole(roleId);
@@ -107,13 +154,17 @@ public sealed class UserManager(
         var existingUserByUserName = await userRepository.FindByNormalizedUserNameAsync(normalizedUserName, cancellationToken);
         if (existingUserByUserName is not null && existingUserByUserName.Id != userIdToIgnore)
         {
-            throw new InvalidOperationException($"A user named '{userName}' already exists.");
+            throw new BusinessException(
+                $"A user named '{userName}' already exists.",
+                new ErrorCode("Identity.DuplicateUserName"));
         }
 
         var existingUserByEmail = await userRepository.FindByNormalizedEmailAsync(normalizedEmail, cancellationToken);
         if (existingUserByEmail is not null && existingUserByEmail.Id != userIdToIgnore)
         {
-            throw new InvalidOperationException($"A user with email '{email}' already exists.");
+            throw new BusinessException(
+                $"A user with email '{email}' already exists.",
+                new ErrorCode("Identity.DuplicateEmail"));
         }
     }
 

@@ -13,7 +13,9 @@ public static class ChengYuanDbContextConfigurationContextSqliteExtensions
         ArgumentNullException.ThrowIfNull(context);
         ArgumentException.ThrowIfNullOrWhiteSpace(connectionString);
 
-        return context.DbContextOptions.UseSqlite(connectionString, builder =>
+        var effectiveConnectionString = context.ConnectionString ?? connectionString;
+
+        return context.DbContextOptions.UseSqlite(effectiveConnectionString, builder =>
         {
             ApplyMigrationHistoryTable(context, builder);
             sqliteOptionsAction?.Invoke(builder);

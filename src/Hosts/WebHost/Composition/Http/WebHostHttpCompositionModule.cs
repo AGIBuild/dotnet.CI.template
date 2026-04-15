@@ -1,6 +1,7 @@
 using System.Threading.RateLimiting;
 using Asp.Versioning;
 using ChengYuan.AspNetCore;
+using ChengYuan.Core.Json;
 using ChengYuan.Core.Modularity;
 using ChengYuan.ExceptionHandling;
 using ChengYuan.HealthChecks;
@@ -8,6 +9,7 @@ using ChengYuan.MultiTenancy;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
 
@@ -20,6 +22,15 @@ internal sealed class WebHostHttpCompositionModule : HostModule
     public override void ConfigureServices(ServiceConfigurationContext context)
     {
         context.Services.AddHttpContextAccessor();
+
+        context.Services.ConfigureHttpJsonOptions(httpJsonOptions =>
+        {
+            var sharedOptions = new ChengYuanJsonOptions().JsonSerializerOptions;
+            foreach (var converter in sharedOptions.Converters)
+            {
+                httpJsonOptions.SerializerOptions.Converters.Add(converter);
+            }
+        });
 
         context.Services
             .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)

@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using ChengYuan.Core.Data.Auditing;
 
 namespace ChengYuan.AuditLogging;
 
@@ -17,10 +18,12 @@ public sealed record AuditLogRecord
         string? correlationId,
         bool succeeded,
         string? errorMessage,
-        IReadOnlyDictionary<string, object?> properties)
+        IReadOnlyDictionary<string, object?> properties,
+        IReadOnlyList<EntityChangeInfo> entityChanges)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(name);
         ArgumentNullException.ThrowIfNull(properties);
+        ArgumentNullException.ThrowIfNull(entityChanges);
 
         Name = name;
         StartedAtUtc = startedAtUtc;
@@ -34,6 +37,7 @@ public sealed record AuditLogRecord
         Succeeded = succeeded;
         ErrorMessage = errorMessage;
         Properties = properties;
+        EntityChanges = entityChanges;
     }
 
     public string Name { get; }
@@ -59,6 +63,8 @@ public sealed record AuditLogRecord
     public string? ErrorMessage { get; }
 
     public IReadOnlyDictionary<string, object?> Properties { get; }
+
+    public IReadOnlyList<EntityChangeInfo> EntityChanges { get; }
 
     public bool TryGetProperty(string name, out object? value)
     {

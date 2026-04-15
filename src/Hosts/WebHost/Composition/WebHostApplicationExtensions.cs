@@ -1,5 +1,6 @@
 using Asp.Versioning;
 using Asp.Versioning.Builder;
+using ChengYuan.Auditing;
 using ChengYuan.Core.Modularity;
 using ChengYuan.ExecutionContext;
 using ChengYuan.Identity;
@@ -28,6 +29,7 @@ public static class WebHostApplicationExtensions
         app.UseMultiTenancy();
         app.UseRateLimiter();
         app.UseMiddleware<CurrentUserMiddleware>();
+        app.UseAuditing();
         app.UseAuthorization();
 
         app.MapWebHostEndpoints();
@@ -64,6 +66,11 @@ public static class WebHostApplicationExtensions
             .RequireRateLimiting("per-tenant");
 
         api.MapIdentityManagementEndpoints();
+        api.MapAuditLogEndpoints();
+        api.MapPermissionManagementEndpoints();
+        api.MapFeatureManagementEndpoints();
+        api.MapTenantManagementEndpoints();
+        api.MapSettingManagementEndpoints();
         return app;
     }
 }

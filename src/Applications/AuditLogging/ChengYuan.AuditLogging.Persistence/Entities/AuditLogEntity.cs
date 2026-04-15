@@ -75,6 +75,8 @@ public sealed class AuditLogEntity
         private set => _serializedProperties = value;
     }
 
+    public ICollection<AuditLogEntityChangeEntity> EntityChanges { get; private set; } = [];
+
     public IReadOnlyDictionary<string, object?> ReadProperties()
     {
         using var document = JsonDocument.Parse(SerializedProperties);

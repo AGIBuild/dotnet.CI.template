@@ -8,6 +8,8 @@ public sealed class ChengYuanDbContextOptions
 
     internal Dictionary<Type, object> ConfigureActions { get; } = new();
 
+    internal HashSet<Type> RegisteredDbContextTypes { get; } = [];
+
     public void Configure(Action<ChengYuanDbContextConfigurationContext> configureAction)
     {
         ArgumentNullException.ThrowIfNull(configureAction);

@@ -1,4 +1,5 @@
 using System.Net;
+using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using ChengYuan.Core.Modularity;
 using ChengYuan.EntityFrameworkCore;
@@ -8,6 +9,7 @@ using ChengYuan.WebHost;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.TestHost;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 using Shouldly;
 
 namespace ChengYuan.FrameworkKernel.Tests;
@@ -18,7 +20,7 @@ public class IdentityWebEndpointTests
     public async Task IdentityWeb_ShouldManageUsersRolesAndAssignmentsOverHttp()
     {
         await using var app = await CreateApplicationAsync();
-        var client = app.GetTestClient();
+        var client = await CreateAuthenticatedClientAsync(app);
 
         var createRoleResponse = await client.PostAsJsonAsync("/api/v1/identity/roles", new CreateRoleRequest
         {
@@ -32,7 +34,8 @@ public class IdentityWebEndpointTests
         var createUserResponse = await client.PostAsJsonAsync("/api/v1/identity/users", new CreateUserRequest
         {
             UserName = "alice",
-            Email = "alice@example.com"
+            Email = "alice@example.com",
+            Password = "AlicePass123!"
         }, TestContext.Current.CancellationToken);
 
         createUserResponse.StatusCode.ShouldBe(HttpStatusCode.Created);
@@ -66,10 +69,10 @@ public class IdentityWebEndpointTests
     }
 
     [Fact]
-    public async Task IdentityWeb_ShouldReturnConflictForDuplicateUsersAndRoles()
+    public async Task IdentityWeb_ShouldReturnBadRequestForDuplicateUsersAndRoles()
     {
         await using var app = await CreateApplicationAsync();
-        var client = app.GetTestClient();
+        var client = await CreateAuthenticatedClientAsync(app);
 
         var firstRoleResponse = await client.PostAsJsonAsync("/api/v1/identity/roles", new CreateRoleRequest
         {
@@ -83,12 +86,13 @@ public class IdentityWebEndpointTests
             Name = " administrators "
         }, TestContext.Current.CancellationToken);
 
-        duplicateRoleResponse.StatusCode.ShouldBe(HttpStatusCode.Conflict);
+        duplicateRoleResponse.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
 
         var firstUserResponse = await client.PostAsJsonAsync("/api/v1/identity/users", new CreateUserRequest
         {
             UserName = "alice",
-            Email = "alice@example.com"
+            Email = "alice@example.com",
+            Password = "AlicePass123!"
         }, TestContext.Current.CancellationToken);
 
         firstUserResponse.EnsureSuccessStatusCode();
@@ -96,10 +100,61 @@ public class IdentityWebEndpointTests
         var duplicateUserResponse = await client.PostAsJsonAsync("/api/v1/identity/users", new CreateUserRequest
         {
             UserName = " ALICE ",
-            Email = "other@example.com"
+            Email = "other@example.com",
+            Password = "AlicePass123!"
         }, TestContext.Current.CancellationToken);
 
-        duplicateUserResponse.StatusCode.ShouldBe(HttpStatusCode.Conflict);
+        duplicateUserResponse.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
+    }
+
+    [Fact]
+    public async Task IdentityWeb_ShouldLoginAndReturnAccessToken()
+    {
+        await using var app = await CreateApplicationAsync();
+
+        var userManager = app.Services.GetRequiredService<IUserManager>();
+        await userManager.CreateAsync("admin", "admin@test.com", "AdminPass123!", TestContext.Current.CancellationToken);
+
+        var client = app.GetTestClient();
+        var loginResponse = await client.PostAsJsonAsync("/api/v1/identity/login", new LoginRequest
+        {
+            UserName = "admin",
+            Password = "AdminPass123!"
+        }, TestContext.Current.CancellationToken);
+
+        loginResponse.StatusCode.ShouldBe(HttpStatusCode.OK);
+        var token = await loginResponse.Content.ReadFromJsonAsync<TokenResponse>(TestContext.Current.CancellationToken);
+        token.ShouldNotBeNull();
+        token.AccessToken.ShouldNotBeNullOrWhiteSpace();
+        token.ExpiresIn.ShouldBeGreaterThan(0);
+    }
+
+    [Fact]
+    public async Task IdentityWeb_ShouldReturnUnauthorizedForInvalidCredentials()
+    {
+        await using var app = await CreateApplicationAsync();
+
+        var userManager = app.Services.GetRequiredService<IUserManager>();
+        await userManager.CreateAsync("admin", "admin@test.com", "AdminPass123!", TestContext.Current.CancellationToken);
+
+        var client = app.GetTestClient();
+        var loginResponse = await client.PostAsJsonAsync("/api/v1/identity/login", new LoginRequest
+        {
+            UserName = "admin",
+            Password = "WrongPassword!"
+        }, TestContext.Current.CancellationToken);
+
+        loginResponse.StatusCode.ShouldBe(HttpStatusCode.Unauthorized);
+    }
+
+    [Fact]
+    public async Task IdentityWeb_ShouldReturnUnauthorizedForProtectedEndpointsWithoutToken()
+    {
+        await using var app = await CreateApplicationAsync();
+        var client = app.GetTestClient();
+
+        var response = await client.GetAsync("/api/v1/identity/users", TestContext.Current.CancellationToken);
+        response.StatusCode.ShouldBe(HttpStatusCode.Unauthorized);
     }
 
     [Fact]
@@ -131,6 +186,24 @@ public class IdentityWebEndpointTests
         await app.StartAsync();
 
         return app;
+    }
+
+    private static async Task<HttpClient> CreateAuthenticatedClientAsync(WebApplication app)
+    {
+        var userManager = app.Services.GetRequiredService<IUserManager>();
+        await userManager.CreateAsync("testadmin", "testadmin@test.com", "TestAdminPass123!", TestContext.Current.CancellationToken);
+
+        var client = app.GetTestClient();
+        var loginResponse = await client.PostAsJsonAsync("/api/v1/identity/login", new LoginRequest
+        {
+            UserName = "testadmin",
+            Password = "TestAdminPass123!"
+        }, TestContext.Current.CancellationToken);
+
+        var token = await loginResponse.Content.ReadFromJsonAsync<TokenResponse>(TestContext.Current.CancellationToken);
+        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token!.AccessToken);
+
+        return client;
     }
 
     private sealed class HealthPayload

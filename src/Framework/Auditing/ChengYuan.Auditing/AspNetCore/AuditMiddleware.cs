@@ -5,13 +5,17 @@ using Microsoft.Extensions.Options;
 
 namespace ChengYuan.Auditing;
 
-internal sealed class AuditMiddleware(RequestDelegate next, IOptions<AuditMiddlewareOptions> options)
+internal sealed class AuditMiddleware(
+    RequestDelegate next,
+    IOptions<AuditingOptions> auditingOptions,
+    IOptions<AuditMiddlewareOptions> middlewareOptions)
 {
-    private readonly AuditMiddlewareOptions _options = options.Value;
+    private readonly AuditingOptions _auditingOptions = auditingOptions.Value;
+    private readonly AuditMiddlewareOptions _middlewareOptions = middlewareOptions.Value;
 
     public async Task InvokeAsync(HttpContext httpContext, IAuditScopeFactory auditScopeFactory)
     {
-        if (_options.RequestFilter is not null && !_options.RequestFilter(httpContext))
+        if (!ShouldAudit(httpContext))
         {
             await next(httpContext);
             return;
@@ -46,5 +50,31 @@ internal sealed class AuditMiddleware(RequestDelegate next, IOptions<AuditMiddle
         }
 
         scope.SetProperty("httpStatusCode", httpContext.Response.StatusCode);
+    }
+
+    private bool ShouldAudit(HttpContext httpContext)
+    {
+        if (!_auditingOptions.IsEnabled)
+        {
+            return false;
+        }
+
+        if (!_auditingOptions.IsEnabledForAnonymousUsers && !(httpContext.User.Identity?.IsAuthenticated ?? false))
+        {
+            return false;
+        }
+
+        if (!_auditingOptions.IsEnabledForGetRequests
+            && string.Equals(httpContext.Request.Method, HttpMethods.Get, StringComparison.OrdinalIgnoreCase))
+        {
+            return false;
+        }
+
+        if (_middlewareOptions.RequestFilter is not null && !_middlewareOptions.RequestFilter(httpContext))
+        {
+            return false;
+        }
+
+        return true;
     }
 }

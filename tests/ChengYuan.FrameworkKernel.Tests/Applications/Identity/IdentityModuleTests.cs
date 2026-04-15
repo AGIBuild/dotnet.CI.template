@@ -1,3 +1,4 @@
+using ChengYuan.Core.Exceptions;
 using ChengYuan.Core.Modularity;
 using ChengYuan.Identity;
 using Microsoft.Extensions.DependencyInjection;
@@ -39,7 +40,7 @@ public class IdentityModuleTests
 
         var role = await roleManager.CreateAsync(" Administrators ", TestContext.Current.CancellationToken);
 
-        var createdUser = await userManager.CreateAsync(" Alice ", " alice@example.com ", TestContext.Current.CancellationToken);
+        var createdUser = await userManager.CreateAsync(" Alice ", " alice@example.com ", "Password123!", TestContext.Current.CancellationToken);
         createdUser.UserName.ShouldBe("Alice");
         createdUser.Email.ShouldBe("alice@example.com");
         createdUser.IsActive.ShouldBeTrue();
@@ -71,13 +72,13 @@ public class IdentityModuleTests
         await using var serviceProvider = services.BuildServiceProvider();
         var userManager = serviceProvider.GetRequiredService<IUserManager>();
 
-        await userManager.CreateAsync("Alice", "alice@example.com", TestContext.Current.CancellationToken);
+        await userManager.CreateAsync("Alice", "alice@example.com", "Password123!", TestContext.Current.CancellationToken);
 
-        await Should.ThrowAsync<InvalidOperationException>(async () =>
-            await userManager.CreateAsync(" ALICE ", "another@example.com", TestContext.Current.CancellationToken));
+        await Should.ThrowAsync<BusinessException>(async () =>
+            await userManager.CreateAsync(" ALICE ", "another@example.com", "Password123!", TestContext.Current.CancellationToken));
 
-        await Should.ThrowAsync<InvalidOperationException>(async () =>
-            await userManager.CreateAsync("Bob", " ALICE@EXAMPLE.COM ", TestContext.Current.CancellationToken));
+        await Should.ThrowAsync<BusinessException>(async () =>
+            await userManager.CreateAsync("Bob", " ALICE@EXAMPLE.COM ", "Password123!", TestContext.Current.CancellationToken));
     }
 
     [Fact]
@@ -93,10 +94,10 @@ public class IdentityModuleTests
         var userReader = serviceProvider.GetRequiredService<IUserReader>();
 
         var role = await roleManager.CreateAsync("Administrators", TestContext.Current.CancellationToken);
-        var user = await userManager.CreateAsync("Alice", "alice@example.com", TestContext.Current.CancellationToken);
+        var user = await userManager.CreateAsync("Alice", "alice@example.com", "Password123!", TestContext.Current.CancellationToken);
         await userManager.AssignRoleAsync(user.Id, role.Id, TestContext.Current.CancellationToken);
 
-        await Should.ThrowAsync<InvalidOperationException>(async () =>
+        await Should.ThrowAsync<BusinessException>(async () =>
             await roleManager.CreateAsync(" administrators ", TestContext.Current.CancellationToken));
 
         await roleManager.RemoveAsync(role.Id, TestContext.Current.CancellationToken);

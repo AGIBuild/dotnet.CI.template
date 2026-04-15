@@ -1,3 +1,6 @@
+using System;
+using System.Collections.Generic;
+
 namespace ChengYuan.Core.Data.Auditing;
 
 public sealed class EntityChangeInfo
@@ -7,6 +10,8 @@ public sealed class EntityChangeInfo
     public required string? EntityId { get; init; }
 
     public required EntityChangeType ChangeType { get; init; }
+
+    public required DateTimeOffset ChangeTime { get; init; }
 
     public IReadOnlyList<PropertyChangeInfo> PropertyChanges { get; init; } = [];
 }

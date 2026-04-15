@@ -1,4 +1,5 @@
 using System;
+using ChengYuan.Core.Data;
 using ChengYuan.Core.Guids;
 using ChengYuan.Core.Timing;
 using Microsoft.Extensions.DependencyInjection;
@@ -11,6 +12,7 @@ public abstract class ApplicationServiceBase : IApplicationService
     private IClock? _clock;
     private IGuidGenerator? _guidGenerator;
     private ILogger? _logger;
+    private IUnitOfWorkAccessor? _unitOfWorkAccessor;
 
     protected ApplicationServiceBase(IServiceProvider serviceProvider)
     {
@@ -25,4 +27,8 @@ public abstract class ApplicationServiceBase : IApplicationService
     protected IGuidGenerator GuidGenerator => _guidGenerator ??= ServiceProvider.GetRequiredService<IGuidGenerator>();
 
     protected ILogger Logger => _logger ??= ServiceProvider.GetRequiredService<ILoggerFactory>().CreateLogger(GetType());
+
+    protected IUnitOfWork? CurrentUnitOfWork => UnitOfWorkAccessor.Current;
+
+    private IUnitOfWorkAccessor UnitOfWorkAccessor => _unitOfWorkAccessor ??= ServiceProvider.GetRequiredService<IUnitOfWorkAccessor>();
 }

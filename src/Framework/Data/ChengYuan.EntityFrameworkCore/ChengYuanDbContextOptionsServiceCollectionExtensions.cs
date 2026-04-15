@@ -38,6 +38,7 @@ public static class ChengYuanDbContextOptionsServiceCollectionExtensions
     {
         ArgumentNullException.ThrowIfNull(services);
 
+        services.Configure<ChengYuanDbContextOptions>(o => o.RegisteredDbContextTypes.Add(typeof(TDbContext)));
         services.AddDbContext<TDbContext>(DbContextOptionsFactory.Configure<TDbContext>);
 
         return services;
@@ -48,7 +49,17 @@ public static class ChengYuanDbContextOptionsServiceCollectionExtensions
     {
         ArgumentNullException.ThrowIfNull(services);
 
+        services.Configure<ChengYuanDbContextOptions>(o => o.RegisteredDbContextTypes.Add(typeof(TDbContext)));
         services.AddDbContextFactory<TDbContext>(DbContextOptionsFactory.Configure<TDbContext>);
+
+        return services;
+    }
+
+    public static IServiceCollection AddDatabaseMigration(this IServiceCollection services)
+    {
+        ArgumentNullException.ThrowIfNull(services);
+
+        services.AddHostedService<DatabaseMigrationHostedService>();
 
         return services;
     }

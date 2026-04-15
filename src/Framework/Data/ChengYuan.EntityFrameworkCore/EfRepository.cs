@@ -1,4 +1,5 @@
 using ChengYuan.Core.Data;
+using ChengYuan.Core.Data.Auditing;
 using ChengYuan.Core.Entities;
 using ChengYuan.Core.Timing;
 using Microsoft.EntityFrameworkCore;
@@ -10,7 +11,8 @@ public class EfRepository<TDbContext, TEntity, TId>(
     IDataFilter<SoftDeleteFilter>? softDeleteFilter = null,
     IDataFilter<MultiTenantFilter>? multiTenantFilter = null,
     IDataTenantProvider? dataTenantProvider = null,
-    IClock? clock = null) : IRepository<TEntity, TId>
+    IClock? clock = null,
+    IAuditUserProvider? auditUserProvider = null) : IRepository<TEntity, TId>
     where TDbContext : DbContext
     where TEntity : class, IAggregateRoot<TId>
     where TId : notnull
@@ -34,6 +36,16 @@ public class EfRepository<TDbContext, TEntity, TId>(
 
         return entity ?? throw new InvalidOperationException(
             $"Aggregate root '{typeof(TEntity).FullName}' with id '{id}' was not found.");
+    }
+
+    public async ValueTask<List<TEntity>> GetPagedListAsync(int skipCount, int maxResultCount, string? sorting = null, CancellationToken cancellationToken = default)
+    {
+        return await Query.Skip(skipCount).Take(maxResultCount).ToListAsync(cancellationToken);
+    }
+
+    public async ValueTask<long> GetCountAsync(CancellationToken cancellationToken = default)
+    {
+        return await Query.LongCountAsync(cancellationToken);
     }
 
     public async ValueTask<TEntity> InsertAsync(TEntity entity, CancellationToken cancellationToken = default)
@@ -63,6 +75,11 @@ public class EfRepository<TDbContext, TEntity, TId>(
             if (typeof(IHasDeletionTime).IsAssignableFrom(typeof(TEntity)))
             {
                 entry.Property(nameof(IHasDeletionTime.DeletionTime)).CurrentValue = clock?.UtcNow ?? DateTimeOffset.UtcNow;
+            }
+
+            if (typeof(IHasDeleterId).IsAssignableFrom(typeof(TEntity)) && auditUserProvider?.UserId is { } deleterId)
+            {
+                entry.Property(nameof(IHasDeleterId.DeleterId)).CurrentValue = deleterId;
             }
 
             entry.State = EntityState.Modified;

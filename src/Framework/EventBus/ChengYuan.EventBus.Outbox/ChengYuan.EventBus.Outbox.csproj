@@ -1,0 +1,12 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\ChengYuan.EventBus\ChengYuan.EventBus.csproj" />
+    <ProjectReference Include="..\..\Outbox\ChengYuan.Outbox\ChengYuan.Outbox.csproj" />
+  </ItemGroup>
+
+</Project>

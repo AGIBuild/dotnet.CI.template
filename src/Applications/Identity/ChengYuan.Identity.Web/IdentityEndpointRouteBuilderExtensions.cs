@@ -1,3 +1,4 @@
+using ChengYuan.Core.Application.Dtos;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
@@ -11,10 +12,13 @@ public static class IdentityEndpointRouteBuilderExtensions
         ArgumentNullException.ThrowIfNull(endpoints);
 
         var group = endpoints.MapGroup("/identity")
-            .WithTags("Identity");
+            .WithTags("Identity")
+            .RequireAuthorization();
+
+        group.MapPost("/login", LoginAsync).AllowAnonymous();
 
         group.MapGet("/users", static async (IUserReader reader, CancellationToken cancellationToken) =>
-            TypedResults.Ok(await reader.GetListAsync(cancellationToken)));
+            TypedResults.Ok(new ListResultDto<UserRecord>(await reader.GetListAsync(cancellationToken))));
 
         group.MapGet("/users/{userId:guid}", GetUserByIdAsync);
         group.MapPost("/users", CreateUserAsync);
@@ -24,7 +28,7 @@ public static class IdentityEndpointRouteBuilderExtensions
         group.MapDelete("/users/{userId:guid}/roles/{roleId:guid}", UnassignRoleAsync);
 
         group.MapGet("/roles", static async (IRoleReader reader, CancellationToken cancellationToken) =>
-            TypedResults.Ok(await reader.GetListAsync(cancellationToken)));
+            TypedResults.Ok(new ListResultDto<RoleRecord>(await reader.GetListAsync(cancellationToken))));
 
         group.MapGet("/roles/{roleId:guid}", GetRoleByIdAsync);
         group.MapPost("/roles", CreateRoleAsync);
@@ -32,6 +36,22 @@ public static class IdentityEndpointRouteBuilderExtensions
         group.MapDelete("/roles/{roleId:guid}", DeleteRoleAsync);
 
         return endpoints;
+    }
+
+    private static async Task<IResult> LoginAsync(
+        LoginRequest request,
+        IUserManager manager,
+        JwtTokenService tokenService,
+        CancellationToken cancellationToken)
+    {
+        var user = await manager.VerifyPasswordAsync(request.UserName, request.Password, cancellationToken);
+        if (user is null)
+        {
+            return TypedResults.Unauthorized();
+        }
+
+        var token = tokenService.GenerateToken(user);
+        return TypedResults.Ok(token);
     }
 
     private static async Task<IResult> GetUserByIdAsync(Guid userId, IUserReader reader, CancellationToken cancellationToken)
@@ -42,87 +62,32 @@ public static class IdentityEndpointRouteBuilderExtensions
 
     private static async Task<IResult> CreateUserAsync(CreateUserRequest request, IUserManager manager, CancellationToken cancellationToken)
     {
-        try
-        {
-            var user = await manager.CreateAsync(request.UserName, request.Email, cancellationToken);
-            return TypedResults.Created($"/identity/users/{user.Id}", user);
-        }
-        catch (ArgumentException exception)
-        {
-            return TypedResults.BadRequest(new { error = exception.Message });
-        }
-        catch (InvalidOperationException exception)
-        {
-            return CreateOperationErrorResult(exception);
-        }
+        var user = await manager.CreateAsync(request.UserName, request.Email, request.Password, cancellationToken);
+        return TypedResults.Created($"/identity/users/{user.Id}", user);
     }
 
     private static async Task<IResult> UpdateUserAsync(Guid userId, UpdateUserRequest request, IUserManager manager, CancellationToken cancellationToken)
     {
-        try
-        {
-            var user = await manager.UpdateAsync(userId, request.UserName, request.Email, request.IsActive, cancellationToken);
-            return TypedResults.Ok(user);
-        }
-        catch (ArgumentException exception)
-        {
-            return TypedResults.BadRequest(new { error = exception.Message });
-        }
-        catch (InvalidOperationException exception)
-        {
-            return CreateOperationErrorResult(exception);
-        }
+        var user = await manager.UpdateAsync(userId, request.UserName, request.Email, request.IsActive, cancellationToken);
+        return TypedResults.Ok(user);
     }
 
     private static async Task<IResult> DeleteUserAsync(Guid userId, IUserManager manager, CancellationToken cancellationToken)
     {
-        try
-        {
-            await manager.RemoveAsync(userId, cancellationToken);
-            return TypedResults.NoContent();
-        }
-        catch (ArgumentException exception)
-        {
-            return TypedResults.BadRequest(new { error = exception.Message });
-        }
-        catch (InvalidOperationException exception)
-        {
-            return CreateOperationErrorResult(exception);
-        }
+        await manager.RemoveAsync(userId, cancellationToken);
+        return TypedResults.NoContent();
     }
 
     private static async Task<IResult> AssignRoleAsync(Guid userId, Guid roleId, IUserManager manager, CancellationToken cancellationToken)
     {
-        try
-        {
-            var user = await manager.AssignRoleAsync(userId, roleId, cancellationToken);
-            return TypedResults.Ok(user);
-        }
-        catch (ArgumentException exception)
-        {
-            return TypedResults.BadRequest(new { error = exception.Message });
-        }
-        catch (InvalidOperationException exception)
-        {
-            return CreateOperationErrorResult(exception);
-        }
+        var user = await manager.AssignRoleAsync(userId, roleId, cancellationToken);
+        return TypedResults.Ok(user);
     }
 
     private static async Task<IResult> UnassignRoleAsync(Guid userId, Guid roleId, IUserManager manager, CancellationToken cancellationToken)
     {
-        try
-        {
-            var user = await manager.UnassignRoleAsync(userId, roleId, cancellationToken);
-            return TypedResults.Ok(user);
-        }
-        catch (ArgumentException exception)
-        {
-            return TypedResults.BadRequest(new { error = exception.Message });
-        }
-        catch (InvalidOperationException exception)
-        {
-            return CreateOperationErrorResult(exception);
-        }
+        var user = await manager.UnassignRoleAsync(userId, roleId, cancellationToken);
+        return TypedResults.Ok(user);
     }
 
     private static async Task<IResult> GetRoleByIdAsync(Guid roleId, IRoleReader reader, CancellationToken cancellationToken)
@@ -133,59 +98,19 @@ public static class IdentityEndpointRouteBuilderExtensions
 
     private static async Task<IResult> CreateRoleAsync(CreateRoleRequest request, IRoleManager manager, CancellationToken cancellationToken)
     {
-        try
-        {
-            var role = await manager.CreateAsync(request.Name, cancellationToken);
-            return TypedResults.Created($"/identity/roles/{role.Id}", role);
-        }
-        catch (ArgumentException exception)
-        {
-            return TypedResults.BadRequest(new { error = exception.Message });
-        }
-        catch (InvalidOperationException exception)
-        {
-            return CreateOperationErrorResult(exception);
-        }
+        var role = await manager.CreateAsync(request.Name, cancellationToken);
+        return TypedResults.Created($"/identity/roles/{role.Id}", role);
     }
 
     private static async Task<IResult> UpdateRoleAsync(Guid roleId, UpdateRoleRequest request, IRoleManager manager, CancellationToken cancellationToken)
     {
-        try
-        {
-            var role = await manager.UpdateAsync(roleId, request.Name, request.IsActive, cancellationToken);
-            return TypedResults.Ok(role);
-        }
-        catch (ArgumentException exception)
-        {
-            return TypedResults.BadRequest(new { error = exception.Message });
-        }
-        catch (InvalidOperationException exception)
-        {
-            return CreateOperationErrorResult(exception);
-        }
+        var role = await manager.UpdateAsync(roleId, request.Name, request.IsActive, cancellationToken);
+        return TypedResults.Ok(role);
     }
 
     private static async Task<IResult> DeleteRoleAsync(Guid roleId, IRoleManager manager, CancellationToken cancellationToken)
     {
-        try
-        {
-            await manager.RemoveAsync(roleId, cancellationToken);
-            return TypedResults.NoContent();
-        }
-        catch (ArgumentException exception)
-        {
-            return TypedResults.BadRequest(new { error = exception.Message });
-        }
-        catch (InvalidOperationException exception)
-        {
-            return CreateOperationErrorResult(exception);
-        }
-    }
-
-    private static IResult CreateOperationErrorResult(InvalidOperationException exception)
-    {
-        return exception.Message.Contains("was not found", StringComparison.Ordinal)
-            ? TypedResults.NotFound(new { error = exception.Message })
-            : TypedResults.Conflict(new { error = exception.Message });
+        await manager.RemoveAsync(roleId, cancellationToken);
+        return TypedResults.NoContent();
     }
 }

@@ -99,6 +99,29 @@ internal sealed class InMemoryIdentityUserRepository : IIdentityUserRepository
         }
     }
 
+    public ValueTask<List<IdentityUser>> GetPagedListAsync(int skipCount, int maxResultCount, string? sorting = null, CancellationToken cancellationToken = default)
+    {
+        lock (_sync)
+        {
+            var result = _users.Values
+                .Where(user => !user.IsDeleted)
+                .OrderBy(user => user.NormalizedUserName)
+                .Skip(skipCount)
+                .Take(maxResultCount)
+                .ToList();
+
+            return ValueTask.FromResult(result);
+        }
+    }
+
+    public ValueTask<long> GetCountAsync(CancellationToken cancellationToken = default)
+    {
+        lock (_sync)
+        {
+            return ValueTask.FromResult((long)_users.Values.Count(user => !user.IsDeleted));
+        }
+    }
+
     public ValueTask<IReadOnlyList<IdentityUser>> GetListAsync(CancellationToken cancellationToken = default)
     {
         lock (_sync)

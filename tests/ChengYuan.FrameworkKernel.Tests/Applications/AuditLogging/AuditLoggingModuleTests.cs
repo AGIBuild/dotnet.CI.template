@@ -112,7 +112,8 @@ public class AuditLoggingModuleTests
                 null,
                 true,
                 null,
-                new Dictionary<string, object?>()),
+                new Dictionary<string, object?>(),
+                []),
             cancellationToken);
 
         var records = await auditLogStore.GetListAsync(cancellationToken);

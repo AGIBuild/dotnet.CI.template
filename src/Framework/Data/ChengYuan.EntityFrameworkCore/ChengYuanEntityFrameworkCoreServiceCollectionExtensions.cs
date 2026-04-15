@@ -1,4 +1,5 @@
 using ChengYuan.Core.Data;
+using ChengYuan.Core.Data.Auditing;
 using ChengYuan.Core.Entities;
 using ChengYuan.Core.Timing;
 using Microsoft.EntityFrameworkCore;
@@ -33,7 +34,6 @@ public static class ChengYuanEntityFrameworkCoreServiceCollectionExtensions
     {
         ArgumentNullException.ThrowIfNull(services);
 
-        services.AddConfiguredDbContext<TDbContext>();
         services.AddConfiguredDbContextFactory<TDbContext>();
         services.AddEntityFrameworkCoreDataAccess<TDbContext>();
         services.TryAddSingleton<TStore, TImpl>();
@@ -65,6 +65,7 @@ public static class ChengYuanEntityFrameworkCoreServiceCollectionExtensions
             serviceProvider.GetService<IDataFilter<SoftDeleteFilter>>(),
             serviceProvider.GetService<IDataFilter<MultiTenantFilter>>(),
             serviceProvider.GetService<IDataTenantProvider>(),
-            serviceProvider.GetService<IClock>());
+            serviceProvider.GetService<IClock>(),
+            serviceProvider.GetService<IAuditUserProvider>());
     }
 }

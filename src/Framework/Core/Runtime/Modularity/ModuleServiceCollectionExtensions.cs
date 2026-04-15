@@ -28,10 +28,7 @@ public static class ModuleServiceCollectionExtensions
 
         var (catalog, configurationContext) = PrepareModuleGraph(services, rootModuleType, additionalModuleTypes);
 
-        foreach (var descriptor in catalog.ConcreteModules)
-        {
-            await ExecuteServiceRegistrationStageAsync(descriptor, configurationContext);
-        }
+        await ExecuteServiceRegistrationPhasesAsync(catalog.ConcreteModules, configurationContext);
 
         return services;
     }
@@ -58,10 +55,7 @@ public static class ModuleServiceCollectionExtensions
 
         var (catalog, configurationContext) = PrepareModuleGraph(services, rootModuleType, additionalModuleTypes);
 
-        foreach (var descriptor in catalog.ConcreteModules)
-        {
-            ExecuteServiceRegistrationStage(descriptor, configurationContext);
-        }
+        ExecuteServiceRegistrationPhases(catalog.ConcreteModules, configurationContext);
 
         return services;
     }
@@ -165,39 +159,85 @@ public static class ModuleServiceCollectionExtensions
         }
     }
 
-    private static void ExecuteServiceRegistrationStage(ModuleDescriptor descriptor, ServiceConfigurationContext context)
+    private static void ExecuteServiceRegistrationPhases(
+        IReadOnlyList<ModuleDescriptor> descriptors,
+        ServiceConfigurationContext context)
     {
-        try
+        foreach (var descriptor in descriptors)
         {
             descriptor.Instance.ServiceConfigurationContext = context;
-            descriptor.Instance.PreConfigureServices(context);
-            descriptor.Instance.ConfigureServices(context);
-            descriptor.Instance.PostConfigureServices(context);
         }
-        catch (OperationCanceledException)
+
+        try
         {
-            throw;
-        }
-        catch (Exception ex)
-        {
-            throw new InvalidOperationException(
-                $"An error occurred during service registration of module '{descriptor.Name}'.",
-                ex);
+            foreach (var descriptor in descriptors)
+            {
+                ExecuteModulePhase(descriptor, context, static (m, c) => m.PreConfigureServices(c), nameof(ModuleBase.PreConfigureServices));
+            }
+
+            foreach (var descriptor in descriptors)
+            {
+                ExecuteModulePhase(descriptor, context, static (m, c) => m.ConfigureServices(c), nameof(ModuleBase.ConfigureServices));
+            }
+
+            foreach (var descriptor in descriptors)
+            {
+                ExecuteModulePhase(descriptor, context, static (m, c) => m.PostConfigureServices(c), nameof(ModuleBase.PostConfigureServices));
+            }
         }
         finally
         {
-            descriptor.Instance.ServiceConfigurationContext = null!;
+            foreach (var descriptor in descriptors)
+            {
+                descriptor.Instance.ServiceConfigurationContext = null!;
+            }
         }
     }
 
-    private static async Task ExecuteServiceRegistrationStageAsync(ModuleDescriptor descriptor, ServiceConfigurationContext context)
+    private static async Task ExecuteServiceRegistrationPhasesAsync(
+        IReadOnlyList<ModuleDescriptor> descriptors,
+        ServiceConfigurationContext context)
+    {
+        foreach (var descriptor in descriptors)
+        {
+            descriptor.Instance.ServiceConfigurationContext = context;
+        }
+
+        try
+        {
+            foreach (var descriptor in descriptors)
+            {
+                await ExecuteModulePhaseAsync(descriptor, context, static (m, c) => m.PreConfigureServicesAsync(c), nameof(ModuleBase.PreConfigureServices));
+            }
+
+            foreach (var descriptor in descriptors)
+            {
+                await ExecuteModulePhaseAsync(descriptor, context, static (m, c) => m.ConfigureServicesAsync(c), nameof(ModuleBase.ConfigureServices));
+            }
+
+            foreach (var descriptor in descriptors)
+            {
+                await ExecuteModulePhaseAsync(descriptor, context, static (m, c) => m.PostConfigureServicesAsync(c), nameof(ModuleBase.PostConfigureServices));
+            }
+        }
+        finally
+        {
+            foreach (var descriptor in descriptors)
+            {
+                descriptor.Instance.ServiceConfigurationContext = null!;
+            }
+        }
+    }
+
+    private static void ExecuteModulePhase(
+        ModuleDescriptor descriptor,
+        ServiceConfigurationContext context,
+        Action<ModuleBase, ServiceConfigurationContext> phase,
+        string phaseName)
     {
         try
         {
-            descriptor.Instance.ServiceConfigurationContext = context;
-            await descriptor.Instance.PreConfigureServicesAsync(context);
-            await descriptor.Instance.ConfigureServicesAsync(context);
-            await descriptor.Instance.PostConfigureServicesAsync(context);
+            phase(descriptor.Instance, context);
         }
         catch (OperationCanceledException)
         {
@@ -206,12 +246,30 @@ public static class ModuleServiceCollectionExtensions
         catch (Exception ex)
         {
             throw new InvalidOperationException(
-                $"An error occurred during service registration of module '{descriptor.Name}'.",
+                $"An error occurred during {phaseName} of module '{descriptor.Name}'.",
                 ex);
         }
-        finally
+    }
+
+    private static async Task ExecuteModulePhaseAsync(
+        ModuleDescriptor descriptor,
+        ServiceConfigurationContext context,
+        Func<ModuleBase, ServiceConfigurationContext, Task> phase,
+        string phaseName)
+    {
+        try
         {
-            descriptor.Instance.ServiceConfigurationContext = null!;
+            await phase(descriptor.Instance, context);
+        }
+        catch (OperationCanceledException)
+        {
+            throw;
+        }
+        catch (Exception ex)
+        {
+            throw new InvalidOperationException(
+                $"An error occurred during {phaseName} of module '{descriptor.Name}'.",
+                ex);
         }
     }
 

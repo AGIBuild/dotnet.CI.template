@@ -10,6 +10,7 @@ public static class ExceptionHandlingServiceCollectionExtensions
         ArgumentNullException.ThrowIfNull(services);
 
         services.TryAddSingleton<IExceptionToErrorInfoConverter, DefaultExceptionToErrorInfoConverter>();
+        services.TryAddSingleton<IExceptionToProblemDetailsMapper, DefaultExceptionToProblemDetailsMapper>();
 
         return services;
     }
