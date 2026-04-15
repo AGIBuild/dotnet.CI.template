@@ -20,7 +20,7 @@
     <PackageVersion Include="Microsoft.Extensions.Hosting.Abstractions" Version="10.0.5" />
     <PackageVersion Include="Microsoft.Extensions.Hosting" Version="10.0.5" />
     <PackageVersion Include="Microsoft.Extensions.Http.Resilience" Version="10.1.0" />
-    <PackageVersion Include="Cronos" Version="0.8.4" />
+    <PackageVersion Include="Cronos" Version="0.12.0" />
     <PackageVersion Include="BCrypt.Net-Next" Version="4.0.3" />
     <PackageVersion Include="Mapster" Version="10.0.7" />
     <PackageVersion Include="StackExchange.Redis" Version="2.8.41" />
