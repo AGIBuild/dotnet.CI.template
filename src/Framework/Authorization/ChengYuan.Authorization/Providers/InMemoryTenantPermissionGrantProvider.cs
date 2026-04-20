@@ -11,18 +11,20 @@ internal sealed class InMemoryTenantPermissionGrantProvider(IReadOnlyDictionary<
 
     public int Order => 250;
 
-    public ValueTask<PermissionGrant?> GetOrNullAsync(PermissionDefinition definition, PermissionContext context, CancellationToken cancellationToken = default)
+    public ValueTask<PermissionGrantResult> CheckAsync(PermissionDefinition definition, PermissionContext context, CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(definition);
 
         if (context.TenantId is not Guid tenantId)
         {
-            return ValueTask.FromResult<PermissionGrant?>(null);
+            return ValueTask.FromResult(PermissionGrantResult.Undefined);
         }
 
-        return ValueTask.FromResult(
-            values.TryGetValue((tenantId, definition.Name), out var isGranted)
-                ? new PermissionGrant(isGranted, Name)
-                : null);
+        if (values.TryGetValue((tenantId, definition.Name), out var isGranted))
+        {
+            return ValueTask.FromResult(isGranted ? PermissionGrantResult.Granted : PermissionGrantResult.Prohibited);
+        }
+
+        return ValueTask.FromResult(PermissionGrantResult.Undefined);
     }
 }

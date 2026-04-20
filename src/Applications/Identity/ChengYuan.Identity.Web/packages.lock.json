@@ -276,6 +276,32 @@
           "Microsoft.IdentityModel.Tokens": "8.0.1"
         }
       },
+      "chengyuan.application": {
+        "type": "Project",
+        "dependencies": {
+          "ChengYuan.Core": "[0.2.10-local, )",
+          "ChengYuan.ExecutionContext": "[0.2.10-local, )",
+          "ChengYuan.MultiTenancy": "[0.2.10-local, )",
+          "ChengYuan.ObjectMapping": "[0.2.10-local, )"
+        }
+      },
+      "chengyuan.aspnetcore": {
+        "type": "Project",
+        "dependencies": {
+          "ChengYuan.Application": "[0.2.10-local, )",
+          "ChengYuan.Core": "[0.2.10-local, )",
+          "ChengYuan.Hosting": "[0.2.10-local, )"
+        }
+      },
+      "chengyuan.authorization": {
+        "type": "Project",
+        "dependencies": {
+          "ChengYuan.Core": "[0.2.10-local, )",
+          "ChengYuan.ExecutionContext": "[0.2.10-local, )",
+          "ChengYuan.Features": "[0.2.10-local, )",
+          "ChengYuan.MultiTenancy": "[0.2.10-local, )"
+        }
+      },
       "chengyuan.core": {
         "type": "Project"
       },
@@ -307,6 +333,14 @@
           "ChengYuan.Core": "[0.2.10-local, )"
         }
       },
+      "chengyuan.features": {
+        "type": "Project",
+        "dependencies": {
+          "ChengYuan.Core": "[0.2.10-local, )",
+          "ChengYuan.ExecutionContext": "[0.2.10-local, )",
+          "ChengYuan.MultiTenancy": "[0.2.10-local, )"
+        }
+      },
       "chengyuan.hosting": {
         "type": "Project",
         "dependencies": {
@@ -318,6 +352,7 @@
         "type": "Project",
         "dependencies": {
           "BCrypt.Net-Next": "[4.0.3, )",
+          "ChengYuan.Authorization": "[0.2.10-local, )",
           "ChengYuan.Core": "[0.2.10-local, )",
           "ChengYuan.Identity.Contracts": "[0.2.10-local, )",
           "ChengYuan.Identity.Domain": "[0.2.10-local, )"
@@ -348,6 +383,12 @@
         "dependencies": {
           "ChengYuan.Core": "[0.2.10-local, )",
           "ChengYuan.ExecutionContext": "[0.2.10-local, )"
+        }
+      },
+      "chengyuan.objectmapping": {
+        "type": "Project",
+        "dependencies": {
+          "ChengYuan.Core": "[0.2.10-local, )"
         }
       },
       "BCrypt.Net-Next": {

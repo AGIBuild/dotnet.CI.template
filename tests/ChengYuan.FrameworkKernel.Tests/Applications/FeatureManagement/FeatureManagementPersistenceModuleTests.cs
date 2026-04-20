@@ -35,16 +35,18 @@ public class FeatureManagementPersistenceModuleTests
     public async Task FeatureManagementPersistence_ShouldApplyStoreBackedGlobalTenantAndUserValues()
     {
         var services = CreateServices();
+        services.AddSingleton<IFeatureDefinitionContributor>(new TestContributor(context =>
+        {
+            var group = context.AddGroup("workspace", "Workspace");
+            group.AddFeature<int>("workspace.max-users", 10);
+        }));
 
         await using var serviceProvider = services.BuildServiceProvider();
-        var definitionManager = serviceProvider.GetRequiredService<IFeatureDefinitionManager>();
         var featureChecker = serviceProvider.GetRequiredService<IFeatureChecker>();
         var featureValueManager = serviceProvider.GetRequiredService<IFeatureValueManager>();
         var currentTenant = serviceProvider.GetRequiredService<ICurrentTenantAccessor>();
         var currentUser = serviceProvider.GetRequiredService<ICurrentUserAccessor>();
         var tenantId = Guid.NewGuid();
-
-        definitionManager.AddOrUpdate<int>("workspace.max-users").WithDefaultValue(10);
 
         await featureValueManager.SetAsync(new FeatureValueRecord("workspace.max-users", FeatureScope.Global, 20), TestContext.Current.CancellationToken);
         (await featureChecker.GetAsync<int>("workspace.max-users", TestContext.Current.CancellationToken)).ShouldBe(20);
@@ -68,13 +70,15 @@ public class FeatureManagementPersistenceModuleTests
     public async Task FeatureManagementPersistence_ShouldRemoveValuesAndFallbackToDefinitionDefault()
     {
         var services = CreateServices();
+        services.AddSingleton<IFeatureDefinitionContributor>(new TestContributor(context =>
+        {
+            var group = context.AddGroup("workspace", "Workspace");
+            group.AddFeature<bool>("workspace.analytics.enabled", false);
+        }));
 
         await using var serviceProvider = services.BuildServiceProvider();
-        var definitionManager = serviceProvider.GetRequiredService<IFeatureDefinitionManager>();
         var featureChecker = serviceProvider.GetRequiredService<IFeatureChecker>();
         var featureValueManager = serviceProvider.GetRequiredService<IFeatureValueManager>();
-
-        definitionManager.AddOrUpdate<bool>("workspace.analytics.enabled").WithDefaultValue(false);
 
         await featureValueManager.SetAsync(new FeatureValueRecord("workspace.analytics.enabled", FeatureScope.Global, true), TestContext.Current.CancellationToken);
         (await featureChecker.IsEnabledAsync("workspace.analytics.enabled", TestContext.Current.CancellationToken)).ShouldBeTrue();
@@ -87,14 +91,16 @@ public class FeatureManagementPersistenceModuleTests
     public async Task FeatureManagementPersistence_ShouldReturnTypedValuesFromStore()
     {
         var services = CreateServices();
+        services.AddSingleton<IFeatureDefinitionContributor>(new TestContributor(context =>
+        {
+            var group = context.AddGroup("workspace", "Workspace");
+            group.AddFeature<decimal>("workspace.storage-quota", 1m);
+            group.AddFeature<string>("workspace.plan", "free");
+        }));
 
         await using var serviceProvider = services.BuildServiceProvider();
-        var definitionManager = serviceProvider.GetRequiredService<IFeatureDefinitionManager>();
         var featureChecker = serviceProvider.GetRequiredService<IFeatureChecker>();
         var featureValueManager = serviceProvider.GetRequiredService<IFeatureValueManager>();
-
-        definitionManager.AddOrUpdate<decimal>("workspace.storage-quota").WithDefaultValue(1m);
-        definitionManager.AddOrUpdate<string>("workspace.plan").WithDefaultValue("free");
 
         await featureValueManager.SetAsync(new FeatureValueRecord("workspace.storage-quota", FeatureScope.Global, 12.5m), TestContext.Current.CancellationToken);
         await featureValueManager.SetAsync(new FeatureValueRecord("workspace.plan", FeatureScope.Global, "enterprise"), TestContext.Current.CancellationToken);
@@ -131,5 +137,10 @@ public class FeatureManagementPersistenceModuleTests
             options.UseInMemoryDatabase(databaseName));
 
         return services;
+    }
+
+    private sealed class TestContributor(Action<IFeatureDefinitionContext> configure) : IFeatureDefinitionContributor
+    {
+        public void Define(IFeatureDefinitionContext context) => configure(context);
     }
 }

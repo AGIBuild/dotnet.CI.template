@@ -43,9 +43,11 @@
     <Project Path="src/Applications/AuditLogging/ChengYuan.AuditLogging.Contracts/ChengYuan.AuditLogging.Contracts.csproj" />
     <Project Path="src/Applications/AuditLogging/ChengYuan.AuditLogging.Application/ChengYuan.AuditLogging.Application.csproj" />
     <Project Path="src/Applications/AuditLogging/ChengYuan.AuditLogging.Persistence/ChengYuan.AuditLogging.Persistence.csproj" />
+    <Project Path="src/Applications/AuditLogging/ChengYuan.AuditLogging.Web/ChengYuan.AuditLogging.Web.csproj" />
     <Project Path="src/Applications/FeatureManagement/ChengYuan.FeatureManagement.Contracts/ChengYuan.FeatureManagement.Contracts.csproj" />
     <Project Path="src/Applications/FeatureManagement/ChengYuan.FeatureManagement.Application/ChengYuan.FeatureManagement.Application.csproj" />
     <Project Path="src/Applications/FeatureManagement/ChengYuan.FeatureManagement.Persistence/ChengYuan.FeatureManagement.Persistence.csproj" />
+    <Project Path="src/Applications/FeatureManagement/ChengYuan.FeatureManagement.Web/ChengYuan.FeatureManagement.Web.csproj" />
     <Project Path="src/Applications/Identity/ChengYuan.Identity.Contracts/ChengYuan.Identity.Contracts.csproj" />
     <Project Path="src/Applications/Identity/ChengYuan.Identity.Domain/ChengYuan.Identity.Domain.csproj" />
     <Project Path="src/Applications/Identity/ChengYuan.Identity.Application/ChengYuan.Identity.Application.csproj" />
@@ -54,12 +56,15 @@
     <Project Path="src/Applications/PermissionManagement/ChengYuan.PermissionManagement.Contracts/ChengYuan.PermissionManagement.Contracts.csproj" />
     <Project Path="src/Applications/PermissionManagement/ChengYuan.PermissionManagement.Application/ChengYuan.PermissionManagement.Application.csproj" />
     <Project Path="src/Applications/PermissionManagement/ChengYuan.PermissionManagement.Persistence/ChengYuan.PermissionManagement.Persistence.csproj" />
+    <Project Path="src/Applications/PermissionManagement/ChengYuan.PermissionManagement.Web/ChengYuan.PermissionManagement.Web.csproj" />
     <Project Path="src/Applications/SettingManagement/ChengYuan.SettingManagement.Contracts/ChengYuan.SettingManagement.Contracts.csproj" />
     <Project Path="src/Applications/SettingManagement/ChengYuan.SettingManagement.Application/ChengYuan.SettingManagement.Application.csproj" />
     <Project Path="src/Applications/SettingManagement/ChengYuan.SettingManagement.Persistence/ChengYuan.SettingManagement.Persistence.csproj" />
+    <Project Path="src/Applications/SettingManagement/ChengYuan.SettingManagement.Web/ChengYuan.SettingManagement.Web.csproj" />
     <Project Path="src/Applications/TenantManagement/ChengYuan.TenantManagement.Contracts/ChengYuan.TenantManagement.Contracts.csproj" />
     <Project Path="src/Applications/TenantManagement/ChengYuan.TenantManagement.Application/ChengYuan.TenantManagement.Application.csproj" />
     <Project Path="src/Applications/TenantManagement/ChengYuan.TenantManagement.Persistence/ChengYuan.TenantManagement.Persistence.csproj" />
+    <Project Path="src/Applications/TenantManagement/ChengYuan.TenantManagement.Web/ChengYuan.TenantManagement.Web.csproj" />
   </Folder>
   <Folder Name="/src/Hosts/">
     <Project Path="src/Hosts/WebHost/ChengYuan.WebHost.csproj" />

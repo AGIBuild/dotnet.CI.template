@@ -1,3 +1,4 @@
+using ChengYuan.Authorization;
 using ChengYuan.Core.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -10,6 +11,7 @@ public static class IdentityServiceCollectionExtensions
         ArgumentNullException.ThrowIfNull(services);
 
         services.AddConventionalServices(typeof(IdentityServiceCollectionExtensions).Assembly);
+        services.AddTransient<IPermissionDefinitionContributor, IdentityPermissionDefinitionContributor>();
 
         return services;
     }

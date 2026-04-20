@@ -1,3 +1,4 @@
+using ChengYuan.Authorization;
 using ChengYuan.Features;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
@@ -12,6 +13,7 @@ public static class FeatureManagementServiceCollectionExtensions
         services.TryAddEnumerable(ServiceDescriptor.Singleton<IFeatureValueProvider, FeatureStoreUserValueProvider>());
         services.TryAddEnumerable(ServiceDescriptor.Singleton<IFeatureValueProvider, FeatureStoreTenantValueProvider>());
         services.TryAddEnumerable(ServiceDescriptor.Singleton<IFeatureValueProvider, FeatureStoreGlobalValueProvider>());
+        services.AddTransient<IPermissionDefinitionContributor, FeatureManagementPermissionDefinitionContributor>();
 
         return services;
     }

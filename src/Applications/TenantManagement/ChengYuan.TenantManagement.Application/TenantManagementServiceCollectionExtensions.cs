@@ -1,3 +1,4 @@
+using ChengYuan.Authorization;
 using ChengYuan.MultiTenancy;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
@@ -9,6 +10,7 @@ public static class TenantManagementServiceCollectionExtensions
     public static IServiceCollection AddTenantManagement(this IServiceCollection services)
     {
         services.TryAddScoped<ITenantManager, TenantManager>();
+        services.AddTransient<IPermissionDefinitionContributor, TenantManagementPermissionDefinitionContributor>();
         return services;
     }
 

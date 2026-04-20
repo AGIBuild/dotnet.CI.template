@@ -2,8 +2,13 @@ using System.Net;
 using System.Net.Http.Json;
 using System.Security.Claims;
 using System.Text.Encodings.Web;
+using ChengYuan.Authorization;
 using ChengYuan.Core.Data;
+using ChengYuan.Core.Modularity;
+using ChengYuan.ExecutionContext;
+using ChengYuan.Features;
 using ChengYuan.Identity;
+using ChengYuan.MultiTenancy;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -28,6 +33,9 @@ public sealed class IdentityEndpointsTests
                 services.AddAuthentication("Test")
                     .AddScheme<AuthenticationSchemeOptions, AutoAuthHandler>("Test", null);
                 services.AddAuthorization();
+                services.AddModule<AuthorizationModule>();
+                services.AddChengYuanAuthorization();
+                services.AddPermissivePermissionGrants();
                 services.Configure<JwtOptions>(o =>
                 {
                     o.SecretKey = "TestKey-At-Least-32-Characters-Long!!!";

@@ -29,7 +29,7 @@ public class PermissionManagementModuleTests
     }
 
     [Fact]
-    public async Task PermissionManagement_ShouldApplyStoreBackedGlobalTenantAndUserGrants()
+    public async Task PermissionManagement_ShouldApplyStoreBackedGrantsWithProhibitedOverride()
     {
         var cancellationToken = TestContext.Current.CancellationToken;
         var tenantId = Guid.NewGuid();
@@ -38,30 +38,35 @@ public class PermissionManagementModuleTests
         var services = new ServiceCollection();
         services.AddModule<PermissionManagementTestModule>();
         services.AddInMemoryPermissionManagement();
+        services.AddSingleton<IPermissionDefinitionContributor>(new TestContributor(context =>
+        {
+            var group = context.AddGroup("workspace", "Workspace");
+            group.AddPermission("workspace.members.delete", "Delete Members");
+        }));
 
         using var serviceProvider = services.BuildServiceProvider();
-        var definitionManager = serviceProvider.GetRequiredService<IPermissionDefinitionManager>();
         var permissionChecker = serviceProvider.GetRequiredService<IPermissionChecker>();
         var permissionGrantManager = serviceProvider.GetRequiredService<IPermissionGrantManager>();
         var currentTenant = serviceProvider.GetRequiredService<ICurrentTenantAccessor>();
         var currentUser = serviceProvider.GetRequiredService<ICurrentUserAccessor>();
 
-        definitionManager.AddOrUpdate("workspace.members.delete").WithDefaultGrant(false);
-
+        // Global=Granted → true
         await permissionGrantManager.SetAsync(new PermissionGrantRecord("workspace.members.delete", PermissionScope.Global, true), cancellationToken);
         (await permissionChecker.IsGrantedAsync("workspace.members.delete", cancellationToken)).ShouldBeTrue();
 
+        // Add Tenant=Prohibited → any Prohibited overrides → false
         await permissionGrantManager.SetAsync(new PermissionGrantRecord("workspace.members.delete", PermissionScope.Tenant, false, tenantId), cancellationToken);
 
         using (currentTenant.Change(tenantId, "tenant-a"))
         {
             (await permissionChecker.IsGrantedAsync("workspace.members.delete", cancellationToken)).ShouldBeFalse();
 
+            // Add User=Granted, but Tenant still Prohibited → Prohibited wins → false
             await permissionGrantManager.SetAsync(new PermissionGrantRecord("workspace.members.delete", PermissionScope.User, true, userId: userId), cancellationToken);
 
             using (currentUser.Change(new CurrentUserInfo(userId, "Alice", true)))
             {
-                (await permissionChecker.IsGrantedAsync("workspace.members.delete", cancellationToken)).ShouldBeTrue();
+                (await permissionChecker.IsGrantedAsync("workspace.members.delete", cancellationToken)).ShouldBeFalse();
             }
         }
     }
@@ -73,13 +78,15 @@ public class PermissionManagementModuleTests
         var services = new ServiceCollection();
         services.AddModule<PermissionManagementTestModule>();
         services.AddInMemoryPermissionManagement();
+        services.AddSingleton<IPermissionDefinitionContributor>(new TestContributor(context =>
+        {
+            var group = context.AddGroup("workspace", "Workspace");
+            group.AddPermission("workspace.analytics.view", "View Analytics");
+        }));
 
         using var serviceProvider = services.BuildServiceProvider();
-        var definitionManager = serviceProvider.GetRequiredService<IPermissionDefinitionManager>();
         var permissionChecker = serviceProvider.GetRequiredService<IPermissionChecker>();
         var permissionGrantManager = serviceProvider.GetRequiredService<IPermissionGrantManager>();
-
-        definitionManager.AddOrUpdate("workspace.analytics.view").WithDefaultGrant(false);
 
         await permissionGrantManager.SetAsync(new PermissionGrantRecord("workspace.analytics.view", PermissionScope.Global, true), cancellationToken);
         (await permissionChecker.IsGrantedAsync("workspace.analytics.view", cancellationToken)).ShouldBeTrue();
@@ -110,5 +117,10 @@ public class PermissionManagementModuleTests
         records.Select(record => record.Name).ShouldContain("workspace.members.list");
         records.Select(record => record.Name).ShouldContain("workspace.members.edit");
         records.Select(record => record.Name).ShouldContain("workspace.members.invite");
+    }
+
+    private sealed class TestContributor(Action<IPermissionDefinitionContext> configure) : IPermissionDefinitionContributor
+    {
+        public void Define(IPermissionDefinitionContext context) => configure(context);
     }
 }

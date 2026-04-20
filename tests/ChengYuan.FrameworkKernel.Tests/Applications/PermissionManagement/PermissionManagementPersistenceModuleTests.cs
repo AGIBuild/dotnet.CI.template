@@ -32,34 +32,39 @@ public class PermissionManagementPersistenceModuleTests
     }
 
     [Fact]
-    public async Task PermissionManagementPersistence_ShouldApplyStoreBackedGlobalTenantAndUserGrants()
+    public async Task PermissionManagementPersistence_ShouldApplyStoreBackedGrantsWithProhibitedOverride()
     {
         var services = CreateServices();
+        services.AddSingleton<IPermissionDefinitionContributor>(new TestContributor(context =>
+        {
+            var group = context.AddGroup("workspace", "Workspace");
+            group.AddPermission("workspace.members.delete", "Delete Members");
+        }));
 
         await using var serviceProvider = services.BuildServiceProvider();
-        var definitionManager = serviceProvider.GetRequiredService<IPermissionDefinitionManager>();
         var permissionChecker = serviceProvider.GetRequiredService<IPermissionChecker>();
         var permissionGrantManager = serviceProvider.GetRequiredService<IPermissionGrantManager>();
         var currentTenant = serviceProvider.GetRequiredService<ICurrentTenantAccessor>();
         var currentUser = serviceProvider.GetRequiredService<ICurrentUserAccessor>();
         var tenantId = Guid.NewGuid();
 
-        definitionManager.AddOrUpdate("workspace.members.delete").WithDefaultGrant(false);
-
+        // Global=Granted → true
         await permissionGrantManager.SetAsync(new PermissionGrantRecord("workspace.members.delete", PermissionScope.Global, true), TestContext.Current.CancellationToken);
         (await permissionChecker.IsGrantedAsync("workspace.members.delete", TestContext.Current.CancellationToken)).ShouldBeTrue();
 
+        // Add Tenant=Prohibited → any Prohibited overrides → false
         await permissionGrantManager.SetAsync(new PermissionGrantRecord("workspace.members.delete", PermissionScope.Tenant, false, tenantId), TestContext.Current.CancellationToken);
 
         using (currentTenant.Change(tenantId, "tenant-a"))
         {
             (await permissionChecker.IsGrantedAsync("workspace.members.delete", TestContext.Current.CancellationToken)).ShouldBeFalse();
 
+            // Add User=Granted, but Tenant still Prohibited → Prohibited wins → false
             await permissionGrantManager.SetAsync(new PermissionGrantRecord("workspace.members.delete", PermissionScope.User, true, userId: "alice"), TestContext.Current.CancellationToken);
 
             using (currentUser.Change(new CurrentUserInfo("alice", "Alice", true)))
             {
-                (await permissionChecker.IsGrantedAsync("workspace.members.delete", TestContext.Current.CancellationToken)).ShouldBeTrue();
+                (await permissionChecker.IsGrantedAsync("workspace.members.delete", TestContext.Current.CancellationToken)).ShouldBeFalse();
             }
         }
     }
@@ -68,13 +73,15 @@ public class PermissionManagementPersistenceModuleTests
     public async Task PermissionManagementPersistence_ShouldRemoveGrantsAndFallbackToDefinitionDefault()
     {
         var services = CreateServices();
+        services.AddSingleton<IPermissionDefinitionContributor>(new TestContributor(context =>
+        {
+            var group = context.AddGroup("workspace", "Workspace");
+            group.AddPermission("workspace.analytics.view", "View Analytics");
+        }));
 
         await using var serviceProvider = services.BuildServiceProvider();
-        var definitionManager = serviceProvider.GetRequiredService<IPermissionDefinitionManager>();
         var permissionChecker = serviceProvider.GetRequiredService<IPermissionChecker>();
         var permissionGrantManager = serviceProvider.GetRequiredService<IPermissionGrantManager>();
-
-        definitionManager.AddOrUpdate("workspace.analytics.view").WithDefaultGrant(false);
 
         await permissionGrantManager.SetAsync(new PermissionGrantRecord("workspace.analytics.view", PermissionScope.Global, true), TestContext.Current.CancellationToken);
         (await permissionChecker.IsGrantedAsync("workspace.analytics.view", TestContext.Current.CancellationToken)).ShouldBeTrue();
@@ -111,5 +118,10 @@ public class PermissionManagementPersistenceModuleTests
             options.UseInMemoryDatabase(databaseName));
 
         return services;
+    }
+
+    private sealed class TestContributor(Action<IPermissionDefinitionContext> configure) : IPermissionDefinitionContributor
+    {
+        public void Define(IPermissionDefinitionContext context) => configure(context);
     }
 }

@@ -1,3 +1,4 @@
+using ChengYuan.Authorization;
 using ChengYuan.Settings;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
@@ -12,6 +13,7 @@ public static class SettingManagementServiceCollectionExtensions
         services.TryAddEnumerable(ServiceDescriptor.Singleton<ISettingValueProvider, SettingStoreUserValueProvider>());
         services.TryAddEnumerable(ServiceDescriptor.Singleton<ISettingValueProvider, SettingStoreTenantValueProvider>());
         services.TryAddEnumerable(ServiceDescriptor.Singleton<ISettingValueProvider, SettingStoreGlobalValueProvider>());
+        services.AddTransient<IPermissionDefinitionContributor, SettingManagementPermissionDefinitionContributor>();
 
         return services;
     }

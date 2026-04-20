@@ -38,15 +38,17 @@ public class FeatureManagementModuleTests
         var services = new ServiceCollection();
         services.AddModule<FeatureManagementTestModule>();
         services.AddInMemoryFeatureManagement();
+        services.AddSingleton<IFeatureDefinitionContributor>(new TestContributor(context =>
+        {
+            var group = context.AddGroup("workspace", "Workspace");
+            group.AddFeature<int>("workspace.max-users", 10);
+        }));
 
         using var serviceProvider = services.BuildServiceProvider();
-        var definitionManager = serviceProvider.GetRequiredService<IFeatureDefinitionManager>();
         var featureChecker = serviceProvider.GetRequiredService<IFeatureChecker>();
         var featureValueManager = serviceProvider.GetRequiredService<IFeatureValueManager>();
         var currentTenant = serviceProvider.GetRequiredService<ICurrentTenantAccessor>();
         var currentUser = serviceProvider.GetRequiredService<ICurrentUserAccessor>();
-
-        definitionManager.AddOrUpdate<int>("workspace.max-users").WithDefaultValue(10);
 
         await featureValueManager.SetAsync(new FeatureValueRecord("workspace.max-users", FeatureScope.Global, 20), cancellationToken);
         (await featureChecker.GetAsync<int>("workspace.max-users", cancellationToken)).ShouldBe(20);
@@ -73,13 +75,15 @@ public class FeatureManagementModuleTests
         var services = new ServiceCollection();
         services.AddModule<FeatureManagementTestModule>();
         services.AddInMemoryFeatureManagement();
+        services.AddSingleton<IFeatureDefinitionContributor>(new TestContributor(context =>
+        {
+            var group = context.AddGroup("workspace", "Workspace");
+            group.AddFeature<bool>("workspace.analytics.enabled", false);
+        }));
 
         using var serviceProvider = services.BuildServiceProvider();
-        var definitionManager = serviceProvider.GetRequiredService<IFeatureDefinitionManager>();
         var featureChecker = serviceProvider.GetRequiredService<IFeatureChecker>();
         var featureValueManager = serviceProvider.GetRequiredService<IFeatureValueManager>();
-
-        definitionManager.AddOrUpdate<bool>("workspace.analytics.enabled").WithDefaultValue(false);
 
         await featureValueManager.SetAsync(new FeatureValueRecord("workspace.analytics.enabled", FeatureScope.Global, true), cancellationToken);
         (await featureChecker.IsEnabledAsync("workspace.analytics.enabled", cancellationToken)).ShouldBeTrue();
@@ -95,14 +99,16 @@ public class FeatureManagementModuleTests
         var services = new ServiceCollection();
         services.AddModule<FeatureManagementTestModule>();
         services.AddInMemoryFeatureManagement();
+        services.AddSingleton<IFeatureDefinitionContributor>(new TestContributor(context =>
+        {
+            var group = context.AddGroup("workspace", "Workspace");
+            group.AddFeature<decimal>("workspace.storage-quota", 1m);
+            group.AddFeature<string>("workspace.plan", "free");
+        }));
 
         using var serviceProvider = services.BuildServiceProvider();
-        var definitionManager = serviceProvider.GetRequiredService<IFeatureDefinitionManager>();
         var featureChecker = serviceProvider.GetRequiredService<IFeatureChecker>();
         var featureValueManager = serviceProvider.GetRequiredService<IFeatureValueManager>();
-
-        definitionManager.AddOrUpdate<decimal>("workspace.storage-quota").WithDefaultValue(1m);
-        definitionManager.AddOrUpdate<string>("workspace.plan").WithDefaultValue("free");
 
         await featureValueManager.SetAsync(new FeatureValueRecord("workspace.storage-quota", FeatureScope.Global, 12.5m), cancellationToken);
         await featureValueManager.SetAsync(new FeatureValueRecord("workspace.plan", FeatureScope.Global, "enterprise"), cancellationToken);
@@ -133,5 +139,10 @@ public class FeatureManagementModuleTests
         records.Select(record => record.Name).ShouldContain("workspace.title");
         records.Select(record => record.Name).ShouldContain("workspace.region");
         records.Select(record => record.Name).ShouldContain("workspace.theme");
+    }
+
+    private sealed class TestContributor(Action<IFeatureDefinitionContext> configure) : IFeatureDefinitionContributor
+    {
+        public void Define(IFeatureDefinitionContext context) => configure(context);
     }
 }

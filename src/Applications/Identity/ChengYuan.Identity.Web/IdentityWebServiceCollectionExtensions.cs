@@ -1,3 +1,5 @@
+using ChengYuan.AspNetCore;
+using ChengYuan.Core.UI.Navigation;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
@@ -17,6 +19,9 @@ public static class IdentityWebServiceCollectionExtensions
 
         services.AddSingleton<JwtTokenService>();
         services.AddSingleton<IPostConfigureOptions<JwtBearerOptions>, ConfigureJwtBearerOptions>();
+
+        services.AddTransient<IEndpointContributor, IdentityEndpointContributor>();
+        services.AddTransient<IMenuContributor, IdentityMenuContributor>();
 
         return services;
     }

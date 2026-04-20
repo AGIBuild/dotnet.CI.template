@@ -21,12 +21,12 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\Framework\Data\ChengYuan.Data.Sqlite\ChengYuan.Data.Sqlite.csproj" />
-    <ProjectReference Include="..\..\Applications\AuditLogging\ChengYuan.AuditLogging.Persistence\ChengYuan.AuditLogging.Persistence.csproj" />
-    <ProjectReference Include="..\..\Applications\FeatureManagement\ChengYuan.FeatureManagement.Persistence\ChengYuan.FeatureManagement.Persistence.csproj" />
+    <ProjectReference Include="..\..\Applications\AuditLogging\ChengYuan.AuditLogging.Web\ChengYuan.AuditLogging.Web.csproj" />
+    <ProjectReference Include="..\..\Applications\FeatureManagement\ChengYuan.FeatureManagement.Web\ChengYuan.FeatureManagement.Web.csproj" />
     <ProjectReference Include="..\..\Applications\Identity\ChengYuan.Identity.Web\ChengYuan.Identity.Web.csproj" />
-    <ProjectReference Include="..\..\Applications\PermissionManagement\ChengYuan.PermissionManagement.Persistence\ChengYuan.PermissionManagement.Persistence.csproj" />
-    <ProjectReference Include="..\..\Applications\SettingManagement\ChengYuan.SettingManagement.Persistence\ChengYuan.SettingManagement.Persistence.csproj" />
-    <ProjectReference Include="..\..\Applications\TenantManagement\ChengYuan.TenantManagement.Persistence\ChengYuan.TenantManagement.Persistence.csproj" />
+    <ProjectReference Include="..\..\Applications\PermissionManagement\ChengYuan.PermissionManagement.Web\ChengYuan.PermissionManagement.Web.csproj" />
+    <ProjectReference Include="..\..\Applications\SettingManagement\ChengYuan.SettingManagement.Web\ChengYuan.SettingManagement.Web.csproj" />
+    <ProjectReference Include="..\..\Applications\TenantManagement\ChengYuan.TenantManagement.Web\ChengYuan.TenantManagement.Web.csproj" />
     <ProjectReference Include="..\..\Framework\Caching\ChengYuan.Caching.Memory\ChengYuan.Caching.Memory.csproj" />
     <ProjectReference Include="..\..\Framework\ExecutionContext\ChengYuan.ExecutionContext\ChengYuan.ExecutionContext.csproj" />
     <ProjectReference Include="..\..\Framework\MultiTenancy\ChengYuan.MultiTenancy\ChengYuan.MultiTenancy.csproj" />

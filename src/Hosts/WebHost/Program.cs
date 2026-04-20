@@ -28,11 +28,11 @@ try
     builder.AddChengYuan<WebHostHttpCompositionModule>(cy => cy
         .UseSqlite(connectionString)
         .AddModule<IdentityWebModule>()
-        .AddModule<TenantManagementPersistenceModule>()
-        .AddModule<SettingManagementPersistenceModule>()
-        .AddModule<PermissionManagementPersistenceModule>()
-        .AddModule<FeatureManagementPersistenceModule>()
-        .AddModule<AuditLoggingPersistenceModule>()
+        .AddModule<TenantManagementWebModule>()
+        .AddModule<SettingManagementWebModule>()
+        .AddModule<PermissionManagementWebModule>()
+        .AddModule<FeatureManagementWebModule>()
+        .AddModule<AuditLoggingWebModule>()
         .AddModule<BackgroundJobPersistenceModule>()
     );
 

@@ -7,6 +7,15 @@
         "resolved": "10.0.5",
         "contentHash": "/HUHJ0tw/LQvD0DZrz50eQy/3z7PfX7WWEaXnjKTV9/TNdcgFlNTZGo49QhS7PTmhDqMyHRMqAXSBxLh0vso4g=="
       },
+      "chengyuan.authorization": {
+        "type": "Project",
+        "dependencies": {
+          "ChengYuan.Core": "[0.2.10-local, )",
+          "ChengYuan.ExecutionContext": "[0.2.10-local, )",
+          "ChengYuan.Features": "[0.2.10-local, )",
+          "ChengYuan.MultiTenancy": "[0.2.10-local, )"
+        }
+      },
       "chengyuan.core": {
         "type": "Project",
         "dependencies": {
@@ -20,6 +29,14 @@
         "type": "Project",
         "dependencies": {
           "ChengYuan.Core": "[0.2.10-local, )"
+        }
+      },
+      "chengyuan.features": {
+        "type": "Project",
+        "dependencies": {
+          "ChengYuan.Core": "[0.2.10-local, )",
+          "ChengYuan.ExecutionContext": "[0.2.10-local, )",
+          "ChengYuan.MultiTenancy": "[0.2.10-local, )"
         }
       },
       "chengyuan.multitenancy": {

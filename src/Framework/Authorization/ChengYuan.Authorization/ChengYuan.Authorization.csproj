@@ -11,6 +11,7 @@
   <ItemGroup>
     <ProjectReference Include="..\..\Core\ChengYuan.Core.csproj" />
    <ProjectReference Include="..\..\ExecutionContext\ChengYuan.ExecutionContext\ChengYuan.ExecutionContext.csproj" />
+    <ProjectReference Include="..\..\Features\ChengYuan.Features\ChengYuan.Features.csproj" />
     <ProjectReference Include="..\..\MultiTenancy\ChengYuan.MultiTenancy\ChengYuan.MultiTenancy.csproj" />
   </ItemGroup>
 

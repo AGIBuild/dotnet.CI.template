@@ -845,6 +845,7 @@
         "dependencies": {
           "ChengYuan.AuditLogging.Contracts": "[0.2.10-local, )",
           "ChengYuan.Auditing": "[0.2.10-local, )",
+          "ChengYuan.Authorization": "[0.2.10-local, )",
           "ChengYuan.Core": "[0.2.10-local, )"
         }
       },
@@ -862,11 +863,19 @@
           "ChengYuan.EntityFrameworkCore": "[0.2.10-local, )"
         }
       },
+      "chengyuan.auditlogging.web": {
+        "type": "Project",
+        "dependencies": {
+          "ChengYuan.AspNetCore": "[0.2.10-local, )",
+          "ChengYuan.AuditLogging.Persistence": "[0.2.10-local, )"
+        }
+      },
       "chengyuan.authorization": {
         "type": "Project",
         "dependencies": {
           "ChengYuan.Core": "[0.2.10-local, )",
           "ChengYuan.ExecutionContext": "[0.2.10-local, )",
+          "ChengYuan.Features": "[0.2.10-local, )",
           "ChengYuan.MultiTenancy": "[0.2.10-local, )"
         }
       },
@@ -994,6 +1003,7 @@
       "chengyuan.featuremanagement.application": {
         "type": "Project",
         "dependencies": {
+          "ChengYuan.Authorization": "[0.2.10-local, )",
           "ChengYuan.Core": "[0.2.10-local, )",
           "ChengYuan.FeatureManagement.Contracts": "[0.2.10-local, )",
           "ChengYuan.Features": "[0.2.10-local, )"
@@ -1012,6 +1022,13 @@
           "ChengYuan.Data.Sqlite": "[0.2.10-local, )",
           "ChengYuan.EntityFrameworkCore": "[0.2.10-local, )",
           "ChengYuan.FeatureManagement.Application": "[0.2.10-local, )"
+        }
+      },
+      "chengyuan.featuremanagement.web": {
+        "type": "Project",
+        "dependencies": {
+          "ChengYuan.AspNetCore": "[0.2.10-local, )",
+          "ChengYuan.FeatureManagement.Persistence": "[0.2.10-local, )"
         }
       },
       "chengyuan.features": {
@@ -1042,6 +1059,7 @@
         "type": "Project",
         "dependencies": {
           "BCrypt.Net-Next": "[4.0.3, )",
+          "ChengYuan.Authorization": "[0.2.10-local, )",
           "ChengYuan.Core": "[0.2.10-local, )",
           "ChengYuan.Identity.Contracts": "[0.2.10-local, )",
           "ChengYuan.Identity.Domain": "[0.2.10-local, )"
@@ -1070,7 +1088,7 @@
       "chengyuan.identity.web": {
         "type": "Project",
         "dependencies": {
-          "ChengYuan.Core": "[0.2.10-local, )",
+          "ChengYuan.AspNetCore": "[0.2.10-local, )",
           "ChengYuan.Identity.Application": "[0.2.10-local, )",
           "ChengYuan.Identity.Persistence": "[0.2.10-local, )",
           "Microsoft.AspNetCore.Authentication.JwtBearer": "[10.0.5, )"
@@ -1159,9 +1177,17 @@
           "ChengYuan.PermissionManagement.Application": "[0.2.10-local, )"
         }
       },
+      "chengyuan.permissionmanagement.web": {
+        "type": "Project",
+        "dependencies": {
+          "ChengYuan.AspNetCore": "[0.2.10-local, )",
+          "ChengYuan.PermissionManagement.Persistence": "[0.2.10-local, )"
+        }
+      },
       "chengyuan.settingmanagement.application": {
         "type": "Project",
         "dependencies": {
+          "ChengYuan.Authorization": "[0.2.10-local, )",
           "ChengYuan.Core": "[0.2.10-local, )",
           "ChengYuan.SettingManagement.Contracts": "[0.2.10-local, )",
           "ChengYuan.Settings": "[0.2.10-local, )"
@@ -1180,6 +1206,13 @@
           "ChengYuan.Data.Sqlite": "[0.2.10-local, )",
           "ChengYuan.EntityFrameworkCore": "[0.2.10-local, )",
           "ChengYuan.SettingManagement.Application": "[0.2.10-local, )"
+        }
+      },
+      "chengyuan.settingmanagement.web": {
+        "type": "Project",
+        "dependencies": {
+          "ChengYuan.AspNetCore": "[0.2.10-local, )",
+          "ChengYuan.SettingManagement.Persistence": "[0.2.10-local, )"
         }
       },
       "chengyuan.settings": {
@@ -1201,6 +1234,7 @@
       "chengyuan.tenantmanagement.application": {
         "type": "Project",
         "dependencies": {
+          "ChengYuan.Authorization": "[0.2.10-local, )",
           "ChengYuan.Core": "[0.2.10-local, )",
           "ChengYuan.MultiTenancy": "[0.2.10-local, )",
           "ChengYuan.TenantManagement.Contracts": "[0.2.10-local, )"
@@ -1218,6 +1252,13 @@
           "ChengYuan.Data.Sqlite": "[0.2.10-local, )",
           "ChengYuan.EntityFrameworkCore": "[0.2.10-local, )",
           "ChengYuan.TenantManagement.Application": "[0.2.10-local, )"
+        }
+      },
+      "chengyuan.tenantmanagement.web": {
+        "type": "Project",
+        "dependencies": {
+          "ChengYuan.AspNetCore": "[0.2.10-local, )",
+          "ChengYuan.TenantManagement.Persistence": "[0.2.10-local, )"
         }
       },
       "chengyuan.texttemplating": {
@@ -1244,7 +1285,7 @@
         "dependencies": {
           "Asp.Versioning.Http": "[8.1.1, )",
           "ChengYuan.AspNetCore": "[0.2.10-local, )",
-          "ChengYuan.AuditLogging.Persistence": "[0.2.10-local, )",
+          "ChengYuan.AuditLogging.Web": "[0.2.10-local, )",
           "ChengYuan.BackgroundJobs": "[0.2.10-local, )",
           "ChengYuan.BackgroundJobs.Persistence": "[0.2.10-local, )",
           "ChengYuan.BlobStoring": "[0.2.10-local, )",
@@ -1255,16 +1296,16 @@
           "ChengYuan.EventBus": "[0.2.10-local, )",
           "ChengYuan.ExceptionHandling": "[0.2.10-local, )",
           "ChengYuan.ExecutionContext": "[0.2.10-local, )",
-          "ChengYuan.FeatureManagement.Persistence": "[0.2.10-local, )",
+          "ChengYuan.FeatureManagement.Web": "[0.2.10-local, )",
           "ChengYuan.HealthChecks": "[0.2.10-local, )",
           "ChengYuan.Identity.Web": "[0.2.10-local, )",
           "ChengYuan.MultiTenancy": "[0.2.10-local, )",
           "ChengYuan.Notifications": "[0.2.10-local, )",
           "ChengYuan.ObjectMapping": "[0.2.10-local, )",
-          "ChengYuan.PermissionManagement.Persistence": "[0.2.10-local, )",
-          "ChengYuan.SettingManagement.Persistence": "[0.2.10-local, )",
+          "ChengYuan.PermissionManagement.Web": "[0.2.10-local, )",
+          "ChengYuan.SettingManagement.Web": "[0.2.10-local, )",
           "ChengYuan.Sms": "[0.2.10-local, )",
-          "ChengYuan.TenantManagement.Persistence": "[0.2.10-local, )",
+          "ChengYuan.TenantManagement.Web": "[0.2.10-local, )",
           "ChengYuan.TextTemplating": "[0.2.10-local, )",
           "Microsoft.AspNetCore.Authentication.JwtBearer": "[10.0.5, )",
           "Microsoft.AspNetCore.OpenApi": "[10.0.5, )",

@@ -7,24 +7,34 @@ public sealed class SettingDefinition
 {
     private readonly Dictionary<string, object?> _metadata = new(StringComparer.Ordinal);
 
-    public SettingDefinition(string name, Type valueType)
+    internal SettingDefinition(
+        string name,
+        Type valueType,
+        object? defaultValue = null,
+        string? displayName = null,
+        SettingGroupDefinition? group = null)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(name);
         ArgumentNullException.ThrowIfNull(valueType);
 
         Name = name;
         ValueType = valueType;
+        DefaultValue = defaultValue;
+        DisplayName = displayName;
+        Group = group;
     }
 
     public string Name { get; }
 
     public Type ValueType { get; }
 
-    public object? DefaultValue { get; internal set; }
+    public object? DefaultValue { get; set; }
 
-    public string? DisplayName { get; internal set; }
+    public string? DisplayName { get; set; }
 
-    public string? Description { get; internal set; }
+    public string? Description { get; set; }
+
+    public SettingGroupDefinition? Group { get; }
 
     public IReadOnlyDictionary<string, object?> Metadata => _metadata;
 

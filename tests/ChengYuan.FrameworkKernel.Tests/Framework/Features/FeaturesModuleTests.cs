@@ -31,23 +31,24 @@ public class FeaturesModuleTests
     {
         var services = new ServiceCollection();
         services.AddModule<FeaturesTestModule>();
+        services.AddSingleton<IFeatureDefinitionContributor>(new TestContributor(context =>
+        {
+            var group = context.AddGroup("workspace", "Workspace");
+            var feature = group.AddFeature<bool>("workspace.analytics", false, "Workspace analytics");
+            feature.Description = "Enables analytics capabilities.";
+        }));
 
         using var serviceProvider = services.BuildServiceProvider();
         var manager = serviceProvider.GetRequiredService<IFeatureDefinitionManager>();
 
-        manager.AddOrUpdate<bool>("workspace.analytics")
-            .WithDefaultValue(false)
-            .WithDisplayName("Workspace analytics")
-            .WithDescription("Enables analytics capabilities.")
-            .WithMetadata("group", "workspace");
-
         manager.IsDefined("workspace.analytics").ShouldBeTrue();
-        var definition = manager.GetDefinition("workspace.analytics");
+        var definition = manager.GetFeature("workspace.analytics");
         definition.DefaultValue.ShouldBe(false);
         definition.DisplayName.ShouldBe("Workspace analytics");
         definition.Description.ShouldBe("Enables analytics capabilities.");
-        definition.TryGetMetadata("group", out var group).ShouldBeTrue();
-        group.ShouldBe("workspace");
+        definition.Group.ShouldNotBeNull();
+        definition.Group!.Name.ShouldBe("workspace");
+        manager.GetGroups().Count.ShouldBe(1);
         manager.GetAll().Count.ShouldBe(1);
     }
 
@@ -57,12 +58,14 @@ public class FeaturesModuleTests
         var cancellationToken = TestContext.Current.CancellationToken;
         var services = new ServiceCollection();
         services.AddModule<FeaturesTestModule>();
+        services.AddSingleton<IFeatureDefinitionContributor>(new TestContributor(context =>
+        {
+            var group = context.AddGroup("workspace", "Workspace");
+            group.AddFeature<bool>("workspace.analytics", true);
+        }));
 
         using var serviceProvider = services.BuildServiceProvider();
-        var manager = serviceProvider.GetRequiredService<IFeatureDefinitionManager>();
         var checker = serviceProvider.GetRequiredService<IFeatureChecker>();
-
-        manager.AddOrUpdate<bool>("workspace.analytics").WithDefaultValue(true);
 
         (await checker.IsEnabledAsync("workspace.analytics", cancellationToken)).ShouldBeTrue();
     }
@@ -79,14 +82,16 @@ public class FeaturesModuleTests
         services.AddSingleton<IFeatureValueProvider>(new TestTenantFeatureValueProvider(new Dictionary<(Guid TenantId, string Name), object?>()));
         services.AddSingleton<IFeatureValueProvider>(new TestUserFeatureValueProvider(new Dictionary<(string UserId, string Name), object?>()));
         services.AddModule<FeaturesTestModule>();
+        services.AddSingleton<IFeatureDefinitionContributor>(new TestContributor(context =>
+        {
+            var group = context.AddGroup("workspace", "Workspace");
+            group.AddFeature<int>("workspace.max-users", 5);
+        }));
 
         using var serviceProvider = services.BuildServiceProvider();
-        var manager = serviceProvider.GetRequiredService<IFeatureDefinitionManager>();
         var checker = serviceProvider.GetRequiredService<IFeatureChecker>();
         var currentTenant = serviceProvider.GetRequiredService<ICurrentTenantAccessor>();
         var currentUser = serviceProvider.GetRequiredService<ICurrentUserAccessor>();
-
-        manager.AddOrUpdate<int>("workspace.max-users").WithDefaultValue(5);
 
         (await checker.GetAsync<int>("workspace.max-users", cancellationToken)).ShouldBe(10);
 
@@ -121,15 +126,17 @@ public class FeaturesModuleTests
             .SetGlobal("workspace.storage-quota", 12.5m)
             .SetGlobal("workspace.plan", "enterprise"));
         services.AddModule<FeaturesTestModule>();
+        services.AddSingleton<IFeatureDefinitionContributor>(new TestContributor(context =>
+        {
+            var group = context.AddGroup("workspace", "Workspace");
+            group.AddFeature<bool>("workspace.analytics", false);
+            group.AddFeature<int>("workspace.max-users", 5);
+            group.AddFeature<decimal>("workspace.storage-quota", 1m);
+            group.AddFeature<string>("workspace.plan", "free");
+        }));
 
         using var serviceProvider = services.BuildServiceProvider();
-        var manager = serviceProvider.GetRequiredService<IFeatureDefinitionManager>();
         var checker = serviceProvider.GetRequiredService<IFeatureChecker>();
-
-        manager.AddOrUpdate<bool>("workspace.analytics").WithDefaultValue(false);
-        manager.AddOrUpdate<int>("workspace.max-users").WithDefaultValue(5);
-        manager.AddOrUpdate<decimal>("workspace.storage-quota").WithDefaultValue(1m);
-        manager.AddOrUpdate<string>("workspace.plan").WithDefaultValue("free");
 
         (await checker.IsEnabledAsync("workspace.analytics", cancellationToken)).ShouldBeTrue();
         (await checker.GetAsync<int>("workspace.max-users", cancellationToken)).ShouldBe(42);
@@ -146,18 +153,20 @@ public class FeaturesModuleTests
 
         var services = new ServiceCollection();
         services.AddModule<FeaturesTestModule>();
+        services.AddSingleton<IFeatureDefinitionContributor>(new TestContributor(context =>
+        {
+            var group = context.AddGroup("workspace", "Workspace");
+            group.AddFeature<bool>("workspace.analytics", true);
+        }));
         services.AddInMemoryFeatures(builder => builder
             .SetGlobal("workspace.analytics", false)
             .SetTenant("workspace.analytics", tenantId, true)
             .SetUser("workspace.analytics", userId, false));
 
         using var serviceProvider = services.BuildServiceProvider();
-        var manager = serviceProvider.GetRequiredService<IFeatureDefinitionManager>();
         var checker = serviceProvider.GetRequiredService<IFeatureChecker>();
         var currentTenant = serviceProvider.GetRequiredService<ICurrentTenantAccessor>();
         var currentUser = serviceProvider.GetRequiredService<ICurrentUserAccessor>();
-
-        manager.AddOrUpdate<bool>("workspace.analytics").WithDefaultValue(true);
 
         (await checker.IsEnabledAsync("workspace.analytics", cancellationToken)).ShouldBeFalse();
 
@@ -178,12 +187,14 @@ public class FeaturesModuleTests
         var cancellationToken = TestContext.Current.CancellationToken;
         var services = new ServiceCollection();
         services.AddModule<FeaturesTestModule>();
+        services.AddSingleton<IFeatureDefinitionContributor>(new TestContributor(context =>
+        {
+            var group = context.AddGroup("workspace", "Workspace");
+            group.AddFeature<bool>("workspace.analytics", true);
+        }));
 
         using var serviceProvider = services.BuildServiceProvider();
-        var manager = serviceProvider.GetRequiredService<IFeatureDefinitionManager>();
         var checker = serviceProvider.GetRequiredService<IFeatureChecker>();
-
-        manager.AddOrUpdate<bool>("workspace.analytics").WithDefaultValue(true);
 
         await Should.ThrowAsync<InvalidOperationException>(async () => _ = await checker.GetAsync<string>("workspace.analytics", cancellationToken));
     }
@@ -191,6 +202,11 @@ public class FeaturesModuleTests
     [DependsOn(typeof(FeaturesModule))]
     private sealed class FeaturesTestModule : FrameworkCoreModule
     {
+    }
+
+    private sealed class TestContributor(Action<IFeatureDefinitionContext> configure) : IFeatureDefinitionContributor
+    {
+        public void Define(IFeatureDefinitionContext context) => configure(context);
     }
 
     private sealed class TestGlobalFeatureValueProvider(Dictionary<string, object?> values) : IFeatureValueProvider

@@ -9,5 +9,5 @@ public interface IPermissionGrantProvider
 
     int Order { get; }
 
-    ValueTask<PermissionGrant?> GetOrNullAsync(PermissionDefinition definition, PermissionContext context, CancellationToken cancellationToken = default);
+    ValueTask<PermissionGrantResult> CheckAsync(PermissionDefinition definition, PermissionContext context, CancellationToken cancellationToken = default);
 }

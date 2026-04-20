@@ -4,11 +4,15 @@ namespace ChengYuan.Features;
 
 public interface IFeatureDefinitionManager
 {
-    FeatureDefinitionBuilder AddOrUpdate<TValue>(string name);
+    IReadOnlyList<FeatureGroupDefinition> GetGroups();
 
-    FeatureDefinition? Find(string name);
+    FeatureGroupDefinition? GetGroupOrNull(string name);
 
-    FeatureDefinition GetDefinition(string name);
+    FeatureGroupDefinition GetGroup(string name);
+
+    FeatureDefinition? GetOrNull(string name);
+
+    FeatureDefinition GetFeature(string name);
 
     IReadOnlyCollection<FeatureDefinition> GetAll();
 

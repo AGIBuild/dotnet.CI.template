@@ -4,11 +4,15 @@ namespace ChengYuan.Settings;
 
 public interface ISettingDefinitionManager
 {
-    SettingDefinitionBuilder AddOrUpdate<TValue>(string name);
+    IReadOnlyList<SettingGroupDefinition> GetGroups();
 
-    SettingDefinition? Find(string name);
+    SettingGroupDefinition? GetGroupOrNull(string name);
 
-    SettingDefinition GetDefinition(string name);
+    SettingGroupDefinition GetGroup(string name);
+
+    SettingDefinition? GetOrNull(string name);
+
+    SettingDefinition GetSetting(string name);
 
     IReadOnlyCollection<SettingDefinition> GetAll();
 

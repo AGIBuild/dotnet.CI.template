@@ -1,7 +1,6 @@
 using ChengYuan.AspNetCore;
 using ChengYuan.AuditLogging;
 using ChengYuan.BackgroundJobs;
-using ChengYuan.EntityFrameworkCore;
 using ChengYuan.FeatureManagement;
 using ChengYuan.Hosting;
 using ChengYuan.Identity;
@@ -31,13 +30,14 @@ internal static class TestHostBuilder
 
         builder.AddChengYuan<WebHostHttpCompositionModule>(cy => cy
             .AddModule<IdentityWebModule>()
-            .AddModule<TenantManagementPersistenceModule>()
-            .AddModule<SettingManagementPersistenceModule>()
-            .AddModule<PermissionManagementPersistenceModule>()
-            .AddModule<FeatureManagementPersistenceModule>()
-            .AddModule<AuditLoggingPersistenceModule>()
+            .AddModule<TenantManagementWebModule>()
+            .AddModule<SettingManagementWebModule>()
+            .AddModule<PermissionManagementWebModule>()
+            .AddModule<FeatureManagementWebModule>()
+            .AddModule<AuditLoggingWebModule>()
             .AddModule<BackgroundJobPersistenceModule>()
         );
+        builder.Services.AddPermissivePermissionGrants();
         return builder;
     }
 
@@ -49,13 +49,14 @@ internal static class TestHostBuilder
     {
         services.AddChengYuan<WebHostHttpCompositionModule>(cy => cy
             .AddModule<IdentityWebModule>()
-            .AddModule<TenantManagementPersistenceModule>()
-            .AddModule<SettingManagementPersistenceModule>()
-            .AddModule<PermissionManagementPersistenceModule>()
-            .AddModule<FeatureManagementPersistenceModule>()
-            .AddModule<AuditLoggingPersistenceModule>()
+            .AddModule<TenantManagementWebModule>()
+            .AddModule<SettingManagementWebModule>()
+            .AddModule<PermissionManagementWebModule>()
+            .AddModule<FeatureManagementWebModule>()
+            .AddModule<AuditLoggingWebModule>()
             .AddModule<BackgroundJobPersistenceModule>()
         );
+        services.AddPermissivePermissionGrants();
         return services;
     }
 
@@ -78,13 +79,14 @@ internal static class TestHostBuilder
             }
 
             cy.AddModule<IdentityWebModule>()
-              .AddModule<TenantManagementPersistenceModule>()
-              .AddModule<SettingManagementPersistenceModule>()
-              .AddModule<PermissionManagementPersistenceModule>()
-              .AddModule<FeatureManagementPersistenceModule>()
-              .AddModule<AuditLoggingPersistenceModule>()
+              .AddModule<TenantManagementWebModule>()
+              .AddModule<SettingManagementWebModule>()
+              .AddModule<PermissionManagementWebModule>()
+              .AddModule<FeatureManagementWebModule>()
+              .AddModule<AuditLoggingWebModule>()
               .AddModule<BackgroundJobPersistenceModule>();
         });
+        builder.Services.AddPermissivePermissionGrants();
         return builder;
     }
 }

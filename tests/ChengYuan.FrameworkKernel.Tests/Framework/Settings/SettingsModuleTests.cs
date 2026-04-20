@@ -31,23 +31,24 @@ public class SettingsModuleTests
     {
         var services = new ServiceCollection();
         services.AddModule<SettingsTestModule>();
+        services.AddSingleton<ISettingDefinitionContributor>(new TestContributor(context =>
+        {
+            var group = context.AddGroup("application", "Application");
+            var setting = group.AddSetting<string>("app.name", "ChengYuan", "Application name");
+            setting.Description = "The default application name.";
+        }));
 
         using var serviceProvider = services.BuildServiceProvider();
         var manager = serviceProvider.GetRequiredService<ISettingDefinitionManager>();
 
-        manager.AddOrUpdate<string>("app.name")
-            .WithDefaultValue("ChengYuan")
-            .WithDisplayName("Application name")
-            .WithDescription("The default application name.")
-            .WithMetadata("group", "application");
-
         manager.IsDefined("app.name").ShouldBeTrue();
-        var definition = manager.GetDefinition("app.name");
+        var definition = manager.GetSetting("app.name");
         definition.DefaultValue.ShouldBe("ChengYuan");
         definition.DisplayName.ShouldBe("Application name");
         definition.Description.ShouldBe("The default application name.");
-        definition.TryGetMetadata("group", out var group).ShouldBeTrue();
-        group.ShouldBe("application");
+        definition.Group.ShouldNotBeNull();
+        definition.Group!.Name.ShouldBe("application");
+        manager.GetGroups().Count.ShouldBe(1);
         manager.GetAll().Count.ShouldBe(1);
     }
 
@@ -57,12 +58,14 @@ public class SettingsModuleTests
         var cancellationToken = TestContext.Current.CancellationToken;
         var services = new ServiceCollection();
         services.AddModule<SettingsTestModule>();
+        services.AddSingleton<ISettingDefinitionContributor>(new TestContributor(context =>
+        {
+            var group = context.AddGroup("app", "Application");
+            group.AddSetting<string>("app.display-name", "ChengYuan");
+        }));
 
         using var serviceProvider = services.BuildServiceProvider();
-        var manager = serviceProvider.GetRequiredService<ISettingDefinitionManager>();
         var provider = serviceProvider.GetRequiredService<ISettingProvider>();
-
-        manager.AddOrUpdate<string>("app.display-name").WithDefaultValue("ChengYuan");
 
         (await provider.GetAsync<string>("app.display-name", cancellationToken)).ShouldBe("ChengYuan");
     }
@@ -79,14 +82,16 @@ public class SettingsModuleTests
         services.AddSingleton<ISettingValueProvider>(new TestTenantSettingValueProvider(new Dictionary<(Guid TenantId, string Name), object?>()));
         services.AddSingleton<ISettingValueProvider>(new TestUserSettingValueProvider(new Dictionary<(string UserId, string Name), object?>()));
         services.AddModule<SettingsTestModule>();
+        services.AddSingleton<ISettingDefinitionContributor>(new TestContributor(context =>
+        {
+            var group = context.AddGroup("app", "Application");
+            group.AddSetting<string>("app.timezone", "Asia/Shanghai");
+        }));
 
         using var serviceProvider = services.BuildServiceProvider();
-        var manager = serviceProvider.GetRequiredService<ISettingDefinitionManager>();
         var provider = serviceProvider.GetRequiredService<ISettingProvider>();
         var currentTenant = serviceProvider.GetRequiredService<ICurrentTenantAccessor>();
         var currentUser = serviceProvider.GetRequiredService<ICurrentUserAccessor>();
-
-        manager.AddOrUpdate<string>("app.timezone").WithDefaultValue("Asia/Shanghai");
 
         (await provider.GetAsync<string>("app.timezone", cancellationToken)).ShouldBe("UTC");
 
@@ -121,13 +126,15 @@ public class SettingsModuleTests
             [(tenantId, "branding.logo-url")] = "tenant-a.svg"
         }));
         services.AddModule<SettingsTestModule>();
+        services.AddSingleton<ISettingDefinitionContributor>(new TestContributor(context =>
+        {
+            var group = context.AddGroup("branding", "Branding");
+            group.AddSetting<string>("branding.logo-url", "default.svg");
+        }));
 
         using var serviceProvider = services.BuildServiceProvider();
-        var manager = serviceProvider.GetRequiredService<ISettingDefinitionManager>();
         var provider = serviceProvider.GetRequiredService<ISettingProvider>();
         var currentTenant = serviceProvider.GetRequiredService<ICurrentTenantAccessor>();
-
-        manager.AddOrUpdate<string>("branding.logo-url").WithDefaultValue("default.svg");
 
         using (currentTenant.Change(tenantId, "tenant-a"))
         {
@@ -146,13 +153,15 @@ public class SettingsModuleTests
             [(userId, "ui.theme")] = "dark"
         }));
         services.AddModule<SettingsTestModule>();
+        services.AddSingleton<ISettingDefinitionContributor>(new TestContributor(context =>
+        {
+            var group = context.AddGroup("ui", "UI");
+            group.AddSetting<string>("ui.theme", "light");
+        }));
 
         using var serviceProvider = services.BuildServiceProvider();
-        var manager = serviceProvider.GetRequiredService<ISettingDefinitionManager>();
         var provider = serviceProvider.GetRequiredService<ISettingProvider>();
         var currentUser = serviceProvider.GetRequiredService<ICurrentUserAccessor>();
-
-        manager.AddOrUpdate<string>("ui.theme").WithDefaultValue("light");
 
         using (currentUser.Change(new CurrentUserInfo(userId, "Alice", true)))
         {
@@ -173,14 +182,16 @@ public class SettingsModuleTests
             ["workspace.id"] = workspaceId.ToString()
         }));
         services.AddModule<SettingsTestModule>();
+        services.AddSingleton<ISettingDefinitionContributor>(new TestContributor(context =>
+        {
+            var group = context.AddGroup("workspace", "Workspace");
+            group.AddSetting<bool>("feature.enabled", false);
+            group.AddSetting<int>("workspace.max-users", 10);
+            group.AddSetting<Guid>("workspace.id", Guid.Empty);
+        }));
 
         using var serviceProvider = services.BuildServiceProvider();
-        var manager = serviceProvider.GetRequiredService<ISettingDefinitionManager>();
         var provider = serviceProvider.GetRequiredService<ISettingProvider>();
-
-        manager.AddOrUpdate<bool>("feature.enabled").WithDefaultValue(false);
-        manager.AddOrUpdate<int>("workspace.max-users").WithDefaultValue(10);
-        manager.AddOrUpdate<Guid>("workspace.id").WithDefaultValue(Guid.Empty);
 
         (await provider.GetAsync<bool>("feature.enabled", cancellationToken)).ShouldBeTrue();
         (await provider.GetAsync<int>("workspace.max-users", cancellationToken)).ShouldBe(42);
@@ -193,12 +204,14 @@ public class SettingsModuleTests
         var cancellationToken = TestContext.Current.CancellationToken;
         var services = new ServiceCollection();
         services.AddModule<SettingsTestModule>();
+        services.AddSingleton<ISettingDefinitionContributor>(new TestContributor(context =>
+        {
+            var group = context.AddGroup("feature", "Feature");
+            group.AddSetting<bool>("feature.enabled", true);
+        }));
 
         using var serviceProvider = services.BuildServiceProvider();
-        var manager = serviceProvider.GetRequiredService<ISettingDefinitionManager>();
         var provider = serviceProvider.GetRequiredService<ISettingProvider>();
-
-        manager.AddOrUpdate<bool>("feature.enabled").WithDefaultValue(true);
 
         await Should.ThrowAsync<InvalidOperationException>(async () => _ = await provider.GetAsync<string>("feature.enabled", cancellationToken));
     }
@@ -212,6 +225,12 @@ public class SettingsModuleTests
 
         var services = new ServiceCollection();
         services.AddModule<SettingsTestModule>();
+        services.AddSingleton<ISettingDefinitionContributor>(new TestContributor(context =>
+        {
+            var group = context.AddGroup("app", "Application");
+            group.AddSetting<string>("app.timezone", "Asia/Shanghai");
+            group.AddSetting<Guid>("workspace.id", Guid.Empty);
+        }));
         services.AddInMemorySettings(builder => builder
             .SetGlobal("app.timezone", "UTC")
             .SetTenant("app.timezone", tenantId, "Europe/Berlin")
@@ -219,13 +238,9 @@ public class SettingsModuleTests
             .SetGlobal("workspace.id", Guid.Parse("11111111-1111-1111-1111-111111111111").ToString()));
 
         using var serviceProvider = services.BuildServiceProvider();
-        var manager = serviceProvider.GetRequiredService<ISettingDefinitionManager>();
         var provider = serviceProvider.GetRequiredService<ISettingProvider>();
         var currentTenant = serviceProvider.GetRequiredService<ICurrentTenantAccessor>();
         var currentUser = serviceProvider.GetRequiredService<ICurrentUserAccessor>();
-
-        manager.AddOrUpdate<string>("app.timezone").WithDefaultValue("Asia/Shanghai");
-        manager.AddOrUpdate<Guid>("workspace.id").WithDefaultValue(Guid.Empty);
 
         (await provider.GetAsync<string>("app.timezone", cancellationToken)).ShouldBe("UTC");
         (await provider.GetAsync<Guid>("workspace.id", cancellationToken)).ShouldBe(Guid.Parse("11111111-1111-1111-1111-111111111111"));
@@ -244,6 +259,11 @@ public class SettingsModuleTests
     [DependsOn(typeof(SettingsModule))]
     private sealed class SettingsTestModule : FrameworkCoreModule
     {
+    }
+
+    private sealed class TestContributor(Action<ISettingDefinitionContext> configure) : ISettingDefinitionContributor
+    {
+        public void Define(ISettingDefinitionContext context) => configure(context);
     }
 
     private sealed class TestGlobalSettingValueProvider(Dictionary<string, object?> values) : ISettingValueProvider

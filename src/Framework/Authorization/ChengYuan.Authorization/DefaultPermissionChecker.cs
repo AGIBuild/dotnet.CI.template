@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using ChengYuan.ExecutionContext;
+using ChengYuan.Features;
 using ChengYuan.MultiTenancy;
 
 namespace ChengYuan.Authorization;
@@ -13,7 +14,8 @@ internal sealed class DefaultPermissionChecker(
     IEnumerable<IPermissionGrantProvider> grantProviders,
     ICurrentTenant currentTenant,
     ICurrentUser currentUser,
-    ICurrentCorrelation currentCorrelation) : IPermissionChecker
+    ICurrentCorrelation currentCorrelation,
+    IFeatureChecker featureChecker) : IPermissionChecker
 {
     private readonly IPermissionGrantProvider[] _orderedProviders = grantProviders
         .OrderByDescending(provider => provider.Order)
@@ -24,18 +26,53 @@ internal sealed class DefaultPermissionChecker(
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(name);
 
-        var definition = definitionManager.GetDefinition(name);
-        var context = new PermissionContext(currentTenant.Id, currentUser.Id, currentCorrelation.CorrelationId, currentUser.IsAuthenticated);
+        var definition = definitionManager.GetPermission(name);
 
-        foreach (var provider in _orderedProviders)
+        if (!definition.IsEnabled)
         {
-            var grant = await provider.GetOrNullAsync(definition, context, cancellationToken);
-            if (grant is not null)
+            return false;
+        }
+
+        if (!IsMultiTenancySideMatch(definition))
+        {
+            return false;
+        }
+
+        var requiredFeatures = definition.GetRequiredFeatures();
+        foreach (var feature in requiredFeatures)
+        {
+            if (!await featureChecker.IsEnabledAsync(feature, cancellationToken))
             {
-                return grant.IsGranted;
+                return false;
             }
         }
 
-        return definition.DefaultGranted;
+        var context = new PermissionContext(currentTenant.Id, currentUser.Id, currentCorrelation.CorrelationId, currentUser.IsAuthenticated);
+
+        var hasGranted = false;
+        foreach (var provider in _orderedProviders)
+        {
+            var result = await provider.CheckAsync(definition, context, cancellationToken);
+            if (result == PermissionGrantResult.Prohibited)
+            {
+                return false;
+            }
+
+            if (result == PermissionGrantResult.Granted)
+            {
+                hasGranted = true;
+            }
+        }
+
+        return hasGranted || definition.DefaultGranted;
+    }
+
+    private bool IsMultiTenancySideMatch(PermissionDefinition definition)
+    {
+        var currentSide = currentTenant.Id.HasValue
+            ? MultiTenancySides.Tenant
+            : MultiTenancySides.Host;
+
+        return definition.MultiTenancySide.HasFlag(currentSide);
     }
 }

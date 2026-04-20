@@ -8,16 +8,21 @@ internal sealed class PermissionStoreTenantGrantProvider(IPermissionGrantStore s
 
     public int Order => 220;
 
-    public async ValueTask<PermissionGrant?> GetOrNullAsync(PermissionDefinition definition, PermissionContext context, CancellationToken cancellationToken = default)
+    public async ValueTask<PermissionGrantResult> CheckAsync(PermissionDefinition definition, PermissionContext context, CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(definition);
 
         if (context.TenantId is not Guid tenantId)
         {
-            return null;
+            return PermissionGrantResult.Undefined;
         }
 
         var record = await store.FindAsync(definition.Name, PermissionScope.Tenant, tenantId, cancellationToken: cancellationToken);
-        return record is null ? null : new PermissionGrant(record.IsGranted, Name);
+        if (record is null)
+        {
+            return PermissionGrantResult.Undefined;
+        }
+
+        return record.IsGranted ? PermissionGrantResult.Granted : PermissionGrantResult.Prohibited;
     }
 }

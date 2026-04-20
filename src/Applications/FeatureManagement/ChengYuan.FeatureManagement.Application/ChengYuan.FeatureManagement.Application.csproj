@@ -6,6 +6,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\..\Framework\Core\ChengYuan.Core.csproj" />
+    <ProjectReference Include="..\..\..\Framework\Authorization\ChengYuan.Authorization\ChengYuan.Authorization.csproj" />
     <ProjectReference Include="..\ChengYuan.FeatureManagement.Contracts\ChengYuan.FeatureManagement.Contracts.csproj" />
     <ProjectReference Include="..\..\..\Framework\Features\ChengYuan.Features\ChengYuan.Features.csproj" />
   </ItemGroup>

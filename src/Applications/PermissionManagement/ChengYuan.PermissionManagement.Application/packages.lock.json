@@ -12,6 +12,7 @@
         "dependencies": {
           "ChengYuan.Core": "[0.2.10-local, )",
           "ChengYuan.ExecutionContext": "[0.2.10-local, )",
+          "ChengYuan.Features": "[0.2.10-local, )",
           "ChengYuan.MultiTenancy": "[0.2.10-local, )"
         }
       },
@@ -28,6 +29,14 @@
         "type": "Project",
         "dependencies": {
           "ChengYuan.Core": "[0.2.10-local, )"
+        }
+      },
+      "chengyuan.features": {
+        "type": "Project",
+        "dependencies": {
+          "ChengYuan.Core": "[0.2.10-local, )",
+          "ChengYuan.ExecutionContext": "[0.2.10-local, )",
+          "ChengYuan.MultiTenancy": "[0.2.10-local, )"
         }
       },
       "chengyuan.multitenancy": {

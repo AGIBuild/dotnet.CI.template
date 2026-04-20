@@ -10,9 +10,6 @@ public static class AuthorizationServiceCollectionExtensions
     {
         services.TryAddSingleton<IPermissionDefinitionManager, DefaultPermissionDefinitionManager>();
         services.TryAddSingleton<IPermissionChecker, DefaultPermissionChecker>();
-        services.TryAddEnumerable(ServiceDescriptor.Singleton<IPermissionGrantProvider, UserPermissionGrantProvider>());
-        services.TryAddEnumerable(ServiceDescriptor.Singleton<IPermissionGrantProvider, TenantPermissionGrantProvider>());
-        services.TryAddEnumerable(ServiceDescriptor.Singleton<IPermissionGrantProvider, GlobalPermissionGrantProvider>());
 
         return services;
     }

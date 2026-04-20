@@ -11,7 +11,10 @@ public static class AuthorizationAspNetCoreExtensions
         ArgumentNullException.ThrowIfNull(services);
 
         services.AddAuthorizationCore();
-        services.TryAddSingleton<IAuthorizationPolicyProvider, PermissionAuthorizationPolicyProvider>();
+
+        // Replace the default policy provider with our permission-aware one.
+        // Must use Replace because AddAuthorization() may have already registered DefaultAuthorizationPolicyProvider.
+        services.Replace(ServiceDescriptor.Singleton<IAuthorizationPolicyProvider, PermissionAuthorizationPolicyProvider>());
         services.TryAddEnumerable(ServiceDescriptor.Transient<IAuthorizationHandler, PermissionAuthorizationHandler>());
 
         return services;

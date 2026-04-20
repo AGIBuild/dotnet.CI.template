@@ -4,11 +4,15 @@ namespace ChengYuan.Authorization;
 
 public interface IPermissionDefinitionManager
 {
-    PermissionDefinitionBuilder AddOrUpdate(string name);
+    IReadOnlyList<PermissionGroupDefinition> GetGroups();
 
-    PermissionDefinition? Find(string name);
+    PermissionGroupDefinition? GetGroupOrNull(string name);
 
-    PermissionDefinition GetDefinition(string name);
+    PermissionGroupDefinition GetGroup(string name);
+
+    PermissionDefinition? GetOrNull(string name);
+
+    PermissionDefinition GetPermission(string name);
 
     IReadOnlyCollection<PermissionDefinition> GetAll();
 

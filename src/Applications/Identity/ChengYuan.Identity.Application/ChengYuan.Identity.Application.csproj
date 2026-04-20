@@ -10,6 +10,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\..\Framework\Core\ChengYuan.Core.csproj" />
+    <ProjectReference Include="..\..\..\Framework\Authorization\ChengYuan.Authorization\ChengYuan.Authorization.csproj" />
     <ProjectReference Include="..\ChengYuan.Identity.Contracts\ChengYuan.Identity.Contracts.csproj" />
     <ProjectReference Include="..\ChengYuan.Identity.Domain\ChengYuan.Identity.Domain.csproj" />
   </ItemGroup>

@@ -24,6 +24,14 @@ public sealed class PermissionAuthorizationPolicyProvider(
             return null;
         }
 
+        var permission = permissionDefinitionManager.GetOrNull(policyName);
+        if (permission is not null && !permission.IsEnabled)
+        {
+            return new AuthorizationPolicyBuilder()
+                .RequireAssertion(_ => false)
+                .Build();
+        }
+
         return new AuthorizationPolicyBuilder()
             .AddRequirements(new PermissionRequirement(policyName))
             .Build();

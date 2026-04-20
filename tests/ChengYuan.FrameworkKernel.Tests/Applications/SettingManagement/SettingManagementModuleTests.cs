@@ -38,15 +38,17 @@ public class SettingManagementModuleTests
         var services = new ServiceCollection();
         services.AddModule<SettingManagementTestModule>();
         services.AddInMemorySettingManagement();
+        services.AddSingleton<ISettingDefinitionContributor>(new TestContributor(context =>
+        {
+            var group = context.AddGroup("workspace", "Workspace");
+            group.AddSetting<int>("workspace.max-users", 10);
+        }));
 
         using var serviceProvider = services.BuildServiceProvider();
-        var definitionManager = serviceProvider.GetRequiredService<ISettingDefinitionManager>();
         var settingProvider = serviceProvider.GetRequiredService<ISettingProvider>();
         var settingValueManager = serviceProvider.GetRequiredService<ISettingValueManager>();
         var currentTenant = serviceProvider.GetRequiredService<ICurrentTenantAccessor>();
         var currentUser = serviceProvider.GetRequiredService<ICurrentUserAccessor>();
-
-        definitionManager.AddOrUpdate<int>("workspace.max-users").WithDefaultValue(10);
 
         await settingValueManager.SetAsync(new SettingValueRecord("workspace.max-users", SettingScope.Global, 20), cancellationToken);
         (await settingProvider.GetAsync<int>("workspace.max-users", cancellationToken)).ShouldBe(20);
@@ -73,13 +75,15 @@ public class SettingManagementModuleTests
         var services = new ServiceCollection();
         services.AddModule<SettingManagementTestModule>();
         services.AddInMemorySettingManagement();
+        services.AddSingleton<ISettingDefinitionContributor>(new TestContributor(context =>
+        {
+            var group = context.AddGroup("workspace", "Workspace");
+            group.AddSetting<bool>("workspace.analytics.enabled", false);
+        }));
 
         using var serviceProvider = services.BuildServiceProvider();
-        var definitionManager = serviceProvider.GetRequiredService<ISettingDefinitionManager>();
         var settingProvider = serviceProvider.GetRequiredService<ISettingProvider>();
         var settingValueManager = serviceProvider.GetRequiredService<ISettingValueManager>();
-
-        definitionManager.AddOrUpdate<bool>("workspace.analytics.enabled").WithDefaultValue(false);
 
         await settingValueManager.SetAsync(new SettingValueRecord("workspace.analytics.enabled", SettingScope.Global, true), cancellationToken);
         (await settingProvider.GetAsync<bool>("workspace.analytics.enabled", cancellationToken)).ShouldBeTrue();
@@ -95,14 +99,16 @@ public class SettingManagementModuleTests
         var services = new ServiceCollection();
         services.AddModule<SettingManagementTestModule>();
         services.AddInMemorySettingManagement();
+        services.AddSingleton<ISettingDefinitionContributor>(new TestContributor(context =>
+        {
+            var group = context.AddGroup("workspace", "Workspace");
+            group.AddSetting<decimal>("workspace.storage-quota", 1m);
+            group.AddSetting<string>("workspace.plan", "free");
+        }));
 
         using var serviceProvider = services.BuildServiceProvider();
-        var definitionManager = serviceProvider.GetRequiredService<ISettingDefinitionManager>();
         var settingProvider = serviceProvider.GetRequiredService<ISettingProvider>();
         var settingValueManager = serviceProvider.GetRequiredService<ISettingValueManager>();
-
-        definitionManager.AddOrUpdate<decimal>("workspace.storage-quota").WithDefaultValue(1m);
-        definitionManager.AddOrUpdate<string>("workspace.plan").WithDefaultValue("free");
 
         await settingValueManager.SetAsync(new SettingValueRecord("workspace.storage-quota", SettingScope.Global, 12.5m), cancellationToken);
         await settingValueManager.SetAsync(new SettingValueRecord("workspace.plan", SettingScope.Global, "enterprise"), cancellationToken);
@@ -133,5 +139,10 @@ public class SettingManagementModuleTests
         records.Select(record => record.Name).ShouldContain("workspace.title");
         records.Select(record => record.Name).ShouldContain("workspace.region");
         records.Select(record => record.Name).ShouldContain("workspace.theme");
+    }
+
+    private sealed class TestContributor(Action<ISettingDefinitionContext> configure) : ISettingDefinitionContributor
+    {
+        public void Define(ISettingDefinitionContext context) => configure(context);
     }
 }

@@ -255,6 +255,15 @@
           "System.Composition.Runtime": "9.0.0"
         }
       },
+      "chengyuan.authorization": {
+        "type": "Project",
+        "dependencies": {
+          "ChengYuan.Core": "[0.2.10-local, )",
+          "ChengYuan.ExecutionContext": "[0.2.10-local, )",
+          "ChengYuan.Features": "[0.2.10-local, )",
+          "ChengYuan.MultiTenancy": "[0.2.10-local, )"
+        }
+      },
       "chengyuan.core": {
         "type": "Project",
         "dependencies": {
@@ -293,6 +302,14 @@
           "ChengYuan.Core": "[0.2.10-local, )"
         }
       },
+      "chengyuan.features": {
+        "type": "Project",
+        "dependencies": {
+          "ChengYuan.Core": "[0.2.10-local, )",
+          "ChengYuan.ExecutionContext": "[0.2.10-local, )",
+          "ChengYuan.MultiTenancy": "[0.2.10-local, )"
+        }
+      },
       "chengyuan.hosting": {
         "type": "Project",
         "dependencies": {
@@ -305,6 +322,7 @@
         "type": "Project",
         "dependencies": {
           "BCrypt.Net-Next": "[4.0.3, )",
+          "ChengYuan.Authorization": "[0.2.10-local, )",
           "ChengYuan.Core": "[0.2.10-local, )",
           "ChengYuan.Identity.Contracts": "[0.2.10-local, )",
           "ChengYuan.Identity.Domain": "[0.2.10-local, )"

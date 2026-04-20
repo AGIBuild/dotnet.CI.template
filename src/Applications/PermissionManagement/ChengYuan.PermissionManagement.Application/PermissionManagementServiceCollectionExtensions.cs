@@ -12,6 +12,7 @@ public static class PermissionManagementServiceCollectionExtensions
         services.TryAddEnumerable(ServiceDescriptor.Singleton<IPermissionGrantProvider, PermissionStoreUserGrantProvider>());
         services.TryAddEnumerable(ServiceDescriptor.Singleton<IPermissionGrantProvider, PermissionStoreTenantGrantProvider>());
         services.TryAddEnumerable(ServiceDescriptor.Singleton<IPermissionGrantProvider, PermissionStoreGlobalGrantProvider>());
+        services.AddTransient<IPermissionDefinitionContributor, PermissionManagementPermissionDefinitionContributor>();
 
         return services;
     }

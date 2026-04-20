@@ -1,4 +1,5 @@
 using ChengYuan.Auditing;
+using ChengYuan.Authorization;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 
@@ -9,6 +10,7 @@ public static class AuditLoggingServiceCollectionExtensions
     public static IServiceCollection AddAuditLogging(this IServiceCollection services)
     {
         services.TryAddEnumerable(ServiceDescriptor.Singleton<IAuditLogSink, AuditLogStoreSink>());
+        services.AddTransient<IPermissionDefinitionContributor, AuditLoggingPermissionDefinitionContributor>();
         return services;
     }
 

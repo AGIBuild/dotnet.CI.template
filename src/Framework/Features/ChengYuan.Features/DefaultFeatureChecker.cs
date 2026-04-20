@@ -24,7 +24,7 @@ internal sealed class DefaultFeatureChecker(
 
     public async ValueTask<T?> GetAsync<T>(string name, CancellationToken cancellationToken = default)
     {
-        var definition = definitionManager.GetDefinition(name);
+        var definition = definitionManager.GetFeature(name);
         EnsureRequestedTypeMatchesDefinition<T>(definition);
 
         var context = new FeatureContext(currentTenant.Id, currentUser.Id, currentCorrelation.CorrelationId);

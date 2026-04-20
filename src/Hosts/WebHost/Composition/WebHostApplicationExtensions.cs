@@ -1,12 +1,14 @@
 using Asp.Versioning;
 using Asp.Versioning.Builder;
+using ChengYuan.AspNetCore;
+using ChengYuan.AspNetCore.Configuration;
 using ChengYuan.Auditing;
 using ChengYuan.Core.Modularity;
 using ChengYuan.ExecutionContext;
-using ChengYuan.Identity;
 using ChengYuan.MultiTenancy;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
+using Microsoft.AspNetCore.Http;
 
 namespace ChengYuan.WebHost;
 
@@ -65,12 +67,13 @@ public static class WebHostApplicationExtensions
             .WithApiVersionSet(versionSet)
             .RequireRateLimiting("per-tenant");
 
-        api.MapIdentityManagementEndpoints();
-        api.MapAuditLogEndpoints();
-        api.MapPermissionManagementEndpoints();
-        api.MapFeatureManagementEndpoints();
-        api.MapTenantManagementEndpoints();
-        api.MapSettingManagementEndpoints();
+        api.MapModuleEndpoints();
+
+        api.MapGet("/app-configuration",
+            static async (IApplicationConfigurator configurator, CancellationToken cancellationToken) =>
+                TypedResults.Ok(await configurator.BuildAsync(cancellationToken)))
+            .RequireAuthorization();
+
         return app;
     }
 }

@@ -255,6 +255,15 @@
           "System.Composition.Runtime": "9.0.0"
         }
       },
+      "chengyuan.authorization": {
+        "type": "Project",
+        "dependencies": {
+          "ChengYuan.Core": "[0.2.10-local, )",
+          "ChengYuan.ExecutionContext": "[0.2.10-local, )",
+          "ChengYuan.Features": "[0.2.10-local, )",
+          "ChengYuan.MultiTenancy": "[0.2.10-local, )"
+        }
+      },
       "chengyuan.core": {
         "type": "Project",
         "dependencies": {
@@ -290,6 +299,7 @@
       "chengyuan.featuremanagement.application": {
         "type": "Project",
         "dependencies": {
+          "ChengYuan.Authorization": "[0.2.10-local, )",
           "ChengYuan.Core": "[0.2.10-local, )",
           "ChengYuan.FeatureManagement.Contracts": "[0.2.10-local, )",
           "ChengYuan.Features": "[0.2.10-local, )"

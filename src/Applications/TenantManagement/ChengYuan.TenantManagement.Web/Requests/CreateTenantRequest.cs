@@ -1,0 +1,8 @@
+namespace ChengYuan.TenantManagement;
+
+public sealed class CreateTenantRequest
+{
+    public required string Name { get; init; }
+
+    public bool IsActive { get; init; } = true;
+}

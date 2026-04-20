@@ -24,7 +24,7 @@ internal sealed class DefaultSettingProvider(
 
     public async ValueTask<T?> GetAsync<T>(string name, CancellationToken cancellationToken = default)
     {
-        var definition = definitionManager.GetDefinition(name);
+        var definition = definitionManager.GetSetting(name);
         EnsureRequestedTypeMatchesDefinition<T>(definition);
 
         var context = new SettingContext(currentTenant.Id, currentUser.Id, currentCorrelation.CorrelationId);

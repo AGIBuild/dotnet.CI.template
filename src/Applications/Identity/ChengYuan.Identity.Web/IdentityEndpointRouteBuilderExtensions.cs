@@ -18,22 +18,24 @@ public static class IdentityEndpointRouteBuilderExtensions
         group.MapPost("/login", LoginAsync).AllowAnonymous();
 
         group.MapGet("/users", static async (IUserReader reader, CancellationToken cancellationToken) =>
-            TypedResults.Ok(new ListResultDto<UserRecord>(await reader.GetListAsync(cancellationToken))));
+            TypedResults.Ok(new ListResultDto<UserRecord>(await reader.GetListAsync(cancellationToken))))
+            .RequireAuthorization(IdentityPermissions.Users);
 
-        group.MapGet("/users/{userId:guid}", GetUserByIdAsync);
-        group.MapPost("/users", CreateUserAsync);
-        group.MapPut("/users/{userId:guid}", UpdateUserAsync);
-        group.MapDelete("/users/{userId:guid}", DeleteUserAsync);
-        group.MapPut("/users/{userId:guid}/roles/{roleId:guid}", AssignRoleAsync);
-        group.MapDelete("/users/{userId:guid}/roles/{roleId:guid}", UnassignRoleAsync);
+        group.MapGet("/users/{userId:guid}", GetUserByIdAsync).RequireAuthorization(IdentityPermissions.Users);
+        group.MapPost("/users", CreateUserAsync).RequireAuthorization(IdentityPermissions.UsersCreate);
+        group.MapPut("/users/{userId:guid}", UpdateUserAsync).RequireAuthorization(IdentityPermissions.UsersUpdate);
+        group.MapDelete("/users/{userId:guid}", DeleteUserAsync).RequireAuthorization(IdentityPermissions.UsersDelete);
+        group.MapPut("/users/{userId:guid}/roles/{roleId:guid}", AssignRoleAsync).RequireAuthorization(IdentityPermissions.UsersUpdate);
+        group.MapDelete("/users/{userId:guid}/roles/{roleId:guid}", UnassignRoleAsync).RequireAuthorization(IdentityPermissions.UsersUpdate);
 
         group.MapGet("/roles", static async (IRoleReader reader, CancellationToken cancellationToken) =>
-            TypedResults.Ok(new ListResultDto<RoleRecord>(await reader.GetListAsync(cancellationToken))));
+            TypedResults.Ok(new ListResultDto<RoleRecord>(await reader.GetListAsync(cancellationToken))))
+            .RequireAuthorization(IdentityPermissions.Roles);
 
-        group.MapGet("/roles/{roleId:guid}", GetRoleByIdAsync);
-        group.MapPost("/roles", CreateRoleAsync);
-        group.MapPut("/roles/{roleId:guid}", UpdateRoleAsync);
-        group.MapDelete("/roles/{roleId:guid}", DeleteRoleAsync);
+        group.MapGet("/roles/{roleId:guid}", GetRoleByIdAsync).RequireAuthorization(IdentityPermissions.Roles);
+        group.MapPost("/roles", CreateRoleAsync).RequireAuthorization(IdentityPermissions.RolesCreate);
+        group.MapPut("/roles/{roleId:guid}", UpdateRoleAsync).RequireAuthorization(IdentityPermissions.RolesUpdate);
+        group.MapDelete("/roles/{roleId:guid}", DeleteRoleAsync).RequireAuthorization(IdentityPermissions.RolesDelete);
 
         return endpoints;
     }

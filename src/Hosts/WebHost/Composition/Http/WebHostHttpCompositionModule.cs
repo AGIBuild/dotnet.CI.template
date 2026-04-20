@@ -1,6 +1,8 @@
 using System.Threading.RateLimiting;
 using Asp.Versioning;
 using ChengYuan.AspNetCore;
+using ChengYuan.AspNetCore.Configuration;
+using ChengYuan.Authorization;
 using ChengYuan.Core.Json;
 using ChengYuan.Core.Modularity;
 using ChengYuan.ExceptionHandling;
@@ -9,6 +11,7 @@ using ChengYuan.MultiTenancy;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Options;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
@@ -37,6 +40,7 @@ internal sealed class WebHostHttpCompositionModule : HostModule
             .AddJwtBearer();
 
         context.Services.AddAuthorization();
+        context.Services.AddChengYuanAuthorization();
 
         context.Services.AddCors(options =>
             options.AddDefaultPolicy(policy =>
@@ -87,5 +91,7 @@ internal sealed class WebHostHttpCompositionModule : HostModule
                 });
             });
         });
+
+        context.Services.TryAddTransient<IApplicationConfigurator, DefaultApplicationConfigurator>();
     }
 }
