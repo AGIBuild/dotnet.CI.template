@@ -10,9 +10,6 @@ public static class SettingsServiceCollectionExtensions
     {
         services.TryAddSingleton<ISettingDefinitionManager, DefaultSettingDefinitionManager>();
         services.TryAddSingleton<ISettingProvider, DefaultSettingProvider>();
-        services.TryAddEnumerable(ServiceDescriptor.Singleton<ISettingValueProvider, UserSettingValueProvider>());
-        services.TryAddEnumerable(ServiceDescriptor.Singleton<ISettingValueProvider, TenantSettingValueProvider>());
-        services.TryAddEnumerable(ServiceDescriptor.Singleton<ISettingValueProvider, GlobalSettingValueProvider>());
 
         return services;
     }

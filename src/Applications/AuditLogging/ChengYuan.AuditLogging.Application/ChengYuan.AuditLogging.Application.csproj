@@ -7,6 +7,7 @@
   <ItemGroup>
     <ProjectReference Include="..\..\..\Framework\Core\ChengYuan.Core.csproj" />
     <ProjectReference Include="..\..\..\Framework\Authorization\ChengYuan.Authorization\ChengYuan.Authorization.csproj" />
+    <ProjectReference Include="..\..\..\Framework\Settings\ChengYuan.Settings\ChengYuan.Settings.csproj" />
     <ProjectReference Include="..\ChengYuan.AuditLogging.Contracts\ChengYuan.AuditLogging.Contracts.csproj" />
     <ProjectReference Include="..\..\..\Framework\Auditing\ChengYuan.Auditing\ChengYuan.Auditing.csproj" />
   </ItemGroup>

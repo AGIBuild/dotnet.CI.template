@@ -10,9 +10,6 @@ public static class FeaturesServiceCollectionExtensions
     {
         services.TryAddSingleton<IFeatureDefinitionManager, DefaultFeatureDefinitionManager>();
         services.TryAddSingleton<IFeatureChecker, DefaultFeatureChecker>();
-        services.TryAddEnumerable(ServiceDescriptor.Singleton<IFeatureValueProvider, UserFeatureValueProvider>());
-        services.TryAddEnumerable(ServiceDescriptor.Singleton<IFeatureValueProvider, TenantFeatureValueProvider>());
-        services.TryAddEnumerable(ServiceDescriptor.Singleton<IFeatureValueProvider, GlobalFeatureValueProvider>());
 
         return services;
     }

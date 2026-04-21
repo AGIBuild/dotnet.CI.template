@@ -243,7 +243,8 @@
           "ChengYuan.AuditLogging.Contracts": "[0.2.10-local, )",
           "ChengYuan.Auditing": "[0.2.10-local, )",
           "ChengYuan.Authorization": "[0.2.10-local, )",
-          "ChengYuan.Core": "[0.2.10-local, )"
+          "ChengYuan.Core": "[0.2.10-local, )",
+          "ChengYuan.Settings": "[0.2.10-local, )"
         }
       },
       "chengyuan.auditlogging.contracts": {
@@ -320,6 +321,14 @@
         "type": "Project",
         "dependencies": {
           "ChengYuan.Core": "[0.2.10-local, )"
+        }
+      },
+      "chengyuan.settings": {
+        "type": "Project",
+        "dependencies": {
+          "ChengYuan.Core": "[0.2.10-local, )",
+          "ChengYuan.ExecutionContext": "[0.2.10-local, )",
+          "ChengYuan.MultiTenancy": "[0.2.10-local, )"
         }
       },
       "Microsoft.EntityFrameworkCore": {

@@ -325,7 +325,8 @@
           "ChengYuan.Authorization": "[0.2.10-local, )",
           "ChengYuan.Core": "[0.2.10-local, )",
           "ChengYuan.Identity.Contracts": "[0.2.10-local, )",
-          "ChengYuan.Identity.Domain": "[0.2.10-local, )"
+          "ChengYuan.Identity.Domain": "[0.2.10-local, )",
+          "ChengYuan.Settings": "[0.2.10-local, )"
         }
       },
       "chengyuan.identity.contracts": {
@@ -343,6 +344,14 @@
         "dependencies": {
           "ChengYuan.Core": "[0.2.10-local, )",
           "ChengYuan.ExecutionContext": "[0.2.10-local, )"
+        }
+      },
+      "chengyuan.settings": {
+        "type": "Project",
+        "dependencies": {
+          "ChengYuan.Core": "[0.2.10-local, )",
+          "ChengYuan.ExecutionContext": "[0.2.10-local, )",
+          "ChengYuan.MultiTenancy": "[0.2.10-local, )"
         }
       },
       "BCrypt.Net-Next": {
