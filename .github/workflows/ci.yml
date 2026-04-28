@@ -240,7 +240,7 @@ jobs:
         with:
           global-json-file: global.json
 
-      - uses: actions/cache@668228422ae6a00e4ad889ee87cd7109ec5666a7 # v5.0.4
+      - uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
         with:
           path: ~/.nuget/packages
           key: ${{ runner.os }}-nuget-${{ hashFiles('**/*.csproj', 'Directory.Packages.props', 'global.json', '.config/dotnet-tools.json') }}
@@ -276,7 +276,7 @@ jobs:
 
       - name: Upload coverage report
         if: matrix.runtime == 'linux-x64'
-        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: coverage-report
           path: artifacts/test-results/coverage-report/**
@@ -319,7 +319,7 @@ jobs:
 
       - name: Upload test results
         if: always()
-        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: test-results-${{ matrix.runtime }}
           path: artifacts/test-results/**
@@ -335,7 +335,7 @@ jobs:
 
       - name: Upload packages
         if: needs.resolve-version.outputs.is_release == 'true' && matrix.pack
-        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: packages
           path: artifacts/packages/**
@@ -343,7 +343,7 @@ jobs:
 
       - name: Upload installer artifacts
         if: needs.resolve-version.outputs.is_release == 'true' && matrix.publish
-        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: installer-${{ matrix.runtime }}
           path: artifacts/installers/**
@@ -377,7 +377,7 @@ jobs:
             echo "has_docs=false" >> "$GITHUB_OUTPUT"
           fi
 
-      - uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f # v6.3.0
+      - uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0
         if: steps.check.outputs.has_docs == 'true'
         with:
           node-version: 22
@@ -396,7 +396,7 @@ jobs:
 
       - name: Upload docs artifact
         if: steps.check.outputs.has_docs == 'true'
-        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: docs-site
           path: docs/.vitepress/dist
@@ -489,7 +489,7 @@ jobs:
           } >> "$GITHUB_STEP_SUMMARY"
 
       - name: Upload release status artifact
-        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: release-status
           path: artifacts/release/release-status.json
@@ -529,7 +529,7 @@ jobs:
       - name: NuGet login (Trusted Publishing / OIDC)
         if: env.NUGET_USE_OIDC == 'true'
         id: nuget-login
-        uses: NuGet/login@d22cc5f58ff5b88bf9bd452535b4335137e24544 # v1.1.0
+        uses: NuGet/login@8d196754b4036150537f80ac539e15c2f1028841 # v1.2.0
         with:
           user: ${{ vars.NUGET_USER || github.repository_owner }}
 
@@ -695,7 +695,7 @@ jobs:
 
       - name: Upload pages artifact
         if: steps.check.outputs.should_deploy == 'true'
-        uses: actions/upload-pages-artifact@7b1f4a764d45c48632c6b24a0339c27f5614fb0b # v4.0.0
+        uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5.0.0
         with:
           path: docs-site
 
