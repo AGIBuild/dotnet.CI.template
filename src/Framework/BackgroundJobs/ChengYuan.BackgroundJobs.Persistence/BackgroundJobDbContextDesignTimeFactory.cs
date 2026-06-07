@@ -1,5 +1,0 @@
-using ChengYuan.EntityFrameworkCore;
-
-namespace ChengYuan.BackgroundJobs;
-
-public sealed class BackgroundJobDbContextDesignTimeFactory : ChengYuanSqliteDesignTimeDbContextFactory<BackgroundJobDbContext>;

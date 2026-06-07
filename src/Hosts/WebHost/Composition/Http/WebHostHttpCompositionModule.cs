@@ -5,11 +5,13 @@ using ChengYuan.AspNetCore.Configuration;
 using ChengYuan.Authorization;
 using ChengYuan.Core.Json;
 using ChengYuan.Core.Modularity;
+using ChengYuan.Core.UI.Navigation;
 using ChengYuan.ExceptionHandling;
 using ChengYuan.HealthChecks;
 using ChengYuan.MultiTenancy;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Options;
@@ -20,6 +22,10 @@ namespace ChengYuan.WebHost;
 
 [DependsOn(typeof(MultiTenancyModule))]
 [DependsOn(typeof(ExceptionHandlingModule))]
+[DependsOn(typeof(NavigationModule))]
+[DependsOn(typeof(WebHostFrameworkCompositionModule))]
+[DependsOn(typeof(WebHostApplicationCompositionModule))]
+[DependsOn(typeof(WebHostRuntimeGlueModule))]
 internal sealed class WebHostHttpCompositionModule : HostModule
 {
     public override void ConfigureServices(ServiceConfigurationContext context)
@@ -42,9 +48,24 @@ internal sealed class WebHostHttpCompositionModule : HostModule
         context.Services.AddAuthorization();
         context.Services.AddChengYuanAuthorization();
 
+        var allowedOrigins = context.Configuration?
+            .GetSection("Cors:AllowedOrigins")
+            .GetChildren()
+            .Select(static origin => origin.Value)
+            .Where(static origin => !string.IsNullOrWhiteSpace(origin))
+            .Select(static origin => origin!)
+            .ToArray() ?? [];
+
         context.Services.AddCors(options =>
             options.AddDefaultPolicy(policy =>
-                policy.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod()));
+            {
+                if (allowedOrigins.Length > 0)
+                {
+                    policy.WithOrigins(allowedOrigins)
+                        .AllowAnyHeader()
+                        .AllowAnyMethod();
+                }
+            }));
 
         context.Services
             .AddApiVersioning(options =>
@@ -57,6 +78,7 @@ internal sealed class WebHostHttpCompositionModule : HostModule
 
         new HttpTenantResolutionBuilder(context.Services)
             .AddDefaultSources();
+        context.Services.TryAddScoped<IHttpTenantAccessValidator, ClaimTenantAccessValidator>();
 
         context.Services
             .AddControllers()

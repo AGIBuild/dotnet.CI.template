@@ -1,5 +1,6 @@
 using System.Security.Claims;
 using ChengYuan.ExecutionContext;
+using ChengYuan.Identity;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
@@ -16,6 +17,7 @@ public sealed class CurrentUserMiddlewareTests
     [Fact]
     public async Task Authenticated_user_is_bridged_to_ICurrentUser()
     {
+        var userId = Guid.NewGuid().ToString();
         string? capturedUserId = null;
         string? capturedUserName = null;
         bool? capturedIsAuthenticated = null;
@@ -28,6 +30,7 @@ public sealed class CurrentUserMiddlewareTests
                 {
                     services.AddRouting();
                     services.AddExecutionContext();
+                    services.AddSingleton<IUserSessionValidator, AlwaysActiveUserSessionValidator>();
                 });
                 webBuilder.Configure(app =>
                 {
@@ -36,7 +39,7 @@ public sealed class CurrentUserMiddlewareTests
                     {
                         context.User = new ClaimsPrincipal(new ClaimsIdentity(
                         [
-                            new Claim("sub", "user-42"),
+                            new Claim("sub", userId),
                             new Claim("name", "TestUser"),
                         ],
                         authenticationType: "test-scheme"));
@@ -60,7 +63,7 @@ public sealed class CurrentUserMiddlewareTests
         var client = host.GetTestClient();
         await client.GetAsync(new Uri("/whoami", UriKind.Relative), TestContext.Current.CancellationToken);
 
-        capturedUserId.ShouldBe("user-42");
+        capturedUserId.ShouldBe(userId);
         capturedUserName.ShouldBe("TestUser");
         capturedIsAuthenticated.ShouldBe(true);
     }
@@ -78,6 +81,7 @@ public sealed class CurrentUserMiddlewareTests
                 {
                     services.AddRouting();
                     services.AddExecutionContext();
+                    services.AddSingleton<IUserSessionValidator, AlwaysActiveUserSessionValidator>();
                 });
                 webBuilder.Configure(app =>
                 {
@@ -97,5 +101,11 @@ public sealed class CurrentUserMiddlewareTests
         await client.GetAsync(new Uri("/whoami", UriKind.Relative), TestContext.Current.CancellationToken);
 
         capturedIsAuthenticated.ShouldBe(false);
+    }
+
+    private sealed class AlwaysActiveUserSessionValidator : IUserSessionValidator
+    {
+        public ValueTask<bool> IsActiveSessionAsync(Guid userId, CancellationToken cancellationToken = default)
+            => ValueTask.FromResult(true);
     }
 }

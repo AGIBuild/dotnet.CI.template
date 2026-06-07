@@ -68,8 +68,12 @@ public class AuthorizationModuleTests
 
         using var serviceProvider = services.BuildServiceProvider();
         var checker = serviceProvider.GetRequiredService<IPermissionChecker>();
+        var currentUser = serviceProvider.GetRequiredService<ICurrentUserAccessor>();
 
-        (await checker.IsGrantedAsync("workspace.analytics.view", cancellationToken)).ShouldBeTrue();
+        using (currentUser.Change(new CurrentUserInfo("alice", "Alice", true)))
+        {
+            (await checker.IsGrantedAsync("workspace.analytics.view", cancellationToken)).ShouldBeTrue();
+        }
     }
 
     [Fact]
@@ -96,26 +100,26 @@ public class AuthorizationModuleTests
         var currentTenant = serviceProvider.GetRequiredService<ICurrentTenantAccessor>();
         var currentUser = serviceProvider.GetRequiredService<ICurrentUserAccessor>();
 
-        // Global=Granted, no tenant/user context → Granted
-        (await checker.IsGrantedAsync("workspace.members.delete", cancellationToken)).ShouldBeTrue();
-
         var tenantId = Guid.NewGuid();
         const string userId = "alice";
 
-        // Add Tenant=Prohibited → any Prohibited overrides → false
-        var tenantProvider = serviceProvider.GetServices<IPermissionGrantProvider>().OfType<TestTenantPermissionGrantProvider>().Single();
-        tenantProvider.Values[(tenantId, "workspace.members.delete")] = false;
-
-        using (currentTenant.Change(tenantId, "tenant-a"))
+        using (currentUser.Change(new CurrentUserInfo(userId, "Alice", true)))
         {
-            (await checker.IsGrantedAsync("workspace.members.delete", cancellationToken)).ShouldBeFalse();
+            // Global=Granted, authenticated host user → Granted
+            (await checker.IsGrantedAsync("workspace.members.delete", cancellationToken)).ShouldBeTrue();
 
-            // Add User=Granted, but Tenant still Prohibited → still false
-            var userProvider = serviceProvider.GetServices<IPermissionGrantProvider>().OfType<TestUserPermissionGrantProvider>().Single();
-            userProvider.Values[(userId, "workspace.members.delete")] = true;
+            // Add Tenant=Prohibited → any Prohibited overrides → false
+            var tenantProvider = serviceProvider.GetServices<IPermissionGrantProvider>().OfType<TestTenantPermissionGrantProvider>().Single();
+            tenantProvider.Values[(tenantId, "workspace.members.delete")] = false;
 
-            using (currentUser.Change(new CurrentUserInfo(userId, "Alice", true)))
+            using (currentTenant.Change(tenantId, "tenant-a"))
             {
+                (await checker.IsGrantedAsync("workspace.members.delete", cancellationToken)).ShouldBeFalse();
+
+                // Add User=Granted, but Tenant still Prohibited → still false
+                var userProvider = serviceProvider.GetServices<IPermissionGrantProvider>().OfType<TestUserPermissionGrantProvider>().Single();
+                userProvider.Values[(userId, "workspace.members.delete")] = true;
+
                 (await checker.IsGrantedAsync("workspace.members.delete", cancellationToken)).ShouldBeFalse();
             }
         }

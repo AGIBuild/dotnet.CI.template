@@ -1,5 +1,3 @@
-using System;
-
 namespace ChengYuan.Core.UI.Navigation;
 
 public sealed class MenuConfigurationContext

@@ -9,7 +9,7 @@ public static class FeaturesServiceCollectionExtensions
     public static IServiceCollection AddFeatures(this IServiceCollection services)
     {
         services.TryAddSingleton<IFeatureDefinitionManager, DefaultFeatureDefinitionManager>();
-        services.TryAddSingleton<IFeatureChecker, DefaultFeatureChecker>();
+        services.TryAddScoped<IFeatureChecker, DefaultFeatureChecker>();
 
         return services;
     }

@@ -61,7 +61,6 @@ internal sealed class DomainTenantResolutionSource(MultiTenancyOptions options) 
             if (Guid.TryParse(tenant, out var tenantId))
             {
                 context.TenantId = tenantId;
-                context.HasResolved = true;
                 context.SourceName = nameof(DomainTenantResolutionSource);
                 return ValueTask.CompletedTask;
             }

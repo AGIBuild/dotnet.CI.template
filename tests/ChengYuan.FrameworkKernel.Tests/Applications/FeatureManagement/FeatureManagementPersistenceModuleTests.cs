@@ -44,6 +44,7 @@ public class FeatureManagementPersistenceModuleTests
         await using var serviceProvider = services.BuildServiceProvider();
         var featureChecker = serviceProvider.GetRequiredService<IFeatureChecker>();
         var featureValueManager = serviceProvider.GetRequiredService<IFeatureValueManager>();
+        var featureValueStore = serviceProvider.GetRequiredService<IFeatureValueStore>();
         var currentTenant = serviceProvider.GetRequiredService<ICurrentTenantAccessor>();
         var currentUser = serviceProvider.GetRequiredService<ICurrentUserAccessor>();
         var tenantId = Guid.NewGuid();
@@ -57,7 +58,7 @@ public class FeatureManagementPersistenceModuleTests
         {
             (await featureChecker.GetAsync<int>("workspace.max-users", TestContext.Current.CancellationToken)).ShouldBe(30);
 
-            await featureValueManager.SetAsync(new FeatureValueRecord("workspace.max-users", FeatureScope.User, 40, userId: "alice"), TestContext.Current.CancellationToken);
+            await featureValueStore.SetAsync(new FeatureValueRecord("workspace.max-users", FeatureScope.User, 40, userId: "alice"), TestContext.Current.CancellationToken);
 
             using (currentUser.Change(new CurrentUserInfo("alice", "Alice", true)))
             {

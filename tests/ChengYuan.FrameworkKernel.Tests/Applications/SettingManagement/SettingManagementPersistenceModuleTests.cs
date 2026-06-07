@@ -44,6 +44,7 @@ public class SettingManagementPersistenceModuleTests
         await using var serviceProvider = services.BuildServiceProvider();
         var settingProvider = serviceProvider.GetRequiredService<ISettingProvider>();
         var settingValueManager = serviceProvider.GetRequiredService<ISettingValueManager>();
+        var settingValueStore = serviceProvider.GetRequiredService<ISettingValueStore>();
         var currentTenant = serviceProvider.GetRequiredService<ICurrentTenantAccessor>();
         var currentUser = serviceProvider.GetRequiredService<ICurrentUserAccessor>();
         var tenantId = Guid.NewGuid();
@@ -57,7 +58,7 @@ public class SettingManagementPersistenceModuleTests
         {
             (await settingProvider.GetAsync<int>("workspace.max-users", TestContext.Current.CancellationToken)).ShouldBe(30);
 
-            await settingValueManager.SetAsync(new SettingValueRecord("workspace.max-users", SettingScope.User, 40, userId: "alice"), TestContext.Current.CancellationToken);
+            await settingValueStore.SetAsync(new SettingValueRecord("workspace.max-users", SettingScope.User, 40, userId: "alice"), TestContext.Current.CancellationToken);
 
             using (currentUser.Change(new CurrentUserInfo("alice", "Alice", true)))
             {

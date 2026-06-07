@@ -50,7 +50,6 @@ internal sealed class ClaimTenantResolutionSource(MultiTenancyOptions options) :
             if (Guid.TryParse(claim.Value, out var tenantId))
             {
                 context.TenantId = tenantId;
-                context.HasResolved = true;
                 context.SourceName = nameof(ClaimTenantResolutionSource);
                 return ValueTask.CompletedTask;
             }

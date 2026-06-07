@@ -1,4 +1,5 @@
 using ChengYuan.Core.Modularity;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 
@@ -17,6 +18,8 @@ public static class HostingCompositionExtensions
     {
         ArgumentNullException.ThrowIfNull(builder);
         ArgumentNullException.ThrowIfNull(configure);
+
+        builder.Services.AddSingleton<IConfiguration>(builder.Configuration);
 
         var cy = new ChengYuanBuilder(builder.Services);
         configure(cy);

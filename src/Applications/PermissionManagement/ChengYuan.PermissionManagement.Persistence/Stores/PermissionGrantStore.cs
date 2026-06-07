@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace ChengYuan.PermissionManagement;
 
-public sealed class PermissionGrantStore(IDbContextFactory<PermissionManagementDbContext> dbContextFactory) : IPermissionGrantStore
+public sealed class PermissionGrantStore(PermissionManagementDbContext dbContext) : IPermissionGrantStore
 {
     public async ValueTask<PermissionGrantRecord?> FindAsync(
         string name,
@@ -14,7 +14,6 @@ public sealed class PermissionGrantStore(IDbContextFactory<PermissionManagementD
     {
         ValidateArguments(name, scope, tenantId, userId);
 
-        await using var dbContext = await dbContextFactory.CreateDbContextAsync(cancellationToken);
         var entity = await dbContext.PermissionGrants
             .SingleOrDefaultAsync(
                 permissionGrant => permissionGrant.Name == name
@@ -28,7 +27,6 @@ public sealed class PermissionGrantStore(IDbContextFactory<PermissionManagementD
 
     public async ValueTask<IReadOnlyList<PermissionGrantRecord>> GetListAsync(CancellationToken cancellationToken = default)
     {
-        await using var dbContext = await dbContextFactory.CreateDbContextAsync(cancellationToken);
         var entities = await dbContext.PermissionGrants
             .OrderBy(permissionGrant => permissionGrant.Scope)
             .ThenBy(permissionGrant => permissionGrant.Name)
@@ -45,7 +43,6 @@ public sealed class PermissionGrantStore(IDbContextFactory<PermissionManagementD
     {
         ArgumentNullException.ThrowIfNull(record);
 
-        await using var dbContext = await dbContextFactory.CreateDbContextAsync(cancellationToken);
         var entity = await dbContext.PermissionGrants
             .SingleOrDefaultAsync(
                 permissionGrant => permissionGrant.Name == record.Name
@@ -77,7 +74,6 @@ public sealed class PermissionGrantStore(IDbContextFactory<PermissionManagementD
     {
         ValidateArguments(name, scope, tenantId, userId);
 
-        await using var dbContext = await dbContextFactory.CreateDbContextAsync(cancellationToken);
         var entity = await dbContext.PermissionGrants
             .SingleOrDefaultAsync(
                 permissionGrant => permissionGrant.Name == name

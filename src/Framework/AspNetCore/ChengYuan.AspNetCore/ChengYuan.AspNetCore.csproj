@@ -12,6 +12,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\Core\ChengYuan.Core.csproj" />
+    <ProjectReference Include="..\..\UI\ChengYuan.UI.Navigation\ChengYuan.UI.Navigation.csproj" />
     <ProjectReference Include="..\..\Hosting\ChengYuan.Hosting.csproj" />
     <ProjectReference Include="..\..\Application\ChengYuan.Application\ChengYuan.Application.csproj" />
   </ItemGroup>

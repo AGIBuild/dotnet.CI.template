@@ -50,6 +50,12 @@ internal sealed class TenantResolver(
                 return TenantResolveResult.Resolved(context.TenantId!.Value, context.TenantName);
             }
 
+            // Client-provided Guid values are candidates, not trusted resolutions.
+            if (context.TenantId.HasValue)
+            {
+                return await NormalizeByIdAsync(context.TenantId.Value, cancellationToken);
+            }
+
             // A source provided a name candidate but not a Guid — attempt normalization
             if (!string.IsNullOrEmpty(context.TenantName) && !context.TenantId.HasValue)
             {
@@ -66,6 +72,24 @@ internal sealed class TenantResolver(
         }
 
         return TenantResolveResult.Unresolved;
+    }
+
+    private async Task<TenantResolveResult> NormalizeByIdAsync(
+        Guid tenantId, CancellationToken cancellationToken)
+    {
+        var record = await store.FindByIdAsync(tenantId, cancellationToken);
+
+        if (record is null)
+        {
+            return TenantResolveResult.NotFound();
+        }
+
+        if (!record.IsActive)
+        {
+            return TenantResolveResult.InactiveTenant(record.Id, record.Name);
+        }
+
+        return TenantResolveResult.Resolved(record.Id, record.Name);
     }
 
     private async Task<TenantResolveResult> NormalizeByNameAsync(

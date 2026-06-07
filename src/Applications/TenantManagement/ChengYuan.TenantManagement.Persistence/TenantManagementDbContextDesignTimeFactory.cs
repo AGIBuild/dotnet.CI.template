@@ -1,5 +1,0 @@
-using ChengYuan.EntityFrameworkCore;
-
-namespace ChengYuan.TenantManagement;
-
-public sealed class TenantManagementDbContextDesignTimeFactory : ChengYuanSqliteDesignTimeDbContextFactory<TenantManagementDbContext>;

@@ -9,7 +9,7 @@ public static class SettingsServiceCollectionExtensions
     public static IServiceCollection AddSettings(this IServiceCollection services)
     {
         services.TryAddSingleton<ISettingDefinitionManager, DefaultSettingDefinitionManager>();
-        services.TryAddSingleton<ISettingProvider, DefaultSettingProvider>();
+        services.TryAddScoped<ISettingProvider, DefaultSettingProvider>();
 
         return services;
     }

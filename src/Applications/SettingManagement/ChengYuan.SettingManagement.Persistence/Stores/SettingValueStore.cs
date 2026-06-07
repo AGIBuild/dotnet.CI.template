@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace ChengYuan.SettingManagement;
 
-public sealed class SettingValueStore(IDbContextFactory<SettingManagementDbContext> dbContextFactory) : ISettingValueStore
+public sealed class SettingValueStore(SettingManagementDbContext dbContext) : ISettingValueStore
 {
     public async ValueTask<SettingValueRecord?> FindAsync(
         string name,
@@ -14,7 +14,6 @@ public sealed class SettingValueStore(IDbContextFactory<SettingManagementDbConte
     {
         ValidateArguments(name, scope, tenantId, userId);
 
-        await using var dbContext = await dbContextFactory.CreateDbContextAsync(cancellationToken);
         var entity = await dbContext.SettingValues
             .SingleOrDefaultAsync(
                 settingValue => settingValue.Name == name
@@ -28,7 +27,6 @@ public sealed class SettingValueStore(IDbContextFactory<SettingManagementDbConte
 
     public async ValueTask<IReadOnlyList<SettingValueRecord>> GetListAsync(CancellationToken cancellationToken = default)
     {
-        await using var dbContext = await dbContextFactory.CreateDbContextAsync(cancellationToken);
         var entities = await dbContext.SettingValues
             .OrderBy(settingValue => settingValue.Scope)
             .ThenBy(settingValue => settingValue.Name)
@@ -45,7 +43,6 @@ public sealed class SettingValueStore(IDbContextFactory<SettingManagementDbConte
     {
         ArgumentNullException.ThrowIfNull(record);
 
-        await using var dbContext = await dbContextFactory.CreateDbContextAsync(cancellationToken);
         var entity = await dbContext.SettingValues
             .SingleOrDefaultAsync(
                 settingValue => settingValue.Name == record.Name
@@ -77,7 +74,6 @@ public sealed class SettingValueStore(IDbContextFactory<SettingManagementDbConte
     {
         ValidateArguments(name, scope, tenantId, userId);
 
-        await using var dbContext = await dbContextFactory.CreateDbContextAsync(cancellationToken);
         var entity = await dbContext.SettingValues
             .SingleOrDefaultAsync(
                 settingValue => settingValue.Name == name

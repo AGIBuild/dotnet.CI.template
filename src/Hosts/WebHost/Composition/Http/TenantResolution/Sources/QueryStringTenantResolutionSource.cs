@@ -45,7 +45,6 @@ internal sealed class QueryStringTenantResolutionSource(MultiTenancyOptions opti
         if (Guid.TryParse(value, out var tenantId))
         {
             context.TenantId = tenantId;
-            context.HasResolved = true;
             context.SourceName = nameof(QueryStringTenantResolutionSource);
             return ValueTask.CompletedTask;
         }

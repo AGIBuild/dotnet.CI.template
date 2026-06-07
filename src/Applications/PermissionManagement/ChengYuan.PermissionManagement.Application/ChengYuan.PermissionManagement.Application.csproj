@@ -8,6 +8,7 @@
     <ProjectReference Include="..\..\..\Framework\Core\ChengYuan.Core.csproj" />
     <ProjectReference Include="..\ChengYuan.PermissionManagement.Contracts\ChengYuan.PermissionManagement.Contracts.csproj" />
     <ProjectReference Include="..\..\..\Framework\Authorization\ChengYuan.Authorization\ChengYuan.Authorization.csproj" />
+    <ProjectReference Include="..\..\..\Framework\MultiTenancy\ChengYuan.MultiTenancy\ChengYuan.MultiTenancy.csproj" />
   </ItemGroup>
 
 </Project>

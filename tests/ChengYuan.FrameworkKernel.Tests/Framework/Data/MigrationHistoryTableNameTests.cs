@@ -1,4 +1,5 @@
 using ChengYuan.AuditLogging;
+using ChengYuan.BackgroundJobs;
 using ChengYuan.EntityFrameworkCore;
 using ChengYuan.FeatureManagement;
 using ChengYuan.Identity;
@@ -19,6 +20,7 @@ public sealed class MigrationHistoryTableNameTests
     [InlineData(typeof(PermissionManagementDbContext), "__EFMigrationsHistory_PermissionManagement")]
     [InlineData(typeof(SettingManagementDbContext), "__EFMigrationsHistory_SettingManagement")]
     [InlineData(typeof(FeatureManagementDbContext), "__EFMigrationsHistory_FeatureManagement")]
+    [InlineData(typeof(BackgroundJobDbContext), "__EFMigrationsHistory_BackgroundJob")]
     public void Resolve_produces_module_specific_table_name(Type dbContextType, string expectedTableName)
     {
         MigrationHistoryTableNameResolver.Resolve(dbContextType).ShouldBe(expectedTableName);

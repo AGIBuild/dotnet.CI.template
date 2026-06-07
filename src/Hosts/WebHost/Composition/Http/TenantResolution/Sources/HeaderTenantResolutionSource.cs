@@ -67,7 +67,6 @@ internal sealed class HeaderTenantResolutionSource(MultiTenancyOptions options) 
         if (Guid.TryParse(value, out var tenantId))
         {
             context.TenantId = tenantId;
-            context.HasResolved = true;
             context.SourceName = nameof(HeaderTenantResolutionSource);
             return true;
         }

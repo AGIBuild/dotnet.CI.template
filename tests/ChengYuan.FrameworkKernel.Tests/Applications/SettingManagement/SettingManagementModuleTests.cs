@@ -47,6 +47,7 @@ public class SettingManagementModuleTests
         using var serviceProvider = services.BuildServiceProvider();
         var settingProvider = serviceProvider.GetRequiredService<ISettingProvider>();
         var settingValueManager = serviceProvider.GetRequiredService<ISettingValueManager>();
+        var settingValueStore = serviceProvider.GetRequiredService<ISettingValueStore>();
         var currentTenant = serviceProvider.GetRequiredService<ICurrentTenantAccessor>();
         var currentUser = serviceProvider.GetRequiredService<ICurrentUserAccessor>();
 
@@ -59,7 +60,7 @@ public class SettingManagementModuleTests
         {
             (await settingProvider.GetAsync<int>("workspace.max-users", cancellationToken)).ShouldBe(30);
 
-            await settingValueManager.SetAsync(new SettingValueRecord("workspace.max-users", SettingScope.User, 40, userId: userId), cancellationToken);
+            await settingValueStore.SetAsync(new SettingValueRecord("workspace.max-users", SettingScope.User, 40, userId: userId), cancellationToken);
 
             using (currentUser.Change(new CurrentUserInfo(userId, "Alice", true)))
             {

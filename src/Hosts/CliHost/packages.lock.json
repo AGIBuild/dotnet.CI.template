@@ -473,6 +473,7 @@
           "ChengYuan.Auditing": "[0.2.10-local, )",
           "ChengYuan.Authorization": "[0.2.10-local, )",
           "ChengYuan.Core": "[0.2.10-local, )",
+          "ChengYuan.MultiTenancy": "[0.2.10-local, )",
           "ChengYuan.Settings": "[0.2.10-local, )"
         }
       },
@@ -486,7 +487,6 @@
         "type": "Project",
         "dependencies": {
           "ChengYuan.AuditLogging.Application": "[0.2.10-local, )",
-          "ChengYuan.Data.Sqlite": "[0.2.10-local, )",
           "ChengYuan.EntityFrameworkCore": "[0.2.10-local, )"
         }
       },
@@ -557,7 +557,8 @@
           "ChengYuan.Authorization": "[0.2.10-local, )",
           "ChengYuan.Core": "[0.2.10-local, )",
           "ChengYuan.FeatureManagement.Contracts": "[0.2.10-local, )",
-          "ChengYuan.Features": "[0.2.10-local, )"
+          "ChengYuan.Features": "[0.2.10-local, )",
+          "ChengYuan.MultiTenancy": "[0.2.10-local, )"
         }
       },
       "chengyuan.featuremanagement.contracts": {
@@ -570,7 +571,6 @@
       "chengyuan.featuremanagement.persistence": {
         "type": "Project",
         "dependencies": {
-          "ChengYuan.Data.Sqlite": "[0.2.10-local, )",
           "ChengYuan.EntityFrameworkCore": "[0.2.10-local, )",
           "ChengYuan.FeatureManagement.Application": "[0.2.10-local, )"
         }
@@ -599,6 +599,7 @@
           "ChengYuan.Core": "[0.2.10-local, )",
           "ChengYuan.Identity.Contracts": "[0.2.10-local, )",
           "ChengYuan.Identity.Domain": "[0.2.10-local, )",
+          "ChengYuan.MultiTenancy": "[0.2.10-local, )",
           "ChengYuan.Settings": "[0.2.10-local, )"
         }
       },
@@ -615,7 +616,6 @@
       "chengyuan.identity.persistence": {
         "type": "Project",
         "dependencies": {
-          "ChengYuan.Data.Sqlite": "[0.2.10-local, )",
           "ChengYuan.EntityFrameworkCore": "[0.2.10-local, )",
           "ChengYuan.ExceptionHandling": "[0.2.10-local, )",
           "ChengYuan.Identity.Application": "[0.2.10-local, )",
@@ -634,6 +634,7 @@
         "dependencies": {
           "ChengYuan.Authorization": "[0.2.10-local, )",
           "ChengYuan.Core": "[0.2.10-local, )",
+          "ChengYuan.MultiTenancy": "[0.2.10-local, )",
           "ChengYuan.PermissionManagement.Contracts": "[0.2.10-local, )"
         }
       },
@@ -647,7 +648,6 @@
       "chengyuan.permissionmanagement.persistence": {
         "type": "Project",
         "dependencies": {
-          "ChengYuan.Data.Sqlite": "[0.2.10-local, )",
           "ChengYuan.EntityFrameworkCore": "[0.2.10-local, )",
           "ChengYuan.PermissionManagement.Application": "[0.2.10-local, )"
         }
@@ -657,6 +657,7 @@
         "dependencies": {
           "ChengYuan.Authorization": "[0.2.10-local, )",
           "ChengYuan.Core": "[0.2.10-local, )",
+          "ChengYuan.MultiTenancy": "[0.2.10-local, )",
           "ChengYuan.SettingManagement.Contracts": "[0.2.10-local, )",
           "ChengYuan.Settings": "[0.2.10-local, )"
         }
@@ -671,7 +672,6 @@
       "chengyuan.settingmanagement.persistence": {
         "type": "Project",
         "dependencies": {
-          "ChengYuan.Data.Sqlite": "[0.2.10-local, )",
           "ChengYuan.EntityFrameworkCore": "[0.2.10-local, )",
           "ChengYuan.SettingManagement.Application": "[0.2.10-local, )"
         }
@@ -702,7 +702,6 @@
       "chengyuan.tenantmanagement.persistence": {
         "type": "Project",
         "dependencies": {
-          "ChengYuan.Data.Sqlite": "[0.2.10-local, )",
           "ChengYuan.EntityFrameworkCore": "[0.2.10-local, )",
           "ChengYuan.TenantManagement.Application": "[0.2.10-local, )"
         }

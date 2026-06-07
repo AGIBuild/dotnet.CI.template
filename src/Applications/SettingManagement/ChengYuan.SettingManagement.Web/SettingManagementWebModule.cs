@@ -2,7 +2,7 @@ using ChengYuan.Core.Modularity;
 
 namespace ChengYuan.SettingManagement;
 
-[DependsOn(typeof(SettingManagementPersistenceModule))]
+[DependsOn(typeof(SettingManagementModule))]
 public sealed class SettingManagementWebModule : ExtensionModule
 {
     public override void ConfigureServices(ServiceConfigurationContext context)

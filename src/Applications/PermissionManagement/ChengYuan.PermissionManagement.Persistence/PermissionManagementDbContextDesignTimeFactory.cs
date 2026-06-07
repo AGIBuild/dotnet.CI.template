@@ -1,5 +1,0 @@
-using ChengYuan.EntityFrameworkCore;
-
-namespace ChengYuan.PermissionManagement;
-
-public sealed class PermissionManagementDbContextDesignTimeFactory : ChengYuanSqliteDesignTimeDbContextFactory<PermissionManagementDbContext>;

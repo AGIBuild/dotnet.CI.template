@@ -15,8 +15,8 @@ public sealed class SettingManagementEndpointContributor : IEndpointContributor
             .WithTags("SettingManagement")
             .RequireAuthorization();
 
-        group.MapGet("/", static async (ISettingValueReader reader, CancellationToken cancellationToken) =>
-            TypedResults.Ok(new ListResultDto<SettingValueRecord>(await reader.GetListAsync(cancellationToken))))
+        group.MapGet("/", static async (ISettingValueManager manager, CancellationToken cancellationToken) =>
+            TypedResults.Ok(new ListResultDto<SettingValueRecord>(await manager.GetListAsync(cancellationToken))))
             .RequireAuthorization(SettingManagementPermissions.Settings);
 
         group.MapPut("/", static async (SettingValueRecord record, ISettingValueManager manager, CancellationToken cancellationToken) =>

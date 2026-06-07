@@ -44,26 +44,28 @@ public class PermissionManagementPersistenceModuleTests
         await using var serviceProvider = services.BuildServiceProvider();
         var permissionChecker = serviceProvider.GetRequiredService<IPermissionChecker>();
         var permissionGrantManager = serviceProvider.GetRequiredService<IPermissionGrantManager>();
+        var permissionGrantStore = serviceProvider.GetRequiredService<IPermissionGrantStore>();
         var currentTenant = serviceProvider.GetRequiredService<ICurrentTenantAccessor>();
         var currentUser = serviceProvider.GetRequiredService<ICurrentUserAccessor>();
         var tenantId = Guid.NewGuid();
+        const string userId = "alice";
 
         // Global=Granted → true
         await permissionGrantManager.SetAsync(new PermissionGrantRecord("workspace.members.delete", PermissionScope.Global, true), TestContext.Current.CancellationToken);
-        (await permissionChecker.IsGrantedAsync("workspace.members.delete", TestContext.Current.CancellationToken)).ShouldBeTrue();
-
-        // Add Tenant=Prohibited → any Prohibited overrides → false
-        await permissionGrantManager.SetAsync(new PermissionGrantRecord("workspace.members.delete", PermissionScope.Tenant, false, tenantId), TestContext.Current.CancellationToken);
-
-        using (currentTenant.Change(tenantId, "tenant-a"))
+        using (currentUser.Change(new CurrentUserInfo(userId, "Alice", true)))
         {
-            (await permissionChecker.IsGrantedAsync("workspace.members.delete", TestContext.Current.CancellationToken)).ShouldBeFalse();
+            (await permissionChecker.IsGrantedAsync("workspace.members.delete", TestContext.Current.CancellationToken)).ShouldBeTrue();
 
-            // Add User=Granted, but Tenant still Prohibited → Prohibited wins → false
-            await permissionGrantManager.SetAsync(new PermissionGrantRecord("workspace.members.delete", PermissionScope.User, true, userId: "alice"), TestContext.Current.CancellationToken);
+            // Add Tenant=Prohibited → any Prohibited overrides → false
+            await permissionGrantManager.SetAsync(new PermissionGrantRecord("workspace.members.delete", PermissionScope.Tenant, false, tenantId), TestContext.Current.CancellationToken);
 
-            using (currentUser.Change(new CurrentUserInfo("alice", "Alice", true)))
+            using (currentTenant.Change(tenantId, "tenant-a"))
             {
+                (await permissionChecker.IsGrantedAsync("workspace.members.delete", TestContext.Current.CancellationToken)).ShouldBeFalse();
+
+                // Add User=Granted, but Tenant still Prohibited → Prohibited wins → false
+                await permissionGrantStore.SetAsync(new PermissionGrantRecord("workspace.members.delete", PermissionScope.User, true, userId: userId), TestContext.Current.CancellationToken);
+
                 (await permissionChecker.IsGrantedAsync("workspace.members.delete", TestContext.Current.CancellationToken)).ShouldBeFalse();
             }
         }
@@ -82,12 +84,16 @@ public class PermissionManagementPersistenceModuleTests
         await using var serviceProvider = services.BuildServiceProvider();
         var permissionChecker = serviceProvider.GetRequiredService<IPermissionChecker>();
         var permissionGrantManager = serviceProvider.GetRequiredService<IPermissionGrantManager>();
+        var currentUser = serviceProvider.GetRequiredService<ICurrentUserAccessor>();
 
         await permissionGrantManager.SetAsync(new PermissionGrantRecord("workspace.analytics.view", PermissionScope.Global, true), TestContext.Current.CancellationToken);
-        (await permissionChecker.IsGrantedAsync("workspace.analytics.view", TestContext.Current.CancellationToken)).ShouldBeTrue();
+        using (currentUser.Change(new CurrentUserInfo("alice", "Alice", true)))
+        {
+            (await permissionChecker.IsGrantedAsync("workspace.analytics.view", TestContext.Current.CancellationToken)).ShouldBeTrue();
 
-        await permissionGrantManager.RemoveAsync("workspace.analytics.view", PermissionScope.Global, cancellationToken: TestContext.Current.CancellationToken);
-        (await permissionChecker.IsGrantedAsync("workspace.analytics.view", TestContext.Current.CancellationToken)).ShouldBeFalse();
+            await permissionGrantManager.RemoveAsync("workspace.analytics.view", PermissionScope.Global, cancellationToken: TestContext.Current.CancellationToken);
+            (await permissionChecker.IsGrantedAsync("workspace.analytics.view", TestContext.Current.CancellationToken)).ShouldBeFalse();
+        }
     }
 
     [Fact]

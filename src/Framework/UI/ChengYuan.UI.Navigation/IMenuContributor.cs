@@ -1,5 +1,3 @@
-using System.Threading.Tasks;
-
 namespace ChengYuan.Core.UI.Navigation;
 
 public interface IMenuContributor

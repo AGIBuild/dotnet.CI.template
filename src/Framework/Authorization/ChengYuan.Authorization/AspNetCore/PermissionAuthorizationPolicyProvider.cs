@@ -33,6 +33,7 @@ public sealed class PermissionAuthorizationPolicyProvider(
         }
 
         return new AuthorizationPolicyBuilder()
+            .RequireAuthenticatedUser()
             .AddRequirements(new PermissionRequirement(policyName))
             .Build();
     }

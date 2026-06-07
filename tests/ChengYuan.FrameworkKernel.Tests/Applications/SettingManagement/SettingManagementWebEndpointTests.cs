@@ -3,6 +3,9 @@ using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using ChengYuan.EntityFrameworkCore;
 using ChengYuan.Identity;
+using ChengYuan.SettingManagement;
+using ChengYuan.Settings;
+using ChengYuan.TenantManagement;
 using ChengYuan.WebHost;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.TestHost;
@@ -108,6 +111,63 @@ public class SettingManagementWebEndpointTests
         list.Items.ShouldContain(s => s.Name == "app.color" && s.TenantId == tenantId);
     }
 
+    [Fact]
+    public async Task Settings_ShouldForbidWritingAnotherTenantSettingFromTenantContext()
+    {
+        await using var app = await CreateApplicationAsync();
+        var currentTenantId = Guid.NewGuid();
+        var otherTenantId = Guid.NewGuid();
+        await SeedTenantsAsync(app, currentTenantId, otherTenantId);
+
+        var client = await CreateAuthenticatedTenantClientAsync(app, currentTenantId);
+
+        var putResponse = await client.PutAsJsonAsync("/api/v1/settings", new
+        {
+            name = "app.cross-tenant",
+            scope = SettingScope.Tenant,
+            value = "blocked",
+            tenantId = otherTenantId,
+        }, TestContext.Current.CancellationToken);
+
+        putResponse.StatusCode.ShouldBe(HttpStatusCode.Forbidden);
+    }
+
+    [Fact]
+    public async Task Settings_ShouldOnlyListCurrentTenantValuesFromTenantContext()
+    {
+        await using var app = await CreateApplicationAsync();
+        var currentTenantId = Guid.NewGuid();
+        var otherTenantId = Guid.NewGuid();
+        await SeedTenantsAsync(app, currentTenantId, otherTenantId);
+        await SeedSettingAsync(app, "app.current", currentTenantId);
+        await SeedSettingAsync(app, "app.other", otherTenantId);
+
+        var client = await CreateAuthenticatedTenantClientAsync(app, currentTenantId);
+
+        var listResponse = await client.GetAsync("/api/v1/settings", TestContext.Current.CancellationToken);
+        listResponse.StatusCode.ShouldBe(HttpStatusCode.OK);
+
+        var list = await listResponse.Content.ReadFromJsonAsync<ItemsWrapper<SettingDto>>(TestContext.Current.CancellationToken);
+        list.ShouldNotBeNull();
+        list.Items.ShouldContain(s => s.Name == "app.current" && s.TenantId == currentTenantId);
+        list.Items.ShouldNotContain(s => s.Name == "app.other" && s.TenantId == otherTenantId);
+    }
+
+    [Fact]
+    public async Task Settings_ShouldForbidTenantTokenWithAnotherTenantHeader()
+    {
+        await using var app = await CreateApplicationAsync();
+        var tenantId = Guid.NewGuid();
+        var otherTenantId = Guid.NewGuid();
+        await SeedTenantsAsync(app, tenantId, otherTenantId);
+
+        var client = await CreateAuthenticatedTenantClientAsync(app, tenantId, otherTenantId);
+
+        var listResponse = await client.GetAsync("/api/v1/settings", TestContext.Current.CancellationToken);
+
+        listResponse.StatusCode.ShouldBe(HttpStatusCode.Forbidden);
+    }
+
     private static async Task<WebApplication> CreateApplicationAsync()
     {
         var databaseName = $"setting-web-{Guid.NewGuid():N}";
@@ -139,6 +199,51 @@ public class SettingManagementWebEndpointTests
         client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token!.AccessToken);
 
         return client;
+    }
+
+    private static async Task<HttpClient> CreateAuthenticatedTenantClientAsync(WebApplication app, Guid tenantId, Guid? headerTenantId = null)
+    {
+        var userManager = app.Services.GetRequiredService<IUserManager>();
+        var membershipManager = app.Services.GetRequiredService<IUserTenantMembershipManager>();
+        var user = await userManager.CreateAsync(
+            $"tenant-{Guid.NewGuid():N}",
+            $"tenant-{Guid.NewGuid():N}@test.com",
+            "TenantPass123!",
+            TestContext.Current.CancellationToken);
+        await membershipManager.AssignAsync(user.Id, tenantId, TestContext.Current.CancellationToken);
+
+        var client = app.GetTestClient();
+        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(
+            "Bearer",
+            TestJwtTokenFactory.CreateAccessToken(tenantId, user.Id));
+        client.DefaultRequestHeaders.Add("X-Tenant-Id", (headerTenantId ?? tenantId).ToString());
+
+        return client;
+    }
+
+    private static async Task SeedTenantsAsync(WebApplication app, params Guid[] tenantIds)
+    {
+        using var scope = app.Services.CreateScope();
+        var dbContext = scope.ServiceProvider.GetRequiredService<TenantManagementDbContext>();
+
+        foreach (var tenantId in tenantIds)
+        {
+            await dbContext.Tenants.AddAsync(
+                new TenantEntity(tenantId, $"Tenant-{tenantId:N}", isActive: true),
+                TestContext.Current.CancellationToken);
+        }
+
+        await dbContext.SaveChangesAsync(TestContext.Current.CancellationToken);
+    }
+
+    private static async Task SeedSettingAsync(WebApplication app, string name, Guid tenantId)
+    {
+        using var scope = app.Services.CreateScope();
+        var dbContext = scope.ServiceProvider.GetRequiredService<SettingManagementDbContext>();
+        await dbContext.SettingValues.AddAsync(
+            new SettingValueEntity(Guid.NewGuid(), name, SettingScope.Tenant, "seeded", tenantId),
+            TestContext.Current.CancellationToken);
+        await dbContext.SaveChangesAsync(TestContext.Current.CancellationToken);
     }
 
     private sealed class SettingDto

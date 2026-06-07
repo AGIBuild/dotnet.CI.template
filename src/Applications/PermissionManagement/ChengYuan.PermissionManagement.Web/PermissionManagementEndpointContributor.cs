@@ -15,8 +15,8 @@ public sealed class PermissionManagementEndpointContributor : IEndpointContribut
             .WithTags("PermissionManagement")
             .RequireAuthorization();
 
-        group.MapGet("/", static async (IPermissionGrantReader reader, CancellationToken cancellationToken) =>
-            TypedResults.Ok(new ListResultDto<PermissionGrantRecord>(await reader.GetListAsync(cancellationToken))))
+        group.MapGet("/", static async (IPermissionGrantManager manager, CancellationToken cancellationToken) =>
+            TypedResults.Ok(new ListResultDto<PermissionGrantRecord>(await manager.GetListAsync(cancellationToken))))
             .RequireAuthorization(PermissionManagementPermissions.Permissions);
 
         group.MapPut("/", static async (PermissionGrantRecord record, IPermissionGrantManager manager, CancellationToken cancellationToken) =>

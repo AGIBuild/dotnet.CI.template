@@ -15,6 +15,7 @@ internal sealed class TenantResolutionMiddleware(RequestDelegate next)
         HttpContext httpContext,
         MultiTenancyOptions options,
         ITenantResolver resolver,
+        IHttpTenantAccessValidator accessValidator,
         ICurrentTenantAccessor accessor)
     {
         if (!options.IsEnabled)
@@ -28,6 +29,13 @@ internal sealed class TenantResolutionMiddleware(RequestDelegate next)
         switch (result.Outcome)
         {
             case TenantResolveOutcome.Resolved:
+                if (!await accessValidator.CanAccessAsync(httpContext, result, httpContext.RequestAborted))
+                {
+                    httpContext.Response.StatusCode = StatusCodes.Status403Forbidden;
+                    await httpContext.Response.WriteAsync("Tenant access is forbidden.", httpContext.RequestAborted);
+                    return;
+                }
+
                 using (accessor.Change(result.TenantId, result.TenantName))
                 {
                     await next(httpContext);

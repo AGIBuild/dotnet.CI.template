@@ -9,10 +9,10 @@ public static class FeatureManagementServiceCollectionExtensions
 {
     public static IServiceCollection AddFeatureManagement(this IServiceCollection services)
     {
-        services.TryAddSingleton<IFeatureValueManager, FeatureValueManager>();
-        services.TryAddEnumerable(ServiceDescriptor.Singleton<IFeatureValueProvider, FeatureStoreUserValueProvider>());
-        services.TryAddEnumerable(ServiceDescriptor.Singleton<IFeatureValueProvider, FeatureStoreTenantValueProvider>());
-        services.TryAddEnumerable(ServiceDescriptor.Singleton<IFeatureValueProvider, FeatureStoreGlobalValueProvider>());
+        services.TryAddScoped<IFeatureValueManager, FeatureValueManager>();
+        services.TryAddEnumerable(ServiceDescriptor.Scoped<IFeatureValueProvider, FeatureStoreUserValueProvider>());
+        services.TryAddEnumerable(ServiceDescriptor.Scoped<IFeatureValueProvider, FeatureStoreTenantValueProvider>());
+        services.TryAddEnumerable(ServiceDescriptor.Scoped<IFeatureValueProvider, FeatureStoreGlobalValueProvider>());
         services.AddTransient<IPermissionDefinitionContributor, FeatureManagementPermissionDefinitionContributor>();
 
         return services;

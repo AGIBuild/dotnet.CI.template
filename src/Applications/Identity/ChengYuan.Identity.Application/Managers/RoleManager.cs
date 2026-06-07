@@ -1,6 +1,7 @@
 using ChengYuan.Core.Data;
 using ChengYuan.Core.DependencyInjection;
 using ChengYuan.Core.Exceptions;
+using ChengYuan.MultiTenancy;
 
 namespace ChengYuan.Identity;
 
@@ -8,10 +9,12 @@ namespace ChengYuan.Identity;
 public sealed class RoleManager(
     IIdentityRoleRepository roleRepository,
     IIdentityUserRepository userRepository,
+    ICurrentTenant currentTenant,
     IUnitOfWork unitOfWork) : IRoleManager, IRoleReader, IScopedService
 {
     public async ValueTask<RoleRecord> CreateAsync(string name, CancellationToken cancellationToken = default)
     {
+        EnsureHostContext();
         await EnsureUniqueAsync(name, roleIdToIgnore: null, cancellationToken);
 
         var role = new IdentityRole(Guid.NewGuid(), name);
@@ -23,6 +26,7 @@ public sealed class RoleManager(
 
     public async ValueTask<RoleRecord> UpdateAsync(Guid roleId, string name, bool isActive, CancellationToken cancellationToken = default)
     {
+        EnsureHostContext();
         EnsureId(roleId, nameof(roleId), "Role");
         await EnsureUniqueAsync(name, roleId, cancellationToken);
 
@@ -35,6 +39,7 @@ public sealed class RoleManager(
 
     public async ValueTask RemoveAsync(Guid roleId, CancellationToken cancellationToken = default)
     {
+        EnsureHostContext();
         EnsureId(roleId, nameof(roleId), "Role");
 
         var role = await roleRepository.GetAsync(roleId, cancellationToken);
@@ -51,6 +56,7 @@ public sealed class RoleManager(
 
     public async ValueTask<RoleRecord?> FindByIdAsync(Guid roleId, CancellationToken cancellationToken = default)
     {
+        EnsureHostContext();
         EnsureId(roleId, nameof(roleId), "Role");
 
         var role = await roleRepository.FindAsync(roleId, cancellationToken);
@@ -59,14 +65,24 @@ public sealed class RoleManager(
 
     public async ValueTask<RoleRecord?> FindByNameAsync(string name, CancellationToken cancellationToken = default)
     {
+        EnsureHostContext();
         var role = await roleRepository.FindByNormalizedNameAsync(IdentityRole.NormalizeName(name), cancellationToken);
         return role is null ? null : MapToRecord(role);
     }
 
     public async ValueTask<IReadOnlyList<RoleRecord>> GetListAsync(CancellationToken cancellationToken = default)
     {
+        EnsureHostContext();
         var roles = await roleRepository.GetListAsync(cancellationToken);
         return roles.Select(MapToRecord).ToArray();
+    }
+
+    private void EnsureHostContext()
+    {
+        if (currentTenant.Id is not null)
+        {
+            throw new UnauthorizedAccessException("Identity role management is only available in host context.");
+        }
     }
 
     private async ValueTask EnsureUniqueAsync(string name, Guid? roleIdToIgnore, CancellationToken cancellationToken)

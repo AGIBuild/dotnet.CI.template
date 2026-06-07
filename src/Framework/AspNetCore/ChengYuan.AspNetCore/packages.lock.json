@@ -39,6 +39,12 @@
         "dependencies": {
           "ChengYuan.Core": "[0.2.10-local, )"
         }
+      },
+      "chengyuan.ui.navigation": {
+        "type": "Project",
+        "dependencies": {
+          "ChengYuan.Core": "[0.2.10-local, )"
+        }
       }
     }
   }

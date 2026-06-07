@@ -14,8 +14,8 @@ public sealed class AuditLoggingEndpointContributor : IEndpointContributor
             .WithTags("AuditLogging")
             .RequireAuthorization();
 
-        group.MapGet("/", static async (IAuditLogReader reader, CancellationToken cancellationToken) =>
-            TypedResults.Ok(new ListResultDto<AuditLogRecord>(await reader.GetListAsync(cancellationToken))))
+        group.MapGet("/", static async (IAuditLogManager manager, CancellationToken cancellationToken) =>
+            TypedResults.Ok(new ListResultDto<AuditLogRecord>(await manager.GetListAsync(cancellationToken))))
             .RequireAuthorization(AuditLoggingPermissions.AuditLogs);
     }
 }

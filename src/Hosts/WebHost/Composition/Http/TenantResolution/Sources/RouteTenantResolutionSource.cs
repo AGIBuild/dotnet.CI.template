@@ -45,7 +45,6 @@ internal sealed class RouteTenantResolutionSource(MultiTenancyOptions options) :
         if (Guid.TryParse(routeValue, out var tenantId))
         {
             context.TenantId = tenantId;
-            context.HasResolved = true;
             context.SourceName = nameof(RouteTenantResolutionSource);
             return ValueTask.CompletedTask;
         }

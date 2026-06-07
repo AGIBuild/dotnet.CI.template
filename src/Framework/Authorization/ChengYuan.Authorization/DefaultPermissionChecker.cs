@@ -38,6 +38,11 @@ internal sealed class DefaultPermissionChecker(
             return false;
         }
 
+        if (!currentUser.IsAuthenticated)
+        {
+            return false;
+        }
+
         var requiredFeatures = definition.GetRequiredFeatures();
         foreach (var feature in requiredFeatures)
         {

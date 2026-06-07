@@ -7,25 +7,30 @@ public sealed class IdentityDataSeedContributor(
     IUserManager userManager,
     IUserReader userReader,
     IRoleManager roleManager,
-    IRoleReader roleReader) : IDataSeedContributor, ITransientService
+    IRoleReader roleReader,
+    IdentityAdminSeedOptions adminSeedOptions) : IDataSeedContributor, ITransientService
 {
-    private const string AdminUserName = "admin";
-    private const string AdminEmail = "admin@chengyuan.dev";
-    private const string AdminPassword = "Admin@123456";
-    private const string AdminRoleName = "admin";
-
     public async ValueTask SeedAsync(DataSeedContext context, CancellationToken cancellationToken = default)
     {
-        var existingRole = await roleReader.FindByNameAsync(AdminRoleName, cancellationToken);
-        if (existingRole is null)
+        if (!adminSeedOptions.SeedEnabled)
         {
-            existingRole = await roleManager.CreateAsync(AdminRoleName, cancellationToken);
+            return;
         }
 
-        var existingUser = await userReader.FindByUserNameAsync(AdminUserName, cancellationToken);
+        var existingRole = await roleReader.FindByNameAsync(adminSeedOptions.RoleName, cancellationToken);
+        if (existingRole is null)
+        {
+            existingRole = await roleManager.CreateAsync(adminSeedOptions.RoleName, cancellationToken);
+        }
+
+        var existingUser = await userReader.FindByUserNameAsync(adminSeedOptions.UserName, cancellationToken);
         if (existingUser is null)
         {
-            var user = await userManager.CreateAsync(AdminUserName, AdminEmail, AdminPassword, cancellationToken);
+            var user = await userManager.CreateAsync(
+                adminSeedOptions.UserName,
+                adminSeedOptions.Email,
+                adminSeedOptions.Password,
+                cancellationToken);
             await userManager.AssignRoleAsync(user.Id, existingRole.Id, cancellationToken);
         }
     }

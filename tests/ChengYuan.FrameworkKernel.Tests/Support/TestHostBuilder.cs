@@ -27,16 +27,9 @@ internal static class TestHostBuilder
         builder.Configuration["Jwt:SecretKey"] = TestJwtSecretKey;
         builder.Configuration["Jwt:Issuer"] = "test";
         builder.Configuration["Jwt:Audience"] = "test";
+        builder.Configuration["WebHost:Health:Detailed"] = "true";
 
-        builder.AddChengYuan<WebHostHttpCompositionModule>(cy => cy
-            .AddModule<IdentityWebModule>()
-            .AddModule<TenantManagementWebModule>()
-            .AddModule<SettingManagementWebModule>()
-            .AddModule<PermissionManagementWebModule>()
-            .AddModule<FeatureManagementWebModule>()
-            .AddModule<AuditLoggingWebModule>()
-            .AddModule<BackgroundJobPersistenceModule>()
-        );
+        builder.AddChengYuan<WebHostHttpCompositionModule>(_ => { });
         builder.Services.AddPermissivePermissionGrants();
         return builder;
     }
@@ -47,15 +40,7 @@ internal static class TestHostBuilder
     /// </summary>
     public static IServiceCollection AddTestWebHost(this IServiceCollection services)
     {
-        services.AddChengYuan<WebHostHttpCompositionModule>(cy => cy
-            .AddModule<IdentityWebModule>()
-            .AddModule<TenantManagementWebModule>()
-            .AddModule<SettingManagementWebModule>()
-            .AddModule<PermissionManagementWebModule>()
-            .AddModule<FeatureManagementWebModule>()
-            .AddModule<AuditLoggingWebModule>()
-            .AddModule<BackgroundJobPersistenceModule>()
-        );
+        services.AddChengYuan<WebHostHttpCompositionModule>(_ => { });
         services.AddPermissivePermissionGrants();
         return services;
     }
@@ -70,6 +55,7 @@ internal static class TestHostBuilder
         builder.Configuration["Jwt:SecretKey"] = TestJwtSecretKey;
         builder.Configuration["Jwt:Issuer"] = "test";
         builder.Configuration["Jwt:Audience"] = "test";
+        builder.Configuration["WebHost:Health:Detailed"] = "true";
 
         builder.AddChengYuan<WebHostHttpCompositionModule>(cy =>
         {
@@ -78,13 +64,6 @@ internal static class TestHostBuilder
                 cy.ConfigureMultiTenancy(configureMultiTenancy);
             }
 
-            cy.AddModule<IdentityWebModule>()
-              .AddModule<TenantManagementWebModule>()
-              .AddModule<SettingManagementWebModule>()
-              .AddModule<PermissionManagementWebModule>()
-              .AddModule<FeatureManagementWebModule>()
-              .AddModule<AuditLoggingWebModule>()
-              .AddModule<BackgroundJobPersistenceModule>();
         });
         builder.Services.AddPermissivePermissionGrants();
         return builder;

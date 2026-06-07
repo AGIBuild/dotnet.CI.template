@@ -47,25 +47,26 @@ public class PermissionManagementModuleTests
         using var serviceProvider = services.BuildServiceProvider();
         var permissionChecker = serviceProvider.GetRequiredService<IPermissionChecker>();
         var permissionGrantManager = serviceProvider.GetRequiredService<IPermissionGrantManager>();
+        var permissionGrantStore = serviceProvider.GetRequiredService<IPermissionGrantStore>();
         var currentTenant = serviceProvider.GetRequiredService<ICurrentTenantAccessor>();
         var currentUser = serviceProvider.GetRequiredService<ICurrentUserAccessor>();
 
         // Global=Granted → true
         await permissionGrantManager.SetAsync(new PermissionGrantRecord("workspace.members.delete", PermissionScope.Global, true), cancellationToken);
-        (await permissionChecker.IsGrantedAsync("workspace.members.delete", cancellationToken)).ShouldBeTrue();
-
-        // Add Tenant=Prohibited → any Prohibited overrides → false
-        await permissionGrantManager.SetAsync(new PermissionGrantRecord("workspace.members.delete", PermissionScope.Tenant, false, tenantId), cancellationToken);
-
-        using (currentTenant.Change(tenantId, "tenant-a"))
+        using (currentUser.Change(new CurrentUserInfo(userId, "Alice", true)))
         {
-            (await permissionChecker.IsGrantedAsync("workspace.members.delete", cancellationToken)).ShouldBeFalse();
+            (await permissionChecker.IsGrantedAsync("workspace.members.delete", cancellationToken)).ShouldBeTrue();
 
-            // Add User=Granted, but Tenant still Prohibited → Prohibited wins → false
-            await permissionGrantManager.SetAsync(new PermissionGrantRecord("workspace.members.delete", PermissionScope.User, true, userId: userId), cancellationToken);
+            // Add Tenant=Prohibited → any Prohibited overrides → false
+            await permissionGrantManager.SetAsync(new PermissionGrantRecord("workspace.members.delete", PermissionScope.Tenant, false, tenantId), cancellationToken);
 
-            using (currentUser.Change(new CurrentUserInfo(userId, "Alice", true)))
+            using (currentTenant.Change(tenantId, "tenant-a"))
             {
+                (await permissionChecker.IsGrantedAsync("workspace.members.delete", cancellationToken)).ShouldBeFalse();
+
+                // Add User=Granted, but Tenant still Prohibited → Prohibited wins → false
+                await permissionGrantStore.SetAsync(new PermissionGrantRecord("workspace.members.delete", PermissionScope.User, true, userId: userId), cancellationToken);
+
                 (await permissionChecker.IsGrantedAsync("workspace.members.delete", cancellationToken)).ShouldBeFalse();
             }
         }
@@ -87,12 +88,16 @@ public class PermissionManagementModuleTests
         using var serviceProvider = services.BuildServiceProvider();
         var permissionChecker = serviceProvider.GetRequiredService<IPermissionChecker>();
         var permissionGrantManager = serviceProvider.GetRequiredService<IPermissionGrantManager>();
+        var currentUser = serviceProvider.GetRequiredService<ICurrentUserAccessor>();
 
         await permissionGrantManager.SetAsync(new PermissionGrantRecord("workspace.analytics.view", PermissionScope.Global, true), cancellationToken);
-        (await permissionChecker.IsGrantedAsync("workspace.analytics.view", cancellationToken)).ShouldBeTrue();
+        using (currentUser.Change(new CurrentUserInfo("alice", "Alice", true)))
+        {
+            (await permissionChecker.IsGrantedAsync("workspace.analytics.view", cancellationToken)).ShouldBeTrue();
 
-        await permissionGrantManager.RemoveAsync("workspace.analytics.view", PermissionScope.Global, cancellationToken: cancellationToken);
-        (await permissionChecker.IsGrantedAsync("workspace.analytics.view", cancellationToken)).ShouldBeFalse();
+            await permissionGrantManager.RemoveAsync("workspace.analytics.view", PermissionScope.Global, cancellationToken: cancellationToken);
+            (await permissionChecker.IsGrantedAsync("workspace.analytics.view", cancellationToken)).ShouldBeFalse();
+        }
     }
 
     [Fact]

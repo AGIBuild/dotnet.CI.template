@@ -1,6 +1,7 @@
 using ChengYuan.Core.Exceptions;
 using ChengYuan.Core.Modularity;
 using ChengYuan.Identity;
+using ChengYuan.MultiTenancy;
 using Microsoft.Extensions.DependencyInjection;
 using Shouldly;
 
@@ -104,5 +105,26 @@ public class IdentityModuleTests
 
         (await roleReader.FindByIdAsync(role.Id, TestContext.Current.CancellationToken)).ShouldBeNull();
         (await userReader.FindByIdAsync(user.Id, TestContext.Current.CancellationToken))!.RoleIds.ShouldBeEmpty();
+    }
+
+    [Fact]
+    public async Task IdentityModule_ShouldRejectUserAndRoleManagementFromTenantContext()
+    {
+        var services = new ServiceCollection();
+        services.AddModule<IdentityTestModule>();
+
+        await using var serviceProvider = services.BuildServiceProvider();
+        var currentTenantAccessor = serviceProvider.GetRequiredService<ICurrentTenantAccessor>();
+        var userManager = serviceProvider.GetRequiredService<IUserManager>();
+        var roleManager = serviceProvider.GetRequiredService<IRoleManager>();
+
+        using (currentTenantAccessor.Change(Guid.NewGuid(), "tenant"))
+        {
+            await Should.ThrowAsync<UnauthorizedAccessException>(async () =>
+                await userManager.CreateAsync("Alice", "alice@example.com", "Password123!", TestContext.Current.CancellationToken));
+
+            await Should.ThrowAsync<UnauthorizedAccessException>(async () =>
+                await roleManager.CreateAsync("Administrators", TestContext.Current.CancellationToken));
+        }
     }
 }

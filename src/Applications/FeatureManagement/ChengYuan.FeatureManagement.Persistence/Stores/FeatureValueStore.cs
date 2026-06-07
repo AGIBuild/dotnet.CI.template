@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace ChengYuan.FeatureManagement;
 
-public sealed class FeatureValueStore(IDbContextFactory<FeatureManagementDbContext> dbContextFactory) : IFeatureValueStore
+public sealed class FeatureValueStore(FeatureManagementDbContext dbContext) : IFeatureValueStore
 {
     public async ValueTask<FeatureValueRecord?> FindAsync(
         string name,
@@ -14,7 +14,6 @@ public sealed class FeatureValueStore(IDbContextFactory<FeatureManagementDbConte
     {
         ValidateArguments(name, scope, tenantId, userId);
 
-        await using var dbContext = await dbContextFactory.CreateDbContextAsync(cancellationToken);
         var entity = await dbContext.FeatureValues
             .SingleOrDefaultAsync(
                 featureValue => featureValue.Name == name
@@ -28,7 +27,6 @@ public sealed class FeatureValueStore(IDbContextFactory<FeatureManagementDbConte
 
     public async ValueTask<IReadOnlyList<FeatureValueRecord>> GetListAsync(CancellationToken cancellationToken = default)
     {
-        await using var dbContext = await dbContextFactory.CreateDbContextAsync(cancellationToken);
         var entities = await dbContext.FeatureValues
             .OrderBy(featureValue => featureValue.Scope)
             .ThenBy(featureValue => featureValue.Name)
@@ -45,7 +43,6 @@ public sealed class FeatureValueStore(IDbContextFactory<FeatureManagementDbConte
     {
         ArgumentNullException.ThrowIfNull(record);
 
-        await using var dbContext = await dbContextFactory.CreateDbContextAsync(cancellationToken);
         var entity = await dbContext.FeatureValues
             .SingleOrDefaultAsync(
                 featureValue => featureValue.Name == record.Name
@@ -77,7 +74,6 @@ public sealed class FeatureValueStore(IDbContextFactory<FeatureManagementDbConte
     {
         ValidateArguments(name, scope, tenantId, userId);
 
-        await using var dbContext = await dbContextFactory.CreateDbContextAsync(cancellationToken);
         var entity = await dbContext.FeatureValues
             .SingleOrDefaultAsync(
                 featureValue => featureValue.Name == name

@@ -1,5 +1,0 @@
-using ChengYuan.EntityFrameworkCore;
-
-namespace ChengYuan.FeatureManagement;
-
-public sealed class FeatureManagementDbContextDesignTimeFactory : ChengYuanSqliteDesignTimeDbContextFactory<FeatureManagementDbContext>;

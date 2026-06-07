@@ -9,6 +9,6 @@ partial class BuildTask
         .Executes(() =>
         {
             TestResultsDirectory.CreateOrCleanDirectory();
-            DotNet($"test --solution {TestPath} --configuration {Configuration} --no-build --nologo");
+            DotNet($"test --project {RootDirectory / "tests" / "ChengYuan.FrameworkKernel.Tests" / "ChengYuan.FrameworkKernel.Tests.csproj"} --configuration {Configuration} --no-build");
         });
 }

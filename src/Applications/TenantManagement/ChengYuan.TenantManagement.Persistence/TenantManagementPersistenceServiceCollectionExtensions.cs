@@ -12,7 +12,7 @@ public static class TenantManagementPersistenceServiceCollectionExtensions
         ArgumentNullException.ThrowIfNull(services);
 
         services.AddPersistenceModule<TenantManagementDbContext, ITenantStore, ITenantReader, TenantStore>();
-        services.Replace(ServiceDescriptor.Singleton<ITenantResolutionStore>(serviceProvider =>
+        services.Replace(ServiceDescriptor.Scoped<ITenantResolutionStore>(serviceProvider =>
             new TenantResolutionStoreAdapter(serviceProvider.GetRequiredService<ITenantReader>())));
 
         return services;

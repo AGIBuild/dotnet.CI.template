@@ -48,12 +48,14 @@ public sealed class IdentityEndpointsTests
                 services.AddSingleton<InMemoryIdentityUserRepository>();
                 services.AddSingleton<IIdentityRoleRepository>(sp => sp.GetRequiredService<InMemoryIdentityRoleRepository>());
                 services.AddSingleton<IIdentityUserRepository>(sp => sp.GetRequiredService<InMemoryIdentityUserRepository>());
+                services.AddSingleton<IUserSessionValidator, AlwaysActiveUserSessionValidator>();
                 services.AddSingleton<IUnitOfWork, NoopUnitOfWork>();
             });
             webBuilder.Configure(app =>
             {
                 app.UseRouting();
                 app.UseAuthentication();
+                app.UseMiddleware<ChengYuan.WebHost.CurrentUserMiddleware>();
                 app.UseAuthorization();
                 app.UseEndpoints(endpoints => endpoints.MapIdentityManagementEndpoints());
             });
@@ -177,5 +179,11 @@ public sealed class IdentityEndpointsTests
             var ticket = new AuthenticationTicket(principal, "Test");
             return Task.FromResult(AuthenticateResult.Success(ticket));
         }
+    }
+
+    private sealed class AlwaysActiveUserSessionValidator : IUserSessionValidator
+    {
+        public ValueTask<bool> IsActiveSessionAsync(Guid userId, CancellationToken cancellationToken = default)
+            => ValueTask.FromResult(true);
     }
 }

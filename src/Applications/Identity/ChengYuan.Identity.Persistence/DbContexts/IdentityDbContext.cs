@@ -10,6 +10,8 @@ public sealed class IdentityDbContext(DbContextOptions<IdentityDbContext> option
 
     public DbSet<IdentityUserRole> UserRoles => Set<IdentityUserRole>();
 
+    public DbSet<IdentityUserTenantMembership> UserTenantMemberships => Set<IdentityUserTenantMembership>();
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         ArgumentNullException.ThrowIfNull(modelBuilder);
@@ -17,5 +19,6 @@ public sealed class IdentityDbContext(DbContextOptions<IdentityDbContext> option
         modelBuilder.ApplyConfiguration(new IdentityRoleConfiguration());
         modelBuilder.ApplyConfiguration(new IdentityUserConfiguration());
         modelBuilder.ApplyConfiguration(new IdentityUserRoleConfiguration());
+        modelBuilder.ApplyConfiguration(new IdentityUserTenantMembershipConfiguration());
     }
 }

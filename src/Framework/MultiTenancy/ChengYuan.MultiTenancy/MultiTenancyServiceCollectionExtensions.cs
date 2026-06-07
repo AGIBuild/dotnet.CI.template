@@ -45,6 +45,7 @@ public static class MultiTenancyServiceCollectionExtensions
     {
         services.TryAddSingleton<ICurrentTenantAccessor, CurrentTenantAccessor>();
         services.TryAddSingleton<ICurrentTenant>(serviceProvider => serviceProvider.GetRequiredService<ICurrentTenantAccessor>());
+        services.TryAddSingleton<ITenantScopeAccessPolicy, CurrentTenantScopeAccessPolicy>();
         services.Replace(ServiceDescriptor.Singleton<IDataTenantProvider>(
             serviceProvider => new CurrentTenantDataTenantProvider(serviceProvider.GetRequiredService<ICurrentTenant>())));
 

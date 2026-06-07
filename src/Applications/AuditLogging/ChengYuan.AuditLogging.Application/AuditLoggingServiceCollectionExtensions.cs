@@ -11,7 +11,8 @@ public static class AuditLoggingServiceCollectionExtensions
 {
     public static IServiceCollection AddAuditLogging(this IServiceCollection services)
     {
-        services.TryAddEnumerable(ServiceDescriptor.Singleton<IAuditLogSink, AuditLogStoreSink>());
+        services.TryAddScoped<IAuditLogManager, AuditLogManager>();
+        services.TryAddEnumerable(ServiceDescriptor.Scoped<IAuditLogSink, AuditLogStoreSink>());
         services.AddTransient<IPermissionDefinitionContributor, AuditLoggingPermissionDefinitionContributor>();
         services.AddTransient<ISettingDefinitionContributor, AuditLoggingSettingDefinitionContributor>();
         services.AddTransient<IFeatureDefinitionContributor, AuditLoggingFeatureDefinitionContributor>();

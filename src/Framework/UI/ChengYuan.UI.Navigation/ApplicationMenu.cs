@@ -1,7 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-
 namespace ChengYuan.Core.UI.Navigation;
 
 public sealed class ApplicationMenu

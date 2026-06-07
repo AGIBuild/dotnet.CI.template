@@ -2,7 +2,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace ChengYuan.TenantManagement;
 
-public sealed class TenantStore(IDbContextFactory<TenantManagementDbContext> dbContextFactory) : ITenantStore
+public sealed class TenantStore(TenantManagementDbContext dbContext) : ITenantStore
 {
     public async ValueTask<TenantRecord?> FindByIdAsync(Guid tenantId, CancellationToken cancellationToken = default)
     {
@@ -11,7 +11,6 @@ public sealed class TenantStore(IDbContextFactory<TenantManagementDbContext> dbC
             throw new ArgumentException("Tenant id cannot be empty.", nameof(tenantId));
         }
 
-        await using var dbContext = await dbContextFactory.CreateDbContextAsync(cancellationToken);
         var tenant = await dbContext.Tenants
             .Where(tenant => !tenant.IsDeleted)
             .SingleOrDefaultAsync(tenant => tenant.Id == tenantId, cancellationToken);
@@ -24,7 +23,6 @@ public sealed class TenantStore(IDbContextFactory<TenantManagementDbContext> dbC
         ArgumentException.ThrowIfNullOrWhiteSpace(name);
 
         var normalizedName = TenantEntity.NormalizeName(name);
-        await using var dbContext = await dbContextFactory.CreateDbContextAsync(cancellationToken);
         var tenant = await dbContext.Tenants
             .Where(tenant => !tenant.IsDeleted)
             .SingleOrDefaultAsync(tenant => tenant.NormalizedName == normalizedName, cancellationToken);
@@ -34,7 +32,6 @@ public sealed class TenantStore(IDbContextFactory<TenantManagementDbContext> dbC
 
     public async ValueTask<IReadOnlyList<TenantRecord>> GetListAsync(CancellationToken cancellationToken = default)
     {
-        await using var dbContext = await dbContextFactory.CreateDbContextAsync(cancellationToken);
         var tenants = await dbContext.Tenants
             .Where(tenant => !tenant.IsDeleted)
             .OrderBy(tenant => tenant.NormalizedName)
@@ -50,7 +47,6 @@ public sealed class TenantStore(IDbContextFactory<TenantManagementDbContext> dbC
         ArgumentNullException.ThrowIfNull(tenant);
 
         var normalizedName = TenantEntity.NormalizeName(tenant.Name);
-        await using var dbContext = await dbContextFactory.CreateDbContextAsync(cancellationToken);
         var duplicateTenantExists = await dbContext.Tenants
             .Where(entity => !entity.IsDeleted)
             .AnyAsync(entity => entity.NormalizedName == normalizedName && entity.Id != tenant.Id, cancellationToken);
@@ -82,7 +78,6 @@ public sealed class TenantStore(IDbContextFactory<TenantManagementDbContext> dbC
             throw new ArgumentException("Tenant id cannot be empty.", nameof(tenantId));
         }
 
-        await using var dbContext = await dbContextFactory.CreateDbContextAsync(cancellationToken);
         var tenant = await dbContext.Tenants
             .SingleOrDefaultAsync(entity => entity.Id == tenantId, cancellationToken);
 

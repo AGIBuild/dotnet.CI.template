@@ -10,7 +10,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\..\Framework\AspNetCore\ChengYuan.AspNetCore\ChengYuan.AspNetCore.csproj" />
-    <ProjectReference Include="..\ChengYuan.PermissionManagement.Persistence\ChengYuan.PermissionManagement.Persistence.csproj" />
+    <ProjectReference Include="..\ChengYuan.PermissionManagement.Application\ChengYuan.PermissionManagement.Application.csproj" />
   </ItemGroup>
 
 </Project>

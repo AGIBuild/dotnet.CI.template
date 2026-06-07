@@ -1,0 +1,24 @@
+using ChengYuan.AuditLogging;
+using ChengYuan.BackgroundJobs;
+using ChengYuan.EntityFrameworkCore;
+using ChengYuan.FeatureManagement;
+using ChengYuan.Identity;
+using ChengYuan.PermissionManagement;
+using ChengYuan.SettingManagement;
+using ChengYuan.TenantManagement;
+
+namespace ChengYuan.WebHost.DesignTime;
+
+public sealed class IdentityDbContextDesignTimeFactory : ChengYuanSqliteDesignTimeDbContextFactory<IdentityDbContext>;
+
+public sealed class TenantManagementDbContextDesignTimeFactory : ChengYuanSqliteDesignTimeDbContextFactory<TenantManagementDbContext>;
+
+public sealed class SettingManagementDbContextDesignTimeFactory : ChengYuanSqliteDesignTimeDbContextFactory<SettingManagementDbContext>;
+
+public sealed class PermissionManagementDbContextDesignTimeFactory : ChengYuanSqliteDesignTimeDbContextFactory<PermissionManagementDbContext>;
+
+public sealed class FeatureManagementDbContextDesignTimeFactory : ChengYuanSqliteDesignTimeDbContextFactory<FeatureManagementDbContext>;
+
+public sealed class AuditLoggingDbContextDesignTimeFactory : ChengYuanSqliteDesignTimeDbContextFactory<AuditLoggingDbContext>;
+
+public sealed class BackgroundJobDbContextDesignTimeFactory : ChengYuanSqliteDesignTimeDbContextFactory<BackgroundJobDbContext>;

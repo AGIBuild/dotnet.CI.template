@@ -17,7 +17,6 @@ partial class BuildTask
 
     // Internal path conventions controlled by build tasks (not external parameters).
     readonly string BuildPath = "ChengYuan.slnx";
-    readonly string TestPath = "ChengYuan.slnx";
     readonly string PackPath = "ChengYuan.slnx";
     string NormalizedHost => PublishHost.Trim().ToLowerInvariant();
     string PublishPath => NormalizedHost switch

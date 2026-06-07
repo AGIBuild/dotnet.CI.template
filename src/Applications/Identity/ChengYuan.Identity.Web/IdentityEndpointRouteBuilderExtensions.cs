@@ -1,4 +1,5 @@
 using ChengYuan.Core.Application.Dtos;
+using ChengYuan.MultiTenancy;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
@@ -27,6 +28,9 @@ public static class IdentityEndpointRouteBuilderExtensions
         group.MapDelete("/users/{userId:guid}", DeleteUserAsync).RequireAuthorization(IdentityPermissions.UsersDelete);
         group.MapPut("/users/{userId:guid}/roles/{roleId:guid}", AssignRoleAsync).RequireAuthorization(IdentityPermissions.UsersUpdate);
         group.MapDelete("/users/{userId:guid}/roles/{roleId:guid}", UnassignRoleAsync).RequireAuthorization(IdentityPermissions.UsersUpdate);
+        group.MapGet("/users/{userId:guid}/tenants", GetUserTenantsAsync).RequireAuthorization(IdentityPermissions.UsersManageTenants);
+        group.MapPut("/users/{userId:guid}/tenants/{tenantId:guid}", AssignTenantAsync).RequireAuthorization(IdentityPermissions.UsersManageTenants);
+        group.MapDelete("/users/{userId:guid}/tenants/{tenantId:guid}", RevokeTenantAsync).RequireAuthorization(IdentityPermissions.UsersManageTenants);
 
         group.MapGet("/roles", static async (IRoleReader reader, CancellationToken cancellationToken) =>
             TypedResults.Ok(new ListResultDto<RoleRecord>(await reader.GetListAsync(cancellationToken))))
@@ -43,6 +47,8 @@ public static class IdentityEndpointRouteBuilderExtensions
     private static async Task<IResult> LoginAsync(
         LoginRequest request,
         IUserManager manager,
+        IUserTenantMembershipReader membershipReader,
+        ICurrentTenant currentTenant,
         JwtTokenService tokenService,
         CancellationToken cancellationToken)
     {
@@ -52,7 +58,14 @@ public static class IdentityEndpointRouteBuilderExtensions
             return TypedResults.Unauthorized();
         }
 
-        var token = tokenService.GenerateToken(user);
+        var tenantId = currentTenant.Id;
+        if (tenantId is Guid resolvedTenantId
+            && !await membershipReader.IsActiveMemberAsync(user.Id, resolvedTenantId, cancellationToken))
+        {
+            return TypedResults.Forbid();
+        }
+
+        var token = tokenService.GenerateToken(user, tenantId);
         return TypedResults.Ok(token);
     }
 
@@ -90,6 +103,35 @@ public static class IdentityEndpointRouteBuilderExtensions
     {
         var user = await manager.UnassignRoleAsync(userId, roleId, cancellationToken);
         return TypedResults.Ok(user);
+    }
+
+    private static async Task<IResult> GetUserTenantsAsync(
+        Guid userId,
+        IUserTenantMembershipReader reader,
+        CancellationToken cancellationToken)
+    {
+        var memberships = await reader.GetListByUserIdAsync(userId, cancellationToken);
+        return TypedResults.Ok(new ListResultDto<UserTenantMembershipRecord>(memberships));
+    }
+
+    private static async Task<IResult> AssignTenantAsync(
+        Guid userId,
+        Guid tenantId,
+        IUserTenantMembershipManager manager,
+        CancellationToken cancellationToken)
+    {
+        var membership = await manager.AssignAsync(userId, tenantId, cancellationToken);
+        return TypedResults.Ok(membership);
+    }
+
+    private static async Task<IResult> RevokeTenantAsync(
+        Guid userId,
+        Guid tenantId,
+        IUserTenantMembershipManager manager,
+        CancellationToken cancellationToken)
+    {
+        await manager.RevokeAsync(userId, tenantId, cancellationToken);
+        return TypedResults.NoContent();
     }
 
     private static async Task<IResult> GetRoleByIdAsync(Guid roleId, IRoleReader reader, CancellationToken cancellationToken)

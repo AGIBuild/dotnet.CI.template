@@ -2,7 +2,7 @@ using ChengYuan.Core.Modularity;
 
 namespace ChengYuan.TenantManagement;
 
-[DependsOn(typeof(TenantManagementPersistenceModule))]
+[DependsOn(typeof(TenantManagementModule))]
 public sealed class TenantManagementWebModule : ExtensionModule
 {
     public override void ConfigureServices(ServiceConfigurationContext context)

@@ -10,7 +10,7 @@ public sealed class JwtTokenService(IOptions<JwtOptions> options)
 {
     private readonly JwtOptions _options = options.Value;
 
-    public TokenResponse GenerateToken(UserRecord user)
+    public TokenResponse GenerateToken(UserRecord user, Guid? tenantId = null)
     {
         ArgumentNullException.ThrowIfNull(user);
 
@@ -28,6 +28,11 @@ public sealed class JwtTokenService(IOptions<JwtOptions> options)
         if (user.RoleIds is { Count: > 0 })
         {
             claims["roles"] = user.RoleIds.Select(id => id.ToString()).ToArray();
+        }
+
+        if (tenantId is Guid currentTenantId)
+        {
+            claims["tenant_id"] = currentTenantId.ToString();
         }
 
         var now = DateTime.UtcNow;

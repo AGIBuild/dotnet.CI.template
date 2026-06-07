@@ -2,6 +2,7 @@ using ChengYuan.Core.Exceptions;
 using ChengYuan.Core.Modularity;
 using ChengYuan.EntityFrameworkCore;
 using ChengYuan.Identity;
+using ChengYuan.MultiTenancy;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Shouldly;
@@ -121,13 +122,53 @@ public class IdentityPersistenceModuleTests
         users.Select(user => user.UserName).ShouldBe(["alice", "bob", "charlie"]);
     }
 
-    private static ServiceCollection CreateServices()
+    [Fact]
+    public async Task IdentityPersistence_ShouldManageUserTenantMemberships()
+    {
+        var tenantId = Guid.NewGuid();
+        var otherTenantId = Guid.NewGuid();
+        var services = CreateServices(tenantId, otherTenantId);
+
+        await using var serviceProvider = services.BuildServiceProvider();
+        var userManager = serviceProvider.GetRequiredService<IUserManager>();
+        var membershipManager = serviceProvider.GetRequiredService<IUserTenantMembershipManager>();
+        var membershipReader = serviceProvider.GetRequiredService<IUserTenantMembershipReader>();
+
+        var user = await userManager.CreateAsync("Alice", "alice@example.com", "Password123!", TestContext.Current.CancellationToken);
+
+        var membership = await membershipManager.AssignAsync(user.Id, tenantId, TestContext.Current.CancellationToken);
+        membership.UserId.ShouldBe(user.Id);
+        membership.TenantId.ShouldBe(tenantId);
+        membership.IsActive.ShouldBeTrue();
+
+        (await membershipReader.IsActiveMemberAsync(user.Id, tenantId, TestContext.Current.CancellationToken)).ShouldBeTrue();
+        (await membershipReader.GetListByUserIdAsync(user.Id, TestContext.Current.CancellationToken))
+            .Select(record => record.TenantId)
+            .ShouldBe([tenantId]);
+
+        var currentTenantAccessor = serviceProvider.GetRequiredService<ICurrentTenantAccessor>();
+        using (currentTenantAccessor.Change(otherTenantId, "other"))
+        {
+            (await membershipReader.IsActiveMemberAsync(user.Id, tenantId, TestContext.Current.CancellationToken)).ShouldBeTrue();
+        }
+
+        await membershipManager.RevokeAsync(user.Id, tenantId, TestContext.Current.CancellationToken);
+        (await membershipReader.IsActiveMemberAsync(user.Id, tenantId, TestContext.Current.CancellationToken)).ShouldBeFalse();
+    }
+
+    private static ServiceCollection CreateServices(params Guid[] tenantIds)
     {
         var databaseName = $"identity-{Guid.NewGuid():N}";
         var services = new ServiceCollection();
         services.AddModule<IdentityPersistenceTestModule>();
         services.UseDbContextOptions(options =>
             options.UseInMemoryDatabase(databaseName));
+        if (tenantIds.Length > 0)
+        {
+            services.AddSingleton<ITenantResolutionStore>(
+                new InMemoryTenantResolutionStore(tenantIds.Select(tenantId =>
+                    new TenantResolutionRecord(tenantId, $"Tenant-{tenantId:N}", true)).ToArray()));
+        }
 
         return services;
     }

@@ -22,7 +22,12 @@ public class TenantResolutionMiddlewareTests
     {
         var tenantId = Guid.NewGuid();
 
-        await using var app = await CreateApplicationAsync();
+        await using var app = await CreateApplicationAsync(configureServices: services =>
+        {
+            services.AddSingleton<ITenantResolutionStore>(
+                new InMemoryTenantResolutionStore(
+                    new TenantResolutionRecord(tenantId, "acme", true)));
+        });
         var client = app.GetTestClient();
         client.DefaultRequestHeaders.Add("X-Tenant-Id", tenantId.ToString());
 
@@ -35,34 +40,237 @@ public class TenantResolutionMiddlewareTests
     }
 
     [Fact]
-    public async Task Middleware_ShouldPreferClaimOverHeader()
+    public async Task Middleware_ShouldReturnNotFound_WhenHeaderTenantIdIsNotInStore()
+    {
+        await using var app = await CreateApplicationAsync(configureServices: services =>
+        {
+            services.AddSingleton<ITenantResolutionStore>(
+                new InMemoryTenantResolutionStore());
+        });
+
+        var client = app.GetTestClient();
+        client.DefaultRequestHeaders.Add("X-Tenant-Id", Guid.NewGuid().ToString());
+
+        var response = await client.GetAsync("/health", TestContext.Current.CancellationToken);
+
+        response.StatusCode.ShouldBe(HttpStatusCode.NotFound);
+    }
+
+    [Fact]
+    public async Task Middleware_ShouldReturnForbidden_WhenAuthenticatedUserHasNoMatchingTenantClaim()
+    {
+        var tenantId = Guid.NewGuid();
+
+        await using var app = await CreateApplicationAsync(
+            beforeMultiTenancy: webApp =>
+            {
+                webApp.Use((context, next) =>
+                {
+                    context.User = new ClaimsPrincipal(new ClaimsIdentity(
+                    [
+                        new Claim(ClaimTypes.NameIdentifier, Guid.NewGuid().ToString())
+                    ],
+                    authenticationType: "test"));
+
+                    return next(context);
+                });
+            },
+            configureServices: services =>
+            {
+                services.AddSingleton<ITenantResolutionStore>(
+                    new InMemoryTenantResolutionStore(
+                        new TenantResolutionRecord(tenantId, "acme", true)));
+            });
+
+        var client = app.GetTestClient();
+        client.DefaultRequestHeaders.Add("X-Tenant-Id", tenantId.ToString());
+
+        var response = await client.GetAsync("/health", TestContext.Current.CancellationToken);
+
+        response.StatusCode.ShouldBe(HttpStatusCode.Forbidden);
+    }
+
+    [Fact]
+    public async Task Middleware_ShouldReturnForbidden_WhenClaimAndHeaderTenantsConflict()
     {
         var claimTenantId = Guid.NewGuid();
         var headerTenantId = Guid.NewGuid();
 
-        await using var app = await CreateApplicationAsync(beforeMultiTenancy: webApp =>
-        {
-            webApp.Use((context, next) =>
+        await using var app = await CreateApplicationAsync(
+            beforeMultiTenancy: webApp =>
             {
-                context.User = new ClaimsPrincipal(new ClaimsIdentity(
-                [
-                    new Claim("tenant_id", claimTenantId.ToString())
-                ],
-                authenticationType: "test"));
+                webApp.Use((context, next) =>
+                {
+                    context.User = new ClaimsPrincipal(new ClaimsIdentity(
+                    [
+                        new Claim("tenant_id", claimTenantId.ToString())
+                    ],
+                    authenticationType: "test"));
 
-                return next(context);
+                    return next(context);
+                });
+            },
+            configureServices: services =>
+            {
+                services.AddSingleton<ITenantResolutionStore>(
+                    new InMemoryTenantResolutionStore(
+                        new TenantResolutionRecord(claimTenantId, "claim", true),
+                        new TenantResolutionRecord(headerTenantId, "header", true)));
             });
-        });
 
         var client = app.GetTestClient();
         client.DefaultRequestHeaders.Add("X-Tenant-Id", headerTenantId.ToString());
 
         var response = await client.GetAsync("/health", TestContext.Current.CancellationToken);
 
-        response.StatusCode.ShouldBe(HttpStatusCode.OK);
-        var payload = await response.Content.ReadFromJsonAsync<HealthPayload>(TestContext.Current.CancellationToken);
-        payload.ShouldNotBeNull();
-        payload.TenantId.ShouldBe(claimTenantId);
+        response.StatusCode.ShouldBe(HttpStatusCode.Forbidden);
+    }
+
+    [Fact]
+    public async Task Middleware_ShouldReturnForbidden_WhenClaimAndDomainTenantsConflict()
+    {
+        var claimTenantId = Guid.NewGuid();
+        var domainTenantId = Guid.NewGuid();
+
+        await using var app = await CreateApplicationAsync(
+            configure: builder => builder.UseDomain("{0}.myapp.com"),
+            beforeMultiTenancy: webApp =>
+            {
+                webApp.Use((context, next) =>
+                {
+                    context.User = new ClaimsPrincipal(new ClaimsIdentity(
+                    [
+                        new Claim("tenant_id", claimTenantId.ToString())
+                    ],
+                    authenticationType: "test"));
+
+                    return next(context);
+                });
+            },
+            configureServices: services =>
+            {
+                services.AddSingleton<ITenantResolutionStore>(
+                    new InMemoryTenantResolutionStore(
+                        new TenantResolutionRecord(claimTenantId, "claim", true),
+                        new TenantResolutionRecord(domainTenantId, "domain", true)));
+            });
+
+        var client = app.GetTestClient();
+        var request = new HttpRequestMessage(HttpMethod.Get, "/health");
+        request.Headers.Host = "domain.myapp.com";
+
+        var response = await client.SendAsync(request, TestContext.Current.CancellationToken);
+
+        response.StatusCode.ShouldBe(HttpStatusCode.Forbidden);
+    }
+
+    [Fact]
+    public async Task Middleware_ShouldReturnForbidden_WhenClaimAndQueryStringTenantsConflict()
+    {
+        var claimTenantId = Guid.NewGuid();
+        var queryTenantId = Guid.NewGuid();
+
+        await using var app = await CreateApplicationAsync(
+            beforeMultiTenancy: UseAuthenticatedTenantClaim(claimTenantId),
+            configureServices: services =>
+            {
+                services.AddSingleton<ITenantResolutionStore>(
+                    new InMemoryTenantResolutionStore(
+                        new TenantResolutionRecord(claimTenantId, "claim", true),
+                        new TenantResolutionRecord(queryTenantId, "query", true)));
+            });
+
+        var client = app.GetTestClient();
+
+        var response = await client.GetAsync($"/health?__tenant={queryTenantId}", TestContext.Current.CancellationToken);
+
+        response.StatusCode.ShouldBe(HttpStatusCode.Forbidden);
+    }
+
+    [Fact]
+    public async Task Middleware_ShouldReturnForbidden_WhenClaimAndCookieTenantsConflict()
+    {
+        var claimTenantId = Guid.NewGuid();
+        var cookieTenantId = Guid.NewGuid();
+
+        await using var app = await CreateApplicationAsync(
+            beforeMultiTenancy: UseAuthenticatedTenantClaim(claimTenantId),
+            configureServices: services =>
+            {
+                services.AddSingleton<ITenantResolutionStore>(
+                    new InMemoryTenantResolutionStore(
+                        new TenantResolutionRecord(claimTenantId, "claim", true),
+                        new TenantResolutionRecord(cookieTenantId, "cookie", true)));
+            });
+
+        var client = app.GetTestClient();
+        var request = new HttpRequestMessage(HttpMethod.Get, "/health");
+        request.Headers.Add("Cookie", $"__tenant={cookieTenantId}");
+
+        var response = await client.SendAsync(request, TestContext.Current.CancellationToken);
+
+        response.StatusCode.ShouldBe(HttpStatusCode.Forbidden);
+    }
+
+    [Fact]
+    public async Task Middleware_ShouldReturnForbidden_WhenClaimAndRouteTenantsConflict()
+    {
+        var claimTenantId = Guid.NewGuid();
+        var routeTenantId = Guid.NewGuid();
+
+        await using var app = await CreateApplicationAsync(
+            beforeMultiTenancy: webApp =>
+            {
+                UseAuthenticatedTenantClaim(claimTenantId)(webApp);
+                webApp.Use((context, next) =>
+                {
+                    context.Request.RouteValues["__tenant"] = routeTenantId.ToString();
+                    return next(context);
+                });
+            },
+            configureServices: services =>
+            {
+                services.AddSingleton<ITenantResolutionStore>(
+                    new InMemoryTenantResolutionStore(
+                        new TenantResolutionRecord(claimTenantId, "claim", true),
+                        new TenantResolutionRecord(routeTenantId, "route", true)));
+            });
+
+        var client = app.GetTestClient();
+
+        var response = await client.GetAsync("/health", TestContext.Current.CancellationToken);
+
+        response.StatusCode.ShouldBe(HttpStatusCode.Forbidden);
+    }
+
+    [Fact]
+    public async Task Middleware_ShouldReturnNotFound_WhenClaimTenantIdIsNotInStore()
+    {
+        await using var app = await CreateApplicationAsync(
+            beforeMultiTenancy: webApp =>
+            {
+                webApp.Use((context, next) =>
+                {
+                    context.User = new ClaimsPrincipal(new ClaimsIdentity(
+                    [
+                        new Claim("tenant_id", Guid.NewGuid().ToString())
+                    ],
+                    authenticationType: "test"));
+
+                    return next(context);
+                });
+            },
+            configureServices: services =>
+            {
+                services.AddSingleton<ITenantResolutionStore>(
+                    new InMemoryTenantResolutionStore());
+            });
+
+        var client = app.GetTestClient();
+
+        var response = await client.GetAsync("/health", TestContext.Current.CancellationToken);
+
+        response.StatusCode.ShouldBe(HttpStatusCode.NotFound);
     }
 
     [Fact]
@@ -97,7 +305,12 @@ public class TenantResolutionMiddlewareTests
     {
         var tenantId = Guid.NewGuid();
 
-        await using var app = await CreateApplicationAsync();
+        await using var app = await CreateApplicationAsync(configureServices: services =>
+        {
+            services.AddSingleton<ITenantResolutionStore>(
+                new InMemoryTenantResolutionStore(
+                    new TenantResolutionRecord(tenantId, "acme", true)));
+        });
         var client = app.GetTestClient();
 
         var response = await client.GetAsync($"/health?__tenant={tenantId}", TestContext.Current.CancellationToken);
@@ -113,7 +326,12 @@ public class TenantResolutionMiddlewareTests
     {
         var tenantId = Guid.NewGuid();
 
-        await using var app = await CreateApplicationAsync();
+        await using var app = await CreateApplicationAsync(configureServices: services =>
+        {
+            services.AddSingleton<ITenantResolutionStore>(
+                new InMemoryTenantResolutionStore(
+                    new TenantResolutionRecord(tenantId, "acme", true)));
+        });
         var client = app.GetTestClient();
         var request = new HttpRequestMessage(HttpMethod.Get, "/health");
         request.Headers.Add("Cookie", $"__tenant={tenantId}");
@@ -199,7 +417,13 @@ public class TenantResolutionMiddlewareTests
         var headerTenantId = Guid.NewGuid();
         var queryTenantId = Guid.NewGuid();
 
-        await using var app = await CreateApplicationAsync();
+        await using var app = await CreateApplicationAsync(configureServices: services =>
+        {
+            services.AddSingleton<ITenantResolutionStore>(
+                new InMemoryTenantResolutionStore(
+                    new TenantResolutionRecord(headerTenantId, "header", true),
+                    new TenantResolutionRecord(queryTenantId, "query", true)));
+        });
         var client = app.GetTestClient();
         client.DefaultRequestHeaders.Add("X-Tenant-Id", headerTenantId.ToString());
 
@@ -251,6 +475,23 @@ public class TenantResolutionMiddlewareTests
         await app.StartAsync();
 
         return app;
+    }
+
+    private static Action<WebApplication> UseAuthenticatedTenantClaim(Guid tenantId)
+    {
+        return webApp =>
+        {
+            webApp.Use((context, next) =>
+            {
+                context.User = new ClaimsPrincipal(new ClaimsIdentity(
+                [
+                    new Claim("tenant_id", tenantId.ToString())
+                ],
+                authenticationType: "test"));
+
+                return next(context);
+            });
+        };
     }
 
     private sealed class HealthPayload

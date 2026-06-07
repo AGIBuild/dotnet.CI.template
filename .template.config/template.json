@@ -1,0 +1,79 @@
+{
+  "$schema": "http://json.schemastore.org/template",
+  "author": "ChengYuan",
+  "classifications": [
+    "Web",
+    "Modular",
+    "ASP.NET Core"
+  ],
+  "identity": "ChengYuan.ModularApp",
+  "name": "ChengYuan Modular Application",
+  "shortName": "chengyuan-modular",
+  "sourceName": "ChengYuanTemplate",
+  "preferNameDirectory": true,
+  "tags": {
+    "language": "C#",
+    "type": "project"
+  },
+  "symbols": {
+    "namespacePrefix": {
+      "type": "generated",
+      "generator": "join",
+      "replaces": "ChengYuan.",
+      "fileRename": "ChengYuan.",
+      "parameters": {
+        "symbols": [
+          {
+            "type": "ref",
+            "value": "name"
+          },
+          {
+            "type": "const",
+            "value": "."
+          }
+        ],
+        "separator": ""
+      }
+    },
+    "rootFileName": {
+      "type": "derived",
+      "valueSource": "name",
+      "valueTransform": "identity",
+      "fileRename": "ChengYuan"
+    },
+    "safeIdentifier": {
+      "type": "derived",
+      "valueSource": "name",
+      "valueTransform": "safeIdentifier",
+      "replaces": "ChengYuan"
+    }
+  },
+  "forms": {
+    "safeIdentifier": {
+      "identifier": "replace",
+      "pattern": "[^A-Za-z0-9_]",
+      "replacement": ""
+    }
+  },
+  "sources": [
+    {
+      "source": "./",
+      "target": "./",
+      "exclude": [
+        ".git/**",
+        ".cursor/**",
+        ".vs/**",
+        ".idea/**",
+        ".template.config/**",
+        "artifacts/**",
+        "docs/node_modules/**",
+        "**/bin/**",
+        "**/obj/**",
+        "**/TestResults/**",
+        "**/*.user",
+        "**/*.suo",
+        "**/.DS_Store"
+      ]
+    }
+  ]
+}

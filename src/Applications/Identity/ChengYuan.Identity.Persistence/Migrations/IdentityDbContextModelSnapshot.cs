@@ -107,10 +107,37 @@ namespace ChengYuan.Identity.Persistence.Migrations
                     b.ToTable("UserRoles");
                 });
 
+            modelBuilder.Entity("ChengYuan.Identity.IdentityUserTenantMembership", b =>
+                {
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("UserId", "TenantId");
+
+                    b.HasIndex("TenantId");
+
+                    b.ToTable("UserTenantMemberships");
+                });
+
             modelBuilder.Entity("ChengYuan.Identity.IdentityUserRole", b =>
                 {
                     b.HasOne("ChengYuan.Identity.IdentityUser", null)
                         .WithMany("Roles")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("ChengYuan.Identity.IdentityUserTenantMembership", b =>
+                {
+                    b.HasOne("ChengYuan.Identity.IdentityUser", null)
+                        .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();

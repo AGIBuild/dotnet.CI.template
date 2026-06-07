@@ -15,8 +15,8 @@ public sealed class FeatureManagementEndpointContributor : IEndpointContributor
             .WithTags("FeatureManagement")
             .RequireAuthorization();
 
-        group.MapGet("/", static async (IFeatureValueReader reader, CancellationToken cancellationToken) =>
-            TypedResults.Ok(new ListResultDto<FeatureValueRecord>(await reader.GetListAsync(cancellationToken))))
+        group.MapGet("/", static async (IFeatureValueManager manager, CancellationToken cancellationToken) =>
+            TypedResults.Ok(new ListResultDto<FeatureValueRecord>(await manager.GetListAsync(cancellationToken))))
             .RequireAuthorization(FeatureManagementPermissions.Features);
 
         group.MapPut("/", static async (FeatureValueRecord record, IFeatureValueManager manager, CancellationToken cancellationToken) =>

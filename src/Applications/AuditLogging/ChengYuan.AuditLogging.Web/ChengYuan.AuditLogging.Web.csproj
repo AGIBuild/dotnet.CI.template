@@ -10,7 +10,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\..\Framework\AspNetCore\ChengYuan.AspNetCore\ChengYuan.AspNetCore.csproj" />
-    <ProjectReference Include="..\ChengYuan.AuditLogging.Persistence\ChengYuan.AuditLogging.Persistence.csproj" />
+    <ProjectReference Include="..\ChengYuan.AuditLogging.Application\ChengYuan.AuditLogging.Application.csproj" />
   </ItemGroup>
 
 </Project>

@@ -9,10 +9,10 @@ public static class SettingManagementServiceCollectionExtensions
 {
     public static IServiceCollection AddSettingManagement(this IServiceCollection services)
     {
-        services.TryAddSingleton<ISettingValueManager, SettingValueManager>();
-        services.TryAddEnumerable(ServiceDescriptor.Singleton<ISettingValueProvider, SettingStoreUserValueProvider>());
-        services.TryAddEnumerable(ServiceDescriptor.Singleton<ISettingValueProvider, SettingStoreTenantValueProvider>());
-        services.TryAddEnumerable(ServiceDescriptor.Singleton<ISettingValueProvider, SettingStoreGlobalValueProvider>());
+        services.TryAddScoped<ISettingValueManager, SettingValueManager>();
+        services.TryAddEnumerable(ServiceDescriptor.Scoped<ISettingValueProvider, SettingStoreUserValueProvider>());
+        services.TryAddEnumerable(ServiceDescriptor.Scoped<ISettingValueProvider, SettingStoreTenantValueProvider>());
+        services.TryAddEnumerable(ServiceDescriptor.Scoped<ISettingValueProvider, SettingStoreGlobalValueProvider>());
         services.AddTransient<IPermissionDefinitionContributor, SettingManagementPermissionDefinitionContributor>();
 
         return services;

@@ -41,6 +41,7 @@
         "RefreshLockFiles",
         "Restore",
         "ShowVersion",
+        "TemplateSmoke",
         "Test",
         "UpdateVersion",
         "ValidatePackageVersions",

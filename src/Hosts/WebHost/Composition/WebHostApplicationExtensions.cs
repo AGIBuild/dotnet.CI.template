@@ -9,6 +9,8 @@ using ChengYuan.MultiTenancy;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Hosting;
 
 namespace ChengYuan.WebHost;
 
@@ -43,21 +45,31 @@ public static class WebHostApplicationExtensions
     {
         ArgumentNullException.ThrowIfNull(app);
 
-        app.MapOpenApi();
+        if (app.Environment.IsDevelopment() || IsOpenApiEnabled(app.Configuration))
+        {
+            app.MapOpenApi();
+        }
 
         app.MapHealthChecks("/healthz", new HealthCheckOptions
         {
             Predicate = check => check.Tags.Contains("ready"),
         });
 
-        app.MapGet("/health", (IModuleCatalog catalog, ICurrentCorrelation correlation, ICurrentTenant currentTenant) =>
-            Results.Ok(new
-            {
-                status = "ok",
-                correlationId = correlation.CorrelationId,
-                tenantId = currentTenant.Id,
-                modules = catalog.ModuleTypes.Select(moduleType => moduleType.Name)
-            }));
+        if (app.Environment.IsDevelopment() || IsDetailedHealthEnabled(app.Configuration))
+        {
+            app.MapGet("/health", (IModuleCatalog catalog, ICurrentCorrelation correlation, ICurrentTenant currentTenant) =>
+                Results.Ok(new
+                {
+                    status = "ok",
+                    correlationId = correlation.CorrelationId,
+                    tenantId = currentTenant.Id,
+                    modules = catalog.ModuleTypes.Select(moduleType => moduleType.Name)
+                }));
+        }
+        else
+        {
+            app.MapGet("/health", () => Results.Ok(new { status = "ok" }));
+        }
 
         var versionSet = app.NewApiVersionSet()
             .HasApiVersion(new ApiVersion(1, 0))
@@ -76,4 +88,10 @@ public static class WebHostApplicationExtensions
 
         return app;
     }
+
+    private static bool IsOpenApiEnabled(IConfiguration configuration)
+        => bool.TryParse(configuration["WebHost:OpenApi:Enabled"], out var enabled) && enabled;
+
+    private static bool IsDetailedHealthEnabled(IConfiguration configuration)
+        => bool.TryParse(configuration["WebHost:Health:Detailed"], out var enabled) && enabled;
 }

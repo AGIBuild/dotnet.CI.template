@@ -1,6 +1,7 @@
 using ChengYuan.Core.Modularity;
 using ChengYuan.Hosting;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace ChengYuan.AspNetCore;
@@ -19,6 +20,8 @@ public static class ChengYuanWebBuilderExtensions
     {
         ArgumentNullException.ThrowIfNull(builder);
         ArgumentNullException.ThrowIfNull(configure);
+
+        builder.Services.AddSingleton<IConfiguration>(builder.Configuration);
 
         var cy = new ChengYuanBuilder(builder.Services);
         configure(cy);

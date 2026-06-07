@@ -1,15 +1,18 @@
 using System.Net;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
+using System.Security.Claims;
 using ChengYuan.Core.Modularity;
 using ChengYuan.EntityFrameworkCore;
 using ChengYuan.Identity;
 using ChengYuan.MultiTenancy;
+using ChengYuan.TenantManagement;
 using ChengYuan.WebHost;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.TestHost;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.IdentityModel.JsonWebTokens;
 using Shouldly;
 
 namespace ChengYuan.FrameworkKernel.Tests;
@@ -130,6 +133,279 @@ public class IdentityWebEndpointTests
     }
 
     [Fact]
+    public async Task IdentityWeb_ShouldReturnForbiddenForTenantLogin_WhenUserIsNotTenantMember()
+    {
+        await using var app = await CreateApplicationAsync();
+        var tenantId = Guid.NewGuid();
+        await SeedTenantAsync(app, tenantId);
+
+        var userManager = app.Services.GetRequiredService<IUserManager>();
+        await userManager.CreateAsync("admin", "admin@test.com", "AdminPass123!", TestContext.Current.CancellationToken);
+
+        var client = app.GetTestClient();
+        client.DefaultRequestHeaders.Add("X-Tenant-Id", tenantId.ToString());
+
+        var loginResponse = await client.PostAsJsonAsync("/api/v1/identity/login", new LoginRequest
+        {
+            UserName = "admin",
+            Password = "AdminPass123!"
+        }, TestContext.Current.CancellationToken);
+
+        loginResponse.StatusCode.ShouldBe(HttpStatusCode.Forbidden);
+    }
+
+    [Fact]
+    public async Task IdentityWeb_ShouldIssueTenantToken_WhenUserIsTenantMember()
+    {
+        await using var app = await CreateApplicationAsync();
+        var tenantId = Guid.NewGuid();
+        await SeedTenantAsync(app, tenantId);
+
+        var userManager = app.Services.GetRequiredService<IUserManager>();
+        var membershipManager = app.Services.GetRequiredService<IUserTenantMembershipManager>();
+        var user = await userManager.CreateAsync("admin", "admin@test.com", "AdminPass123!", TestContext.Current.CancellationToken);
+        await membershipManager.AssignAsync(user.Id, tenantId, TestContext.Current.CancellationToken);
+
+        var client = app.GetTestClient();
+        client.DefaultRequestHeaders.Add("X-Tenant-Id", tenantId.ToString());
+
+        var loginResponse = await client.PostAsJsonAsync("/api/v1/identity/login", new LoginRequest
+        {
+            UserName = "admin",
+            Password = "AdminPass123!"
+        }, TestContext.Current.CancellationToken);
+
+        loginResponse.StatusCode.ShouldBe(HttpStatusCode.OK);
+        var token = await loginResponse.Content.ReadFromJsonAsync<TokenResponse>(TestContext.Current.CancellationToken);
+        token.ShouldNotBeNull();
+        ReadClaimValue(token.AccessToken, "tenant_id").ShouldBe(tenantId.ToString());
+    }
+
+    [Fact]
+    public async Task IdentityWeb_ShouldManageUserTenantMembershipsFromHostContext()
+    {
+        await using var app = await CreateApplicationAsync();
+        var tenantId = Guid.NewGuid();
+        await SeedTenantAsync(app, tenantId);
+        var client = await CreateAuthenticatedClientAsync(app);
+
+        var userManager = app.Services.GetRequiredService<IUserManager>();
+        var user = await userManager.CreateAsync("tenantuser", "tenantuser@test.com", "TenantUserPass123!", TestContext.Current.CancellationToken);
+
+        var assignResponse = await client.PutAsync(
+            $"/api/v1/identity/users/{user.Id}/tenants/{tenantId}",
+            content: null,
+            TestContext.Current.CancellationToken);
+
+        assignResponse.StatusCode.ShouldBe(HttpStatusCode.OK);
+        var assigned = await assignResponse.Content.ReadFromJsonAsync<UserTenantMembershipRecord>(TestContext.Current.CancellationToken);
+        assigned.ShouldNotBeNull();
+        assigned.UserId.ShouldBe(user.Id);
+        assigned.TenantId.ShouldBe(tenantId);
+        assigned.IsActive.ShouldBeTrue();
+
+        var listResponse = await client.GetAsync(
+            $"/api/v1/identity/users/{user.Id}/tenants",
+            TestContext.Current.CancellationToken);
+        listResponse.StatusCode.ShouldBe(HttpStatusCode.OK);
+
+        var list = await listResponse.Content.ReadFromJsonAsync<ItemsWrapper<UserTenantMembershipRecord>>(TestContext.Current.CancellationToken);
+        list.ShouldNotBeNull();
+        list.Items.ShouldContain(membership => membership.UserId == user.Id && membership.TenantId == tenantId && membership.IsActive);
+
+        var revokeResponse = await client.DeleteAsync(
+            $"/api/v1/identity/users/{user.Id}/tenants/{tenantId}",
+            TestContext.Current.CancellationToken);
+        revokeResponse.StatusCode.ShouldBe(HttpStatusCode.NoContent);
+    }
+
+    [Fact]
+    public async Task IdentityWeb_ShouldForbidTenantContextMembershipManagement()
+    {
+        await using var app = await CreateApplicationAsync();
+        var tenantId = Guid.NewGuid();
+        var otherTenantId = Guid.NewGuid();
+        await SeedTenantAsync(app, tenantId);
+        await SeedTenantAsync(app, otherTenantId);
+
+        var userManager = app.Services.GetRequiredService<IUserManager>();
+        var membershipManager = app.Services.GetRequiredService<IUserTenantMembershipManager>();
+        var user = await userManager.CreateAsync("tenantadmin", "tenantadmin@test.com", "TenantAdminPass123!", TestContext.Current.CancellationToken);
+        await membershipManager.AssignAsync(user.Id, tenantId, TestContext.Current.CancellationToken);
+
+        var client = await CreateTenantClientAsync(app, tenantId, "tenantadmin", "TenantAdminPass123!");
+
+        var assignResponse = await client.PutAsync(
+            $"/api/v1/identity/users/{user.Id}/tenants/{otherTenantId}",
+            content: null,
+            TestContext.Current.CancellationToken);
+
+        assignResponse.StatusCode.ShouldBe(HttpStatusCode.Forbidden);
+    }
+
+    [Fact]
+    public async Task IdentityWeb_ShouldForbidTenantTokenFromIdentityManagementApis()
+    {
+        await using var app = await CreateApplicationAsync();
+        var tenantId = Guid.NewGuid();
+        await SeedTenantAsync(app, tenantId);
+
+        var userManager = app.Services.GetRequiredService<IUserManager>();
+        var membershipManager = app.Services.GetRequiredService<IUserTenantMembershipManager>();
+        var user = await userManager.CreateAsync("tenantadmin", "tenantadmin@test.com", "TenantAdminPass123!", TestContext.Current.CancellationToken);
+        await membershipManager.AssignAsync(user.Id, tenantId, TestContext.Current.CancellationToken);
+
+        var client = await CreateTenantClientAsync(app, tenantId, "tenantadmin", "TenantAdminPass123!");
+
+        var usersResponse = await client.GetAsync("/api/v1/identity/users", TestContext.Current.CancellationToken);
+        var rolesResponse = await client.GetAsync("/api/v1/identity/roles", TestContext.Current.CancellationToken);
+
+        usersResponse.StatusCode.ShouldBe(HttpStatusCode.Forbidden);
+        rolesResponse.StatusCode.ShouldBe(HttpStatusCode.Forbidden);
+    }
+
+    [Fact]
+    public async Task IdentityWeb_ShouldForbidOldTenantTokenAfterMembershipRevoked()
+    {
+        await using var app = await CreateApplicationAsync();
+        var tenantId = Guid.NewGuid();
+        await SeedTenantAsync(app, tenantId);
+
+        var userManager = app.Services.GetRequiredService<IUserManager>();
+        var membershipManager = app.Services.GetRequiredService<IUserTenantMembershipManager>();
+        var user = await userManager.CreateAsync("tenantadmin", "tenantadmin@test.com", "TenantAdminPass123!", TestContext.Current.CancellationToken);
+        await membershipManager.AssignAsync(user.Id, tenantId, TestContext.Current.CancellationToken);
+
+        var client = await CreateTenantClientAsync(app, tenantId, "tenantadmin", "TenantAdminPass123!");
+        await membershipManager.RevokeAsync(user.Id, tenantId, TestContext.Current.CancellationToken);
+
+        var response = await client.GetAsync("/api/v1/settings", TestContext.Current.CancellationToken);
+
+        response.StatusCode.ShouldBe(HttpStatusCode.Forbidden);
+    }
+
+    [Fact]
+    public async Task IdentityWeb_ShouldForbidOldTokenAfterUserIsDeactivated()
+    {
+        await using var app = await CreateApplicationAsync();
+        var userManager = app.Services.GetRequiredService<IUserManager>();
+        var user = await userManager.CreateAsync("sessionuser", "sessionuser@test.com", "SessionUserPass123!", TestContext.Current.CancellationToken);
+
+        var client = app.GetTestClient();
+        var loginResponse = await client.PostAsJsonAsync("/api/v1/identity/login", new LoginRequest
+        {
+            UserName = "sessionuser",
+            Password = "SessionUserPass123!"
+        }, TestContext.Current.CancellationToken);
+        loginResponse.StatusCode.ShouldBe(HttpStatusCode.OK);
+        var token = await loginResponse.Content.ReadFromJsonAsync<TokenResponse>(TestContext.Current.CancellationToken);
+        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token!.AccessToken);
+
+        await userManager.UpdateAsync(user.Id, "sessionuser", "sessionuser@test.com", isActive: false, TestContext.Current.CancellationToken);
+
+        var response = await client.GetAsync("/api/v1/identity/users", TestContext.Current.CancellationToken);
+
+        response.StatusCode.ShouldBe(HttpStatusCode.Forbidden);
+    }
+
+    [Fact]
+    public async Task IdentityWeb_ShouldForbidOldTokenAfterUserIsDeleted()
+    {
+        await using var app = await CreateApplicationAsync();
+        var userManager = app.Services.GetRequiredService<IUserManager>();
+        var user = await userManager.CreateAsync("deleteduser", "deleteduser@test.com", "DeletedUserPass123!", TestContext.Current.CancellationToken);
+
+        var client = app.GetTestClient();
+        var loginResponse = await client.PostAsJsonAsync("/api/v1/identity/login", new LoginRequest
+        {
+            UserName = "deleteduser",
+            Password = "DeletedUserPass123!"
+        }, TestContext.Current.CancellationToken);
+        loginResponse.StatusCode.ShouldBe(HttpStatusCode.OK);
+        var token = await loginResponse.Content.ReadFromJsonAsync<TokenResponse>(TestContext.Current.CancellationToken);
+        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token!.AccessToken);
+
+        await userManager.RemoveAsync(user.Id, TestContext.Current.CancellationToken);
+
+        var response = await client.GetAsync("/api/v1/identity/users", TestContext.Current.CancellationToken);
+
+        response.StatusCode.ShouldBe(HttpStatusCode.Forbidden);
+    }
+
+    [Fact]
+    public async Task IdentityWeb_ShouldRejectAssigningUserToUnknownTenant()
+    {
+        await using var app = await CreateApplicationAsync();
+        var client = await CreateAuthenticatedClientAsync(app);
+
+        var userManager = app.Services.GetRequiredService<IUserManager>();
+        var user = await userManager.CreateAsync("tenantuser", "tenantuser@test.com", "TenantUserPass123!", TestContext.Current.CancellationToken);
+
+        var assignResponse = await client.PutAsync(
+            $"/api/v1/identity/users/{user.Id}/tenants/{Guid.NewGuid()}",
+            content: null,
+            TestContext.Current.CancellationToken);
+
+        assignResponse.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
+    }
+
+    [Fact]
+    public async Task IdentityWeb_ShouldRejectAssigningUserToInactiveTenant()
+    {
+        await using var app = await CreateApplicationAsync();
+        var tenantId = Guid.NewGuid();
+        await SeedTenantAsync(app, tenantId, isActive: false);
+        var client = await CreateAuthenticatedClientAsync(app);
+
+        var userManager = app.Services.GetRequiredService<IUserManager>();
+        var user = await userManager.CreateAsync("tenantuser", "tenantuser@test.com", "TenantUserPass123!", TestContext.Current.CancellationToken);
+
+        var assignResponse = await client.PutAsync(
+            $"/api/v1/identity/users/{user.Id}/tenants/{tenantId}",
+            content: null,
+            TestContext.Current.CancellationToken);
+
+        assignResponse.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
+    }
+
+    [Fact]
+    public async Task IdentityWeb_ShouldForbidHostTokenWithTenantHeader()
+    {
+        await using var app = await CreateApplicationAsync();
+        var tenantId = Guid.NewGuid();
+        await SeedTenantAsync(app, tenantId);
+        var client = await CreateAuthenticatedClientAsync(app);
+        client.DefaultRequestHeaders.Add("X-Tenant-Id", tenantId.ToString());
+
+        var response = await client.GetAsync("/api/v1/identity/users", TestContext.Current.CancellationToken);
+
+        response.StatusCode.ShouldBe(HttpStatusCode.Forbidden);
+    }
+
+    [Fact]
+    public async Task IdentityWeb_ShouldForbidTenantTokenWhenHeaderTargetsAnotherTenant()
+    {
+        await using var app = await CreateApplicationAsync();
+        var tenantId = Guid.NewGuid();
+        var otherTenantId = Guid.NewGuid();
+        await SeedTenantAsync(app, tenantId);
+        await SeedTenantAsync(app, otherTenantId);
+
+        var userManager = app.Services.GetRequiredService<IUserManager>();
+        var membershipManager = app.Services.GetRequiredService<IUserTenantMembershipManager>();
+        var user = await userManager.CreateAsync("tenantadmin", "tenantadmin@test.com", "TenantAdminPass123!", TestContext.Current.CancellationToken);
+        await membershipManager.AssignAsync(user.Id, tenantId, TestContext.Current.CancellationToken);
+
+        var client = await CreateTenantClientAsync(app, tenantId, "tenantadmin", "TenantAdminPass123!");
+        client.DefaultRequestHeaders.Remove("X-Tenant-Id");
+        client.DefaultRequestHeaders.Add("X-Tenant-Id", otherTenantId.ToString());
+
+        var response = await client.GetAsync("/api/v1/identity/users", TestContext.Current.CancellationToken);
+
+        response.StatusCode.ShouldBe(HttpStatusCode.Forbidden);
+    }
+
+    [Fact]
     public async Task IdentityWeb_ShouldReturnUnauthorizedForInvalidCredentials()
     {
         await using var app = await CreateApplicationAsync();
@@ -206,6 +482,43 @@ public class IdentityWebEndpointTests
         return client;
     }
 
+    private static async Task<HttpClient> CreateTenantClientAsync(
+        WebApplication app,
+        Guid tenantId,
+        string userName,
+        string password)
+    {
+        var client = app.GetTestClient();
+        client.DefaultRequestHeaders.Add("X-Tenant-Id", tenantId.ToString());
+        var loginResponse = await client.PostAsJsonAsync("/api/v1/identity/login", new LoginRequest
+        {
+            UserName = userName,
+            Password = password
+        }, TestContext.Current.CancellationToken);
+        loginResponse.StatusCode.ShouldBe(HttpStatusCode.OK);
+
+        var token = await loginResponse.Content.ReadFromJsonAsync<TokenResponse>(TestContext.Current.CancellationToken);
+        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token!.AccessToken);
+
+        return client;
+    }
+
+    private static async Task SeedTenantAsync(WebApplication app, Guid tenantId, bool isActive = true)
+    {
+        using var scope = app.Services.CreateScope();
+        var dbContext = scope.ServiceProvider.GetRequiredService<TenantManagementDbContext>();
+        await dbContext.Tenants.AddAsync(
+            new TenantEntity(tenantId, $"Tenant-{tenantId:N}", isActive),
+            TestContext.Current.CancellationToken);
+        await dbContext.SaveChangesAsync(TestContext.Current.CancellationToken);
+    }
+
+    private static string? ReadClaimValue(string accessToken, string claimType)
+    {
+        var token = new JsonWebTokenHandler().ReadJsonWebToken(accessToken);
+        return token.Claims.SingleOrDefault(claim => claim.Type == claimType)?.Value;
+    }
+
     private sealed class HealthPayload
     {
         public string Status { get; init; } = string.Empty;
@@ -215,5 +528,10 @@ public class IdentityWebEndpointTests
         public Guid? TenantId { get; init; }
 
         public IReadOnlyList<string> Modules { get; init; } = Array.Empty<string>();
+    }
+
+    private sealed class ItemsWrapper<T>
+    {
+        public List<T> Items { get; set; } = [];
     }
 }

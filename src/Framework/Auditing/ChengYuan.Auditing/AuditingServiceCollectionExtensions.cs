@@ -11,7 +11,7 @@ public static class AuditingServiceCollectionExtensions
         services.AddOptions<AuditingOptions>();
         services.AddOptions<AuditMiddlewareOptions>();
         services.TryAddSingleton<IAuditScopeAccessor, AmbientAuditScopeAccessor>();
-        services.TryAddSingleton<IAuditScopeFactory, DefaultAuditScopeFactory>();
+        services.TryAddScoped<IAuditScopeFactory, DefaultAuditScopeFactory>();
         services.TryAddSingleton<IEntityChangeCollector, AuditScopeEntityChangeCollector>();
         services.TryAddSingleton<IAuditableEntityTypeResolver, AuditableEntityTypeResolver>();
         services.TryAddSingleton<IAuditUserProvider, CurrentUserAuditUserProvider>();

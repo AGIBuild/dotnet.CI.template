@@ -9,7 +9,7 @@ public static class AuthorizationServiceCollectionExtensions
     public static IServiceCollection AddAuthorizationCore(this IServiceCollection services)
     {
         services.TryAddSingleton<IPermissionDefinitionManager, DefaultPermissionDefinitionManager>();
-        services.TryAddSingleton<IPermissionChecker, DefaultPermissionChecker>();
+        services.TryAddScoped<IPermissionChecker, DefaultPermissionChecker>();
 
         return services;
     }

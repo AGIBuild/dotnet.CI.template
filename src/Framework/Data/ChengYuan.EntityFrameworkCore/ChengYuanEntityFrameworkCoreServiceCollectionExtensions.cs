@@ -34,10 +34,10 @@ public static class ChengYuanEntityFrameworkCoreServiceCollectionExtensions
     {
         ArgumentNullException.ThrowIfNull(services);
 
-        services.AddConfiguredDbContextFactory<TDbContext>();
+        services.AddConfiguredDbContext<TDbContext>();
         services.AddEntityFrameworkCoreDataAccess<TDbContext>();
-        services.TryAddSingleton<TStore, TImpl>();
-        services.TryAddSingleton<TReader>(serviceProvider => serviceProvider.GetRequiredService<TStore>());
+        services.TryAddScoped<TStore, TImpl>();
+        services.TryAddScoped<TReader>(serviceProvider => serviceProvider.GetRequiredService<TStore>());
 
         return services;
     }

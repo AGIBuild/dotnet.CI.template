@@ -1,6 +1,7 @@
 using ChengYuan.Core.Data;
 using ChengYuan.Core.DependencyInjection;
 using ChengYuan.Core.Exceptions;
+using ChengYuan.MultiTenancy;
 
 namespace ChengYuan.Identity;
 
@@ -9,10 +10,12 @@ public sealed class UserManager(
     IIdentityUserRepository userRepository,
     IIdentityRoleRepository roleRepository,
     IPasswordHasher passwordHasher,
+    ICurrentTenant currentTenant,
     IUnitOfWork unitOfWork) : IUserManager, IUserReader, IScopedService
 {
     public async ValueTask<UserRecord> CreateAsync(string userName, string email, string password, CancellationToken cancellationToken = default)
     {
+        EnsureHostContext();
         ArgumentException.ThrowIfNullOrWhiteSpace(password);
 
         await EnsureUniqueAsync(userName, email, userIdToIgnore: null, cancellationToken);
@@ -48,6 +51,7 @@ public sealed class UserManager(
 
     public async ValueTask ChangePasswordAsync(Guid userId, string currentPassword, string newPassword, CancellationToken cancellationToken = default)
     {
+        EnsureHostContext();
         EnsureId(userId, nameof(userId), "User");
         ArgumentException.ThrowIfNullOrWhiteSpace(currentPassword);
         ArgumentException.ThrowIfNullOrWhiteSpace(newPassword);
@@ -67,6 +71,7 @@ public sealed class UserManager(
 
     public async ValueTask<UserRecord> UpdateAsync(Guid userId, string userName, string email, bool isActive, CancellationToken cancellationToken = default)
     {
+        EnsureHostContext();
         EnsureId(userId, nameof(userId), "User");
 
         await EnsureUniqueAsync(userName, email, userId, cancellationToken);
@@ -80,6 +85,7 @@ public sealed class UserManager(
 
     public async ValueTask<UserRecord> AssignRoleAsync(Guid userId, Guid roleId, CancellationToken cancellationToken = default)
     {
+        EnsureHostContext();
         EnsureId(userId, nameof(userId), "User");
         EnsureId(roleId, nameof(roleId), "Role");
 
@@ -101,6 +107,7 @@ public sealed class UserManager(
 
     public async ValueTask<UserRecord> UnassignRoleAsync(Guid userId, Guid roleId, CancellationToken cancellationToken = default)
     {
+        EnsureHostContext();
         EnsureId(userId, nameof(userId), "User");
         EnsureId(roleId, nameof(roleId), "Role");
 
@@ -113,6 +120,7 @@ public sealed class UserManager(
 
     public async ValueTask RemoveAsync(Guid userId, CancellationToken cancellationToken = default)
     {
+        EnsureHostContext();
         EnsureId(userId, nameof(userId), "User");
 
         var user = await userRepository.GetDetailsAsync(userId, cancellationToken);
@@ -122,6 +130,7 @@ public sealed class UserManager(
 
     public async ValueTask<UserRecord?> FindByIdAsync(Guid userId, CancellationToken cancellationToken = default)
     {
+        EnsureHostContext();
         EnsureId(userId, nameof(userId), "User");
 
         var user = await userRepository.FindDetailsAsync(userId, cancellationToken);
@@ -130,20 +139,31 @@ public sealed class UserManager(
 
     public async ValueTask<UserRecord?> FindByUserNameAsync(string userName, CancellationToken cancellationToken = default)
     {
+        EnsureHostContext();
         var user = await userRepository.FindByNormalizedUserNameAsync(IdentityUser.NormalizeUserName(userName), cancellationToken);
         return user is null ? null : MapToRecord(user);
     }
 
     public async ValueTask<UserRecord?> FindByEmailAsync(string email, CancellationToken cancellationToken = default)
     {
+        EnsureHostContext();
         var user = await userRepository.FindByNormalizedEmailAsync(IdentityUser.NormalizeEmail(email), cancellationToken);
         return user is null ? null : MapToRecord(user);
     }
 
     public async ValueTask<IReadOnlyList<UserRecord>> GetListAsync(CancellationToken cancellationToken = default)
     {
+        EnsureHostContext();
         var users = await userRepository.GetListAsync(cancellationToken);
         return users.Select(MapToRecord).ToArray();
+    }
+
+    private void EnsureHostContext()
+    {
+        if (currentTenant.Id is not null)
+        {
+            throw new UnauthorizedAccessException("Identity user management is only available in host context.");
+        }
     }
 
     private async ValueTask EnsureUniqueAsync(string userName, string email, Guid? userIdToIgnore, CancellationToken cancellationToken)

@@ -45,7 +45,6 @@ internal sealed class CookieTenantResolutionSource(MultiTenancyOptions options) 
         if (Guid.TryParse(value, out var tenantId))
         {
             context.TenantId = tenantId;
-            context.HasResolved = true;
             context.SourceName = nameof(CookieTenantResolutionSource);
             return ValueTask.CompletedTask;
         }

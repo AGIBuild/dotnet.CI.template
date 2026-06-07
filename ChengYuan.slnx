@@ -38,6 +38,7 @@
     <Project Path="src/Framework/AspNetCore/ChengYuan.HealthChecks/ChengYuan.HealthChecks.csproj" />
     <Project Path="src/Framework/HttpResilience/ChengYuan.HttpResilience/ChengYuan.HttpResilience.csproj" />
     <Project Path="src/Framework/Application/ChengYuan.Application/ChengYuan.Application.csproj" />
+    <Project Path="src/Framework/UI/ChengYuan.UI.Navigation/ChengYuan.UI.Navigation.csproj" />
   </Folder>
   <Folder Name="/src/Applications/">
     <Project Path="src/Applications/AuditLogging/ChengYuan.AuditLogging.Contracts/ChengYuan.AuditLogging.Contracts.csproj" />
@@ -69,6 +70,9 @@
   <Folder Name="/src/Hosts/">
     <Project Path="src/Hosts/WebHost/ChengYuan.WebHost.csproj" />
     <Project Path="src/Hosts/CliHost/ChengYuan.CliHost.csproj" />
+  </Folder>
+  <Folder Name="/src/Analyzers/">
+    <Project Path="src/Analyzers/ChengYuan.Architecture/ChengYuan.Architecture.csproj" />
   </Folder>
   <Folder Name="/tests/">
     <Project Path="tests/ChengYuan.FrameworkKernel.Tests/ChengYuan.FrameworkKernel.Tests.csproj" />

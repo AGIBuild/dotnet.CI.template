@@ -8,10 +8,10 @@ public static class PermissionManagementServiceCollectionExtensions
 {
     public static IServiceCollection AddPermissionManagement(this IServiceCollection services)
     {
-        services.TryAddSingleton<IPermissionGrantManager, PermissionGrantManager>();
-        services.TryAddEnumerable(ServiceDescriptor.Singleton<IPermissionGrantProvider, PermissionStoreUserGrantProvider>());
-        services.TryAddEnumerable(ServiceDescriptor.Singleton<IPermissionGrantProvider, PermissionStoreTenantGrantProvider>());
-        services.TryAddEnumerable(ServiceDescriptor.Singleton<IPermissionGrantProvider, PermissionStoreGlobalGrantProvider>());
+        services.TryAddScoped<IPermissionGrantManager, PermissionGrantManager>();
+        services.TryAddEnumerable(ServiceDescriptor.Scoped<IPermissionGrantProvider, PermissionStoreUserGrantProvider>());
+        services.TryAddEnumerable(ServiceDescriptor.Scoped<IPermissionGrantProvider, PermissionStoreTenantGrantProvider>());
+        services.TryAddEnumerable(ServiceDescriptor.Scoped<IPermissionGrantProvider, PermissionStoreGlobalGrantProvider>());
         services.AddTransient<IPermissionDefinitionContributor, PermissionManagementPermissionDefinitionContributor>();
 
         return services;

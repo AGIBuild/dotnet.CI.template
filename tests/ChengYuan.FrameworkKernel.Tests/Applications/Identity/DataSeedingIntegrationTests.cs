@@ -56,7 +56,7 @@ public class DataSeedingIntegrationTests
         var loginResponse = await client.PostAsJsonAsync("/api/v1/identity/login", new LoginRequest
         {
             UserName = "admin",
-            Password = "Admin@123456"
+            Password = TestAdminPassword
         }, TestContext.Current.CancellationToken);
 
         loginResponse.StatusCode.ShouldBe(HttpStatusCode.OK);
@@ -66,12 +66,33 @@ public class DataSeedingIntegrationTests
         token.AccessToken.ShouldNotBeNullOrWhiteSpace();
     }
 
-    private static async Task<WebApplication> CreateApplicationAsync()
+    [Fact]
+    public async Task DataSeeding_ShouldNotCreateAdminUser_WhenAdminSeedIsDisabled()
+    {
+        await using var app = await CreateApplicationAsync(configureAdminSeed: false);
+
+        var userReader = app.Services.GetRequiredService<IUserReader>();
+        var adminUser = await userReader.FindByUserNameAsync("admin", TestContext.Current.CancellationToken);
+
+        adminUser.ShouldBeNull();
+    }
+
+    private const string TestAdminPassword = "SeededAdminPass123!";
+
+    private static async Task<WebApplication> CreateApplicationAsync(bool configureAdminSeed = true)
     {
         var databaseName = $"seed-{Guid.NewGuid():N}";
         var builder = WebApplication.CreateBuilder();
         builder.WebHost.UseTestServer();
         builder.Services.UseDbContextOptions(options => options.UseInMemoryDatabase(databaseName));
+        if (configureAdminSeed)
+        {
+            builder.Configuration["Identity:Admin:SeedEnabled"] = "true";
+            builder.Configuration["Identity:Admin:UserName"] = "admin";
+            builder.Configuration["Identity:Admin:Email"] = "admin@chengyuan.dev";
+            builder.Configuration["Identity:Admin:Password"] = TestAdminPassword;
+            builder.Configuration["Identity:Admin:RoleName"] = "admin";
+        }
         builder.AddTestWebHost();
         builder.Services.TryAddTransient<IDataSeeder, DataSeeder>();
         builder.Services.AddHostedService<DataSeedingHostedService>();

@@ -47,6 +47,7 @@ public class FeatureManagementModuleTests
         using var serviceProvider = services.BuildServiceProvider();
         var featureChecker = serviceProvider.GetRequiredService<IFeatureChecker>();
         var featureValueManager = serviceProvider.GetRequiredService<IFeatureValueManager>();
+        var featureValueStore = serviceProvider.GetRequiredService<IFeatureValueStore>();
         var currentTenant = serviceProvider.GetRequiredService<ICurrentTenantAccessor>();
         var currentUser = serviceProvider.GetRequiredService<ICurrentUserAccessor>();
 
@@ -59,7 +60,7 @@ public class FeatureManagementModuleTests
         {
             (await featureChecker.GetAsync<int>("workspace.max-users", cancellationToken)).ShouldBe(30);
 
-            await featureValueManager.SetAsync(new FeatureValueRecord("workspace.max-users", FeatureScope.User, 40, userId: userId), cancellationToken);
+            await featureValueStore.SetAsync(new FeatureValueRecord("workspace.max-users", FeatureScope.User, 40, userId: userId), cancellationToken);
 
             using (currentUser.Change(new CurrentUserInfo(userId, "Alice", true)))
             {

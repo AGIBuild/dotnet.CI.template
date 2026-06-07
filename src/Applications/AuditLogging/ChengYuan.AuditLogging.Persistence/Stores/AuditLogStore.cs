@@ -3,13 +3,11 @@ using Microsoft.EntityFrameworkCore;
 
 namespace ChengYuan.AuditLogging;
 
-public sealed class AuditLogStore(IDbContextFactory<AuditLoggingDbContext> dbContextFactory) : IAuditLogStore
+public sealed class AuditLogStore(AuditLoggingDbContext dbContext) : IAuditLogStore
 {
     public async ValueTask AppendAsync(AuditLogRecord record, CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(record);
-
-        await using var dbContext = await dbContextFactory.CreateDbContextAsync(cancellationToken);
 
         var auditLogId = Guid.NewGuid();
         var auditLogEntity = new AuditLogEntity(
@@ -45,7 +43,6 @@ public sealed class AuditLogStore(IDbContextFactory<AuditLoggingDbContext> dbCon
 
     public async ValueTask<IReadOnlyList<AuditLogRecord>> GetListAsync(CancellationToken cancellationToken = default)
     {
-        await using var dbContext = await dbContextFactory.CreateDbContextAsync(cancellationToken);
         var entities = await dbContext.AuditLogs
             .OrderBy(auditLog => auditLog.StartedAtUtc)
             .ThenBy(auditLog => auditLog.Id)

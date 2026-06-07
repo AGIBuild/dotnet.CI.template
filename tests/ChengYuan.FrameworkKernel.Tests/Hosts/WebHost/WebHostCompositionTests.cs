@@ -10,8 +10,12 @@ using ChengYuan.PermissionManagement;
 using ChengYuan.SettingManagement;
 using ChengYuan.TenantManagement;
 using ChengYuan.WebHost;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.TestHost;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using System.Net;
 using Shouldly;
 
 namespace ChengYuan.FrameworkKernel.Tests;
@@ -31,6 +35,9 @@ public class WebHostCompositionTests
         var moduleNames = moduleCatalog.ModuleTypes.Select(moduleType => moduleType.Name).ToArray();
 
         moduleNames.ShouldContain(nameof(WebHostHttpCompositionModule));
+        moduleNames.ShouldContain(nameof(WebHostFrameworkCompositionModule));
+        moduleNames.ShouldContain(nameof(WebHostApplicationCompositionModule));
+        moduleNames.ShouldContain(nameof(WebHostRuntimeGlueModule));
         moduleNames.ShouldContain("ChengYuanEntityFrameworkCoreSqliteModule");
 
         using var scope = serviceProvider.CreateScope();
@@ -56,6 +63,9 @@ public class WebHostCompositionTests
         var moduleNames = moduleCatalog.ModuleTypes.Select(moduleType => moduleType.Name).ToArray();
 
         moduleNames.ShouldContain(nameof(WebHostHttpCompositionModule));
+        moduleNames.ShouldContain(nameof(WebHostFrameworkCompositionModule));
+        moduleNames.ShouldContain(nameof(WebHostApplicationCompositionModule));
+        moduleNames.ShouldContain(nameof(WebHostRuntimeGlueModule));
         moduleNames.ShouldContain(nameof(IdentityWebModule));
         moduleNames.ShouldContain(nameof(IdentityPersistenceModule));
         moduleNames.ShouldContain(nameof(TenantManagementPersistenceModule));
@@ -73,6 +83,49 @@ public class WebHostCompositionTests
         scope.ServiceProvider.GetRequiredService<AuditLoggingDbContext>().ShouldNotBeNull();
         scope.ServiceProvider.GetRequiredService<IUserManager>().ShouldNotBeNull();
         scope.ServiceProvider.GetRequiredService<IRoleManager>().ShouldNotBeNull();
+    }
+
+    [Fact]
+    public async Task WebHostComposition_ShouldPassServiceProviderValidation()
+    {
+        var databaseName = $"composition-validation-{Guid.NewGuid():N}";
+        var builder = WebApplication.CreateBuilder();
+        builder.Services.UseDbContextOptions(options => options.UseInMemoryDatabase(databaseName));
+        builder.AddTestWebHost();
+
+        await using var app = builder.Build();
+
+        app.Services.ShouldNotBeNull();
+    }
+
+    [Fact]
+    public void WebModules_ShouldLoadWithoutPersistenceModules()
+    {
+        var services = new ServiceCollection();
+        services.AddChengYuan<WebOnlyHostModule>(cy => cy
+            .AddModule<IdentityWebModule>()
+            .AddModule<TenantManagementWebModule>()
+            .AddModule<SettingManagementWebModule>()
+            .AddModule<PermissionManagementWebModule>()
+            .AddModule<FeatureManagementWebModule>()
+            .AddModule<AuditLoggingWebModule>());
+
+        using var serviceProvider = services.BuildServiceProvider();
+        var moduleCatalog = serviceProvider.GetRequiredService<ChengYuan.Core.Modularity.ModuleCatalog>();
+        var moduleNames = moduleCatalog.ModuleTypes.Select(moduleType => moduleType.Name).ToArray();
+
+        moduleNames.ShouldContain(nameof(IdentityWebModule));
+        moduleNames.ShouldContain(nameof(TenantManagementWebModule));
+        moduleNames.ShouldContain(nameof(SettingManagementWebModule));
+        moduleNames.ShouldContain(nameof(PermissionManagementWebModule));
+        moduleNames.ShouldContain(nameof(FeatureManagementWebModule));
+        moduleNames.ShouldContain(nameof(AuditLoggingWebModule));
+        moduleNames.ShouldNotContain(nameof(IdentityPersistenceModule));
+        moduleNames.ShouldNotContain(nameof(TenantManagementPersistenceModule));
+        moduleNames.ShouldNotContain(nameof(SettingManagementPersistenceModule));
+        moduleNames.ShouldNotContain(nameof(PermissionManagementPersistenceModule));
+        moduleNames.ShouldNotContain(nameof(FeatureManagementPersistenceModule));
+        moduleNames.ShouldNotContain(nameof(AuditLoggingPersistenceModule));
     }
 
     [Fact]
@@ -143,4 +196,26 @@ public class WebHostCompositionTests
             byName.Id.ShouldBe(tenantId);
         }
     }
+
+    [Fact]
+    public async Task PermissionPolicy_ShouldRequireAuthenticatedUser()
+    {
+        var databaseName = $"composition-permission-auth-{Guid.NewGuid():N}";
+        var builder = WebApplication.CreateBuilder();
+        builder.WebHost.UseTestServer();
+        builder.Services.UseDbContextOptions(options => options.UseInMemoryDatabase(databaseName));
+        builder.AddTestWebHost();
+
+        await using var app = builder.Build();
+        app.UseWebHostComposition();
+        app.MapGet("/permission-only", static () => Results.Ok())
+            .RequireAuthorization(IdentityPermissions.Users);
+        await app.StartAsync(TestContext.Current.CancellationToken);
+
+        var response = await app.GetTestClient().GetAsync("/permission-only", TestContext.Current.CancellationToken);
+
+        response.StatusCode.ShouldBe(HttpStatusCode.Unauthorized);
+    }
+
+    private sealed class WebOnlyHostModule : HostModule;
 }
