@@ -6,7 +6,7 @@ using ChengYuan.Core.Entities;
 
 namespace ChengYuan.EventBus;
 
-public sealed class EventBusDomainEventPublisher(ILocalEventBus eventBus) : IDomainEventPublisher
+public sealed class EventBusDomainEventPublisher(IDistributedEventBus eventBus) : IDomainEventPublisher
 {
     public async ValueTask PublishAsync(IReadOnlyList<IDomainEvent> domainEvents, CancellationToken cancellationToken = default)
     {

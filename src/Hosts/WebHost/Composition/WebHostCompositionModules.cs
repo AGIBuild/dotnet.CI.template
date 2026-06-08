@@ -1,6 +1,7 @@
 using ChengYuan.AuditLogging;
 using ChengYuan.BackgroundJobs;
 using ChengYuan.Core.Modularity;
+using ChengYuan.EventBus.Outbox;
 using ChengYuan.FeatureManagement;
 using ChengYuan.Identity;
 using ChengYuan.Outbox;
@@ -11,6 +12,8 @@ using ChengYuan.TenantManagement;
 namespace ChengYuan.WebHost;
 
 [DependsOn(typeof(BackgroundJobPersistenceModule))]
+[DependsOn(typeof(EventBusOutboxModule))]
+[DependsOn(typeof(OutboxWorkerModule))]
 internal sealed class WebHostFrameworkCompositionModule : HostModule;
 
 [DependsOn(typeof(IdentityWebModule))]

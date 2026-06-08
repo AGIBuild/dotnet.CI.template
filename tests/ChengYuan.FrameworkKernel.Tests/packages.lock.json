@@ -984,6 +984,13 @@
           "ChengYuan.Core": "[0.2.10-local, )"
         }
       },
+      "chengyuan.eventbus.outbox": {
+        "type": "Project",
+        "dependencies": {
+          "ChengYuan.EventBus": "[0.2.10-local, )",
+          "ChengYuan.Outbox": "[0.2.10-local, )"
+        }
+      },
       "chengyuan.exceptionhandling": {
         "type": "Project",
         "dependencies": {
@@ -1296,6 +1303,7 @@
           "ChengYuan.DistributedLocking": "[0.2.10-local, )",
           "ChengYuan.Emailing": "[0.2.10-local, )",
           "ChengYuan.EventBus": "[0.2.10-local, )",
+          "ChengYuan.EventBus.Outbox": "[0.2.10-local, )",
           "ChengYuan.ExceptionHandling": "[0.2.10-local, )",
           "ChengYuan.ExecutionContext": "[0.2.10-local, )",
           "ChengYuan.FeatureManagement.Persistence": "[0.2.10-local, )",
@@ -1307,6 +1315,7 @@
           "ChengYuan.Notifications": "[0.2.10-local, )",
           "ChengYuan.ObjectMapping": "[0.2.10-local, )",
           "ChengYuan.Outbox.Persistence": "[0.2.10-local, )",
+          "ChengYuan.Outbox.Worker": "[0.2.10-local, )",
           "ChengYuan.PermissionManagement.Persistence": "[0.2.10-local, )",
           "ChengYuan.PermissionManagement.Web": "[0.2.10-local, )",
           "ChengYuan.SettingManagement.Persistence": "[0.2.10-local, )",

@@ -1,7 +1,9 @@
 using ChengYuan.AuditLogging;
 using ChengYuan.Core.Data;
+using ChengYuan.Core.Entities;
 using ChengYuan.Core.Modularity;
 using ChengYuan.EntityFrameworkCore;
+using ChengYuan.EventBus;
 using ChengYuan.FeatureManagement;
 using ChengYuan.Hosting;
 using ChengYuan.Identity;
@@ -17,6 +19,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.TestHost;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using System.Collections.Concurrent;
 using System.Net;
 using Shouldly;
 
@@ -79,6 +82,9 @@ public class WebHostCompositionTests
         moduleNames.ShouldContain(nameof(FeatureManagementPersistenceModule));
         moduleNames.ShouldContain(nameof(AuditLoggingPersistenceModule));
         moduleNames.ShouldContain(nameof(OutboxPersistenceModule));
+        moduleNames.ShouldContain("EventBusModule");
+        moduleNames.ShouldContain("EventBusOutboxModule");
+        moduleNames.ShouldContain(nameof(OutboxWorkerModule));
 
         using var scope = serviceProvider.CreateScope();
         scope.ServiceProvider.GetRequiredService<IdentityDbContext>().ShouldNotBeNull();
@@ -88,8 +94,171 @@ public class WebHostCompositionTests
         scope.ServiceProvider.GetRequiredService<FeatureManagementDbContext>().ShouldNotBeNull();
         scope.ServiceProvider.GetRequiredService<AuditLoggingDbContext>().ShouldNotBeNull();
         scope.ServiceProvider.GetRequiredService<OutboxDbContext>().ShouldNotBeNull();
+        scope.ServiceProvider.GetRequiredService<IOutboxWorker>().ShouldNotBeNull();
         scope.ServiceProvider.GetRequiredService<IUserManager>().ShouldNotBeNull();
         scope.ServiceProvider.GetRequiredService<IRoleManager>().ShouldNotBeNull();
+    }
+
+    [Fact]
+    public async Task WebHostMessaging_ShouldPersistDistributedEventsToOutboxAndDispatchToLocalSubscribers()
+    {
+        var databaseName = $"chengyuan-messaging-{Guid.NewGuid():N}";
+        var builder = WebApplication.CreateBuilder();
+        builder.WebHost.UseTestServer();
+        builder.Services.UseDbContextOptions(options => options.UseInMemoryDatabase(databaseName));
+        RecordingMessageSubscriber.Clear();
+        builder.Services.AddEventSubscriber<WorkspaceProvisioned, RecordingMessageSubscriber>();
+        builder.AddTestWebHost();
+
+        await using var app = builder.Build();
+        app.UseWebHostComposition();
+        app.MapPost("/messaging/provision-workspace", static async (
+            IDistributedEventBus eventBus,
+            CancellationToken cancellationToken) =>
+        {
+            await eventBus.PublishAsync(new WorkspaceProvisioned("workspace-a"), cancellationToken);
+            return Results.Accepted();
+        });
+
+        await app.StartAsync(TestContext.Current.CancellationToken);
+
+        var response = await app.GetTestClient().PostAsync("/messaging/provision-workspace", null, TestContext.Current.CancellationToken);
+
+        response.StatusCode.ShouldBe(HttpStatusCode.Accepted);
+
+        await using (var verificationScope = app.Services.CreateAsyncScope())
+        {
+            var outboxDbContext = verificationScope.ServiceProvider.GetRequiredService<OutboxDbContext>();
+            var pendingMessages = await outboxDbContext.OutboxMessages
+                .Where(message => message.Status == OutboxMessageStatus.Pending)
+                .ToArrayAsync(TestContext.Current.CancellationToken);
+
+            pendingMessages.Length.ShouldBe(1);
+            pendingMessages[0].Name.ShouldBe(typeof(WorkspaceProvisioned).FullName);
+        }
+
+        await using (var workerScope = app.Services.CreateAsyncScope())
+        {
+            var worker = workerScope.ServiceProvider.GetRequiredService<IOutboxWorker>();
+            var result = await worker.DrainAsync(10, TestContext.Current.CancellationToken);
+
+            result.AttemptedCount.ShouldBe(1);
+            result.DispatchedCount.ShouldBe(1);
+            result.FailedCount.ShouldBe(0);
+        }
+
+        RecordingMessageSubscriber.WorkspaceNames.ShouldBe(["workspace-a"]);
+
+        await using (var dispatchedScope = app.Services.CreateAsyncScope())
+        {
+            var outboxDbContext = dispatchedScope.ServiceProvider.GetRequiredService<OutboxDbContext>();
+            var message = await outboxDbContext.OutboxMessages.SingleAsync(TestContext.Current.CancellationToken);
+            message.Status.ShouldBe(OutboxMessageStatus.Dispatched);
+            message.AttemptCount.ShouldBe(1);
+            message.DispatchedAtUtc.ShouldNotBeNull();
+        }
+    }
+
+    [Fact]
+    public async Task WebHostMessaging_ShouldPersistDomainEventsToOutboxBeforeDispatching()
+    {
+        var databaseName = $"chengyuan-domain-messaging-{Guid.NewGuid():N}";
+        var builder = WebApplication.CreateBuilder();
+        builder.WebHost.UseTestServer();
+        builder.Services.UseDbContextOptions(options => options.UseInMemoryDatabase(databaseName));
+        builder.Services.AddConfiguredDbContext<MessagingTestDbContext>();
+        builder.Services.AddEntityFrameworkCoreDataAccess<MessagingTestDbContext>();
+        DomainMessageSubscriber.Clear();
+        builder.Services.AddEventSubscriber<WorkspaceDomainProvisioned, DomainMessageSubscriber>();
+        builder.AddTestWebHost();
+
+        await using var app = builder.Build();
+        app.UseWebHostComposition();
+        app.MapPost("/messaging/domain-workspace", static async (
+            MessagingTestDbContext dbContext,
+            CancellationToken cancellationToken) =>
+        {
+            await dbContext.Workspaces.AddAsync(WorkspaceAggregate.Create("workspace-domain"), cancellationToken);
+            return Results.Accepted();
+        });
+
+        await app.StartAsync(TestContext.Current.CancellationToken);
+
+        var response = await app.GetTestClient().PostAsync("/messaging/domain-workspace", null, TestContext.Current.CancellationToken);
+
+        response.StatusCode.ShouldBe(HttpStatusCode.Accepted);
+        DomainMessageSubscriber.WorkspaceNames.ShouldBeEmpty();
+
+        await using (var verificationScope = app.Services.CreateAsyncScope())
+        {
+            var outboxDbContext = verificationScope.ServiceProvider.GetRequiredService<OutboxDbContext>();
+            var pendingMessages = await outboxDbContext.OutboxMessages
+                .Where(message => message.Status == OutboxMessageStatus.Pending)
+                .ToArrayAsync(TestContext.Current.CancellationToken);
+
+            pendingMessages.Length.ShouldBe(1);
+            pendingMessages[0].Name.ShouldBe(typeof(WorkspaceDomainProvisioned).FullName);
+        }
+
+        await using (var workerScope = app.Services.CreateAsyncScope())
+        {
+            var worker = workerScope.ServiceProvider.GetRequiredService<IOutboxWorker>();
+            var result = await worker.DrainAsync(10, TestContext.Current.CancellationToken);
+
+            result.AttemptedCount.ShouldBe(1);
+            result.DispatchedCount.ShouldBe(1);
+            result.FailedCount.ShouldBe(0);
+        }
+
+        DomainMessageSubscriber.WorkspaceNames.ShouldBe(["workspace-domain"]);
+    }
+
+    [Fact]
+    public async Task WebHostMessaging_ShouldMarkOutboxMessageFailed_WhenSubscriberThrows()
+    {
+        var databaseName = $"chengyuan-failing-messaging-{Guid.NewGuid():N}";
+        var builder = WebApplication.CreateBuilder();
+        builder.WebHost.UseTestServer();
+        builder.Services.UseDbContextOptions(options => options.UseInMemoryDatabase(databaseName));
+        builder.Services.AddEventSubscriber<WorkspaceProvisioningFailed, FailingMessageSubscriber>();
+        builder.AddTestWebHost();
+
+        await using var app = builder.Build();
+        app.UseWebHostComposition();
+        app.MapPost("/messaging/failing-workspace", static async (
+            IDistributedEventBus eventBus,
+            CancellationToken cancellationToken) =>
+        {
+            await eventBus.PublishAsync(new WorkspaceProvisioningFailed("workspace-failing"), cancellationToken);
+            return Results.Accepted();
+        });
+
+        await app.StartAsync(TestContext.Current.CancellationToken);
+
+        var response = await app.GetTestClient().PostAsync("/messaging/failing-workspace", null, TestContext.Current.CancellationToken);
+
+        response.StatusCode.ShouldBe(HttpStatusCode.Accepted);
+
+        await using (var workerScope = app.Services.CreateAsyncScope())
+        {
+            var worker = workerScope.ServiceProvider.GetRequiredService<IOutboxWorker>();
+            var result = await worker.DrainAsync(10, TestContext.Current.CancellationToken);
+
+            result.AttemptedCount.ShouldBe(1);
+            result.DispatchedCount.ShouldBe(0);
+            result.FailedCount.ShouldBe(1);
+        }
+
+        await using (var verificationScope = app.Services.CreateAsyncScope())
+        {
+            var outboxDbContext = verificationScope.ServiceProvider.GetRequiredService<OutboxDbContext>();
+            var message = await outboxDbContext.OutboxMessages.SingleAsync(TestContext.Current.CancellationToken);
+
+            message.Name.ShouldBe(typeof(WorkspaceProvisioningFailed).FullName);
+            message.Status.ShouldBe(OutboxMessageStatus.Failed);
+            message.AttemptCount.ShouldBe(1);
+            message.LastError.ShouldNotBeNullOrWhiteSpace();
+        }
     }
 
     [Fact]
@@ -265,6 +434,88 @@ public class WebHostCompositionTests
     }
 
     private sealed class WebOnlyHostModule : HostModule;
+
+    private sealed record WorkspaceProvisioned(string WorkspaceName);
+
+    private sealed record WorkspaceDomainProvisioned(string WorkspaceName) : IDomainEvent;
+
+    private sealed record WorkspaceProvisioningFailed(string WorkspaceName);
+
+    private sealed class WorkspaceAggregate : AggregateRoot<Guid>
+    {
+        private WorkspaceAggregate(Guid id, string name)
+            : base(id)
+        {
+            Name = name;
+        }
+
+        public string Name { get; private set; }
+
+        public static WorkspaceAggregate Create(string name)
+        {
+            var workspace = new WorkspaceAggregate(Guid.NewGuid(), name);
+            workspace.AddDomainEvent(new WorkspaceDomainProvisioned(name));
+            return workspace;
+        }
+    }
+
+    private sealed class MessagingTestDbContext(DbContextOptions<MessagingTestDbContext> options) : DbContext(options)
+    {
+        public DbSet<WorkspaceAggregate> Workspaces => Set<WorkspaceAggregate>();
+
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<WorkspaceAggregate>(builder =>
+            {
+                builder.HasKey(workspace => workspace.Id);
+                builder.Property(workspace => workspace.Name).IsRequired();
+            });
+        }
+    }
+
+    private sealed class RecordingMessageSubscriber : IEventSubscriber<WorkspaceProvisioned>
+    {
+        private static readonly ConcurrentQueue<string> RecordedWorkspaceNames = [];
+
+        public static string[] WorkspaceNames => RecordedWorkspaceNames.ToArray();
+
+        public static void Clear()
+        {
+            RecordedWorkspaceNames.Clear();
+        }
+
+        public ValueTask HandleAsync(WorkspaceProvisioned eventData, CancellationToken cancellationToken = default)
+        {
+            RecordedWorkspaceNames.Enqueue(eventData.WorkspaceName);
+            return ValueTask.CompletedTask;
+        }
+    }
+
+    private sealed class DomainMessageSubscriber : IEventSubscriber<WorkspaceDomainProvisioned>
+    {
+        private static readonly ConcurrentQueue<string> RecordedWorkspaceNames = [];
+
+        public static string[] WorkspaceNames => RecordedWorkspaceNames.ToArray();
+
+        public static void Clear()
+        {
+            RecordedWorkspaceNames.Clear();
+        }
+
+        public ValueTask HandleAsync(WorkspaceDomainProvisioned eventData, CancellationToken cancellationToken = default)
+        {
+            RecordedWorkspaceNames.Enqueue(eventData.WorkspaceName);
+            return ValueTask.CompletedTask;
+        }
+    }
+
+    private sealed class FailingMessageSubscriber : IEventSubscriber<WorkspaceProvisioningFailed>
+    {
+        public ValueTask HandleAsync(WorkspaceProvisioningFailed eventData, CancellationToken cancellationToken = default)
+        {
+            throw new InvalidOperationException($"Unable to provision workspace '{eventData.WorkspaceName}'.");
+        }
+    }
 
     private static async Task EnsureDatabasesCreatedAsync(IServiceProvider serviceProvider)
     {

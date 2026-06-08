@@ -13,10 +13,17 @@ internal sealed class SystemTextJsonOutboxSerializer(IOptions<ChengYuanJsonOptio
     {
         ArgumentNullException.ThrowIfNull(payload);
 
-        var type = typeof(T);
+        return Serialize(payload, typeof(T));
+    }
+
+    public OutboxPayload Serialize(object payload, Type payloadType)
+    {
+        ArgumentNullException.ThrowIfNull(payload);
+        ArgumentNullException.ThrowIfNull(payloadType);
+
         return new OutboxPayload(
-            JsonSerializer.SerializeToUtf8Bytes(payload, _serializerOptions),
-            type.AssemblyQualifiedName ?? type.FullName ?? type.Name);
+            JsonSerializer.SerializeToUtf8Bytes(payload, payloadType, _serializerOptions),
+            payloadType.AssemblyQualifiedName ?? payloadType.FullName ?? payloadType.Name);
     }
 
     public T? Deserialize<T>(OutboxPayload payload)

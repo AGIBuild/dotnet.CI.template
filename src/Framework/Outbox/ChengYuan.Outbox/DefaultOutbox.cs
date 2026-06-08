@@ -19,11 +19,25 @@ internal sealed class DefaultOutbox(
         ArgumentException.ThrowIfNullOrWhiteSpace(name);
         ArgumentNullException.ThrowIfNull(payload);
 
+        return await EnqueueCoreAsync(name, payload, typeof(T), cancellationToken);
+    }
+
+    public async ValueTask<Guid> EnqueueAsync(string name, object payload, Type payloadType, CancellationToken cancellationToken = default)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(name);
+        ArgumentNullException.ThrowIfNull(payload);
+        ArgumentNullException.ThrowIfNull(payloadType);
+
+        return await EnqueueCoreAsync(name, payload, payloadType, cancellationToken);
+    }
+
+    private async ValueTask<Guid> EnqueueCoreAsync(string name, object payload, Type payloadType, CancellationToken cancellationToken)
+    {
         var messageId = Guid.NewGuid();
         var message = new OutboxMessage(
             messageId,
             name,
-            serializer.Serialize(payload),
+            serializer.Serialize(payload, payloadType),
             clock.UtcNow,
             currentTenant.Id,
             currentCorrelation.CorrelationId,

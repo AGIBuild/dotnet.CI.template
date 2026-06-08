@@ -37,26 +37,30 @@ internal sealed class EfOutboxStore(OutboxDbContext dbContext) : IOutboxStore
 
     public async ValueTask MarkDispatchedAsync(Guid messageId, DateTimeOffset dispatchedAtUtc, CancellationToken cancellationToken = default)
     {
-        await dbContext.OutboxMessages
-            .Where(e => e.Id == messageId)
-            .ExecuteUpdateAsync(setters => setters
-                .SetProperty(e => e.Status, OutboxMessageStatus.Dispatched)
-                .SetProperty(e => e.AttemptCount, e => e.AttemptCount + 1)
-                .SetProperty(e => e.DispatchedAtUtc, dispatchedAtUtc)
-                .SetProperty(e => e.LastError, (string?)null),
-                cancellationToken);
+        var entity = await dbContext.OutboxMessages.FindAsync([messageId], cancellationToken);
+        if (entity is null)
+        {
+            throw new InvalidOperationException($"Outbox message '{messageId}' was not found.");
+        }
+
+        entity.Status = OutboxMessageStatus.Dispatched;
+        entity.AttemptCount++;
+        entity.DispatchedAtUtc = dispatchedAtUtc;
+        entity.LastError = null;
     }
 
     public async ValueTask MarkFailedAsync(Guid messageId, string errorMessage, CancellationToken cancellationToken = default)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(errorMessage);
 
-        await dbContext.OutboxMessages
-            .Where(e => e.Id == messageId)
-            .ExecuteUpdateAsync(setters => setters
-                .SetProperty(e => e.Status, OutboxMessageStatus.Failed)
-                .SetProperty(e => e.AttemptCount, e => e.AttemptCount + 1)
-                .SetProperty(e => e.LastError, errorMessage),
-                cancellationToken);
+        var entity = await dbContext.OutboxMessages.FindAsync([messageId], cancellationToken);
+        if (entity is null)
+        {
+            throw new InvalidOperationException($"Outbox message '{messageId}' was not found.");
+        }
+
+        entity.Status = OutboxMessageStatus.Failed;
+        entity.AttemptCount++;
+        entity.LastError = errorMessage;
     }
 }

@@ -7,4 +7,6 @@ namespace ChengYuan.Outbox;
 public interface IOutbox
 {
     ValueTask<Guid> EnqueueAsync<T>(string name, T payload, CancellationToken cancellationToken = default);
+
+    ValueTask<Guid> EnqueueAsync(string name, object payload, Type payloadType, CancellationToken cancellationToken = default);
 }

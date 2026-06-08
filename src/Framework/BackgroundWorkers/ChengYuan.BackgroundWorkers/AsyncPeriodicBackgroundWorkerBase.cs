@@ -51,10 +51,26 @@ public abstract partial class AsyncPeriodicBackgroundWorkerBase : BackgroundWork
         {
             try
             {
+                if (!await timer.WaitForNextTickAsync(stoppingToken))
+                {
+                    break;
+                }
+            }
+            catch (OperationCanceledException) when (stoppingToken.IsCancellationRequested)
+            {
+                break;
+            }
+
+            try
+            {
                 await using var scope = _serviceScopeFactory.CreateAsyncScope();
                 await DoWorkAsync(new BackgroundWorkerContext(scope.ServiceProvider, stoppingToken));
             }
             catch (OperationCanceledException) when (stoppingToken.IsCancellationRequested)
+            {
+                break;
+            }
+            catch (ObjectDisposedException)
             {
                 break;
             }
@@ -63,14 +79,6 @@ public abstract partial class AsyncPeriodicBackgroundWorkerBase : BackgroundWork
                 LogWorkerError(Logger, GetType().FullName, ex);
             }
 
-            try
-            {
-                await timer.WaitForNextTickAsync(stoppingToken);
-            }
-            catch (OperationCanceledException) when (stoppingToken.IsCancellationRequested)
-            {
-                break;
-            }
         }
     }
 

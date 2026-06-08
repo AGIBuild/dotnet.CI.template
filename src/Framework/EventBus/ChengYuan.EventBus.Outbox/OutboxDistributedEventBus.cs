@@ -22,6 +22,6 @@ public sealed class OutboxDistributedEventBus(IOutbox outbox) : IDistributedEven
         ArgumentNullException.ThrowIfNull(eventData);
 
         var eventName = eventType.FullName ?? eventType.Name;
-        await outbox.EnqueueAsync(eventName, eventData, cancellationToken);
+        await outbox.EnqueueAsync(eventName, eventData, eventType, cancellationToken);
     }
 }
