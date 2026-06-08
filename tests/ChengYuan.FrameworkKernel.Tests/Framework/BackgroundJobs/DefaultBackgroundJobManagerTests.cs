@@ -11,7 +11,7 @@ public sealed class DefaultBackgroundJobManagerTests
     {
         var store = new InMemoryBackgroundJobStore();
         var clock = new FakeClock(new DateTimeOffset(2025, 1, 1, 0, 0, 0, TimeSpan.Zero));
-        var manager = new DefaultBackgroundJobManager(store, clock);
+        var manager = new DefaultBackgroundJobManager(store, clock, new NoopUnitOfWork());
 
         var jobId = await manager.EnqueueAsync(new TestJobArgs { Name = "test" });
 
@@ -27,7 +27,7 @@ public sealed class DefaultBackgroundJobManagerTests
         var now = DateTimeOffset.UtcNow;
         var store = new InMemoryBackgroundJobStore();
         var clock = new FakeClock(now);
-        var manager = new DefaultBackgroundJobManager(store, clock);
+        var manager = new DefaultBackgroundJobManager(store, clock, new NoopUnitOfWork());
 
         await manager.EnqueueAsync(new TestJobArgs { Name = "delayed" }, delay: TimeSpan.FromHours(1));
 
@@ -41,7 +41,7 @@ public sealed class DefaultBackgroundJobManagerTests
     {
         var store = new InMemoryBackgroundJobStore();
         var clock = new FakeClock(DateTimeOffset.UtcNow);
-        var manager = new DefaultBackgroundJobManager(store, clock);
+        var manager = new DefaultBackgroundJobManager(store, clock, new NoopUnitOfWork());
 
         await manager.EnqueueAsync(new TestJobArgs { Name = "check-type" });
 

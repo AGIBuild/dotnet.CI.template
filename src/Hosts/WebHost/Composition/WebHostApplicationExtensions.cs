@@ -33,6 +33,7 @@ public static class WebHostApplicationExtensions
         app.UseMultiTenancy();
         app.UseRateLimiter();
         app.UseMiddleware<CurrentUserMiddleware>();
+        app.UseMiddleware<UnitOfWorkMiddleware>();
         app.UseAuditing();
         app.UseAuthorization();
 

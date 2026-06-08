@@ -1,11 +1,13 @@
 using ChengYuan.Authorization;
+using ChengYuan.Core.Data;
 using ChengYuan.MultiTenancy;
 
 namespace ChengYuan.PermissionManagement;
 
 public sealed class PermissionGrantManager(
     IPermissionGrantStore store,
-    ITenantScopeAccessPolicy tenantScopeAccessPolicy) : IPermissionGrantManager
+    ITenantScopeAccessPolicy tenantScopeAccessPolicy,
+    IUnitOfWork unitOfWork) : IPermissionGrantManager
 {
     public async ValueTask<IReadOnlyList<PermissionGrantRecord>> GetListAsync(CancellationToken cancellationToken = default)
     {
@@ -13,13 +15,14 @@ public sealed class PermissionGrantManager(
         return tenantScopeAccessPolicy.FilterAccessible(records, record => record.TenantId);
     }
 
-    public ValueTask SetAsync(PermissionGrantRecord record, CancellationToken cancellationToken = default)
+    public async ValueTask SetAsync(PermissionGrantRecord record, CancellationToken cancellationToken = default)
     {
         tenantScopeAccessPolicy.EnsureCanAccess(record.TenantId);
-        return store.SetAsync(record, cancellationToken);
+        await store.SetAsync(record, cancellationToken);
+        await unitOfWork.SaveChangesAsync(cancellationToken);
     }
 
-    public ValueTask RemoveAsync(
+    public async ValueTask RemoveAsync(
         string name,
         PermissionScope scope,
         Guid? tenantId = null,
@@ -27,6 +30,7 @@ public sealed class PermissionGrantManager(
         CancellationToken cancellationToken = default)
     {
         tenantScopeAccessPolicy.EnsureCanAccess(tenantId);
-        return store.RemoveAsync(name, scope, tenantId, userId, cancellationToken);
+        await store.RemoveAsync(name, scope, tenantId, userId, cancellationToken);
+        await unitOfWork.SaveChangesAsync(cancellationToken);
     }
 }

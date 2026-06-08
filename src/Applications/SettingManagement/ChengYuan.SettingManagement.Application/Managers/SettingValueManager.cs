@@ -1,3 +1,4 @@
+using ChengYuan.Core.Data;
 using ChengYuan.Settings;
 using ChengYuan.MultiTenancy;
 
@@ -5,7 +6,8 @@ namespace ChengYuan.SettingManagement;
 
 public sealed class SettingValueManager(
     ISettingValueStore store,
-    ITenantScopeAccessPolicy tenantScopeAccessPolicy) : ISettingValueManager
+    ITenantScopeAccessPolicy tenantScopeAccessPolicy,
+    IUnitOfWork unitOfWork) : ISettingValueManager
 {
     public async ValueTask<IReadOnlyList<SettingValueRecord>> GetListAsync(CancellationToken cancellationToken = default)
     {
@@ -13,13 +15,14 @@ public sealed class SettingValueManager(
         return tenantScopeAccessPolicy.FilterAccessible(records, record => record.TenantId);
     }
 
-    public ValueTask SetAsync(SettingValueRecord record, CancellationToken cancellationToken = default)
+    public async ValueTask SetAsync(SettingValueRecord record, CancellationToken cancellationToken = default)
     {
         tenantScopeAccessPolicy.EnsureCanAccess(record.TenantId);
-        return store.SetAsync(record, cancellationToken);
+        await store.SetAsync(record, cancellationToken);
+        await unitOfWork.SaveChangesAsync(cancellationToken);
     }
 
-    public ValueTask RemoveAsync(
+    public async ValueTask RemoveAsync(
         string name,
         SettingScope scope,
         Guid? tenantId = null,
@@ -27,6 +30,7 @@ public sealed class SettingValueManager(
         CancellationToken cancellationToken = default)
     {
         tenantScopeAccessPolicy.EnsureCanAccess(tenantId);
-        return store.RemoveAsync(name, scope, tenantId, userId, cancellationToken);
+        await store.RemoveAsync(name, scope, tenantId, userId, cancellationToken);
+        await unitOfWork.SaveChangesAsync(cancellationToken);
     }
 }

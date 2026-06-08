@@ -62,7 +62,6 @@ public sealed class FeatureValueStore(FeatureManagementDbContext dbContext) : IF
             entity.Update(record.Name, record.Value);
         }
 
-        await dbContext.SaveChangesAsync(cancellationToken);
     }
 
     public async ValueTask RemoveAsync(
@@ -88,7 +87,6 @@ public sealed class FeatureValueStore(FeatureManagementDbContext dbContext) : IF
         }
 
         dbContext.FeatureValues.Remove(entity);
-        await dbContext.SaveChangesAsync(cancellationToken);
     }
 
     private static FeatureValueRecord MapToRecord(FeatureValueEntity entity)

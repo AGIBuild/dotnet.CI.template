@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
+using ChengYuan.Core.Data;
 using ChengYuan.Core.Timing;
 
 namespace ChengYuan.Auditing;
@@ -12,6 +13,7 @@ internal sealed class DefaultAuditScope : IAuditScope
     private readonly IAuditScopeAccessor _scopeAccessor;
     private readonly IReadOnlyCollection<IAuditLogContributor> _contributors;
     private readonly IReadOnlyCollection<IAuditLogSink> _sinks;
+    private readonly IUnitOfWork _unitOfWork;
     private readonly IAuditScope? _previousScope;
     private bool _completed;
     private bool _disposed;
@@ -21,13 +23,15 @@ internal sealed class DefaultAuditScope : IAuditScope
         IClock clock,
         IAuditScopeAccessor scopeAccessor,
         IReadOnlyCollection<IAuditLogContributor> contributors,
-        IReadOnlyCollection<IAuditLogSink> sinks)
+        IReadOnlyCollection<IAuditLogSink> sinks,
+        IUnitOfWork unitOfWork)
     {
         Entry = entry;
         _clock = clock;
         _scopeAccessor = scopeAccessor;
         _contributors = contributors;
         _sinks = sinks;
+        _unitOfWork = unitOfWork;
 
         _previousScope = scopeAccessor.Current;
         ((AmbientAuditScopeAccessor)scopeAccessor).Current = this;
@@ -98,5 +102,7 @@ internal sealed class DefaultAuditScope : IAuditScope
         {
             await sink.WriteAsync(Entry, cancellationToken);
         }
+
+        await _unitOfWork.SaveChangesAsync(cancellationToken);
     }
 }

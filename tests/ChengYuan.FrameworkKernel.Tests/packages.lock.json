@@ -1147,7 +1147,7 @@
         "dependencies": {
           "ChengYuan.BackgroundWorkers": "[0.2.10-local, )",
           "ChengYuan.Core": "[0.2.10-local, )",
-          "ChengYuan.Outbox.Persistence": "[0.2.10-local, )"
+          "ChengYuan.Outbox": "[0.2.10-local, )"
         }
       },
       "chengyuan.permissionmanagement.application": {
@@ -1306,6 +1306,7 @@
           "ChengYuan.MultiTenancy": "[0.2.10-local, )",
           "ChengYuan.Notifications": "[0.2.10-local, )",
           "ChengYuan.ObjectMapping": "[0.2.10-local, )",
+          "ChengYuan.Outbox.Persistence": "[0.2.10-local, )",
           "ChengYuan.PermissionManagement.Persistence": "[0.2.10-local, )",
           "ChengYuan.PermissionManagement.Web": "[0.2.10-local, )",
           "ChengYuan.SettingManagement.Persistence": "[0.2.10-local, )",

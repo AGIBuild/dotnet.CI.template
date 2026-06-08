@@ -6,8 +6,10 @@ using ChengYuan.FeatureManagement;
 using ChengYuan.Hosting;
 using ChengYuan.Identity;
 using ChengYuan.MultiTenancy;
+using ChengYuan.Outbox;
 using ChengYuan.PermissionManagement;
 using ChengYuan.SettingManagement;
+using ChengYuan.Settings;
 using ChengYuan.TenantManagement;
 using ChengYuan.WebHost;
 using Microsoft.AspNetCore.Builder;
@@ -43,11 +45,14 @@ public class WebHostCompositionTests
         using var scope = serviceProvider.CreateScope();
         var identityProviderName = scope.ServiceProvider.GetRequiredService<IdentityDbContext>().Database.ProviderName;
         var tenantProviderName = scope.ServiceProvider.GetRequiredService<TenantManagementDbContext>().Database.ProviderName;
+        var outboxProviderName = scope.ServiceProvider.GetRequiredService<OutboxDbContext>().Database.ProviderName;
 
         identityProviderName.ShouldNotBeNull();
         tenantProviderName.ShouldNotBeNull();
+        outboxProviderName.ShouldNotBeNull();
         identityProviderName.ShouldContain("Sqlite");
         tenantProviderName.ShouldContain("Sqlite");
+        outboxProviderName.ShouldContain("Sqlite");
     }
 
     [Fact]
@@ -73,6 +78,7 @@ public class WebHostCompositionTests
         moduleNames.ShouldContain(nameof(PermissionManagementPersistenceModule));
         moduleNames.ShouldContain(nameof(FeatureManagementPersistenceModule));
         moduleNames.ShouldContain(nameof(AuditLoggingPersistenceModule));
+        moduleNames.ShouldContain(nameof(OutboxPersistenceModule));
 
         using var scope = serviceProvider.CreateScope();
         scope.ServiceProvider.GetRequiredService<IdentityDbContext>().ShouldNotBeNull();
@@ -81,6 +87,7 @@ public class WebHostCompositionTests
         scope.ServiceProvider.GetRequiredService<PermissionManagementDbContext>().ShouldNotBeNull();
         scope.ServiceProvider.GetRequiredService<FeatureManagementDbContext>().ShouldNotBeNull();
         scope.ServiceProvider.GetRequiredService<AuditLoggingDbContext>().ShouldNotBeNull();
+        scope.ServiceProvider.GetRequiredService<OutboxDbContext>().ShouldNotBeNull();
         scope.ServiceProvider.GetRequiredService<IUserManager>().ShouldNotBeNull();
         scope.ServiceProvider.GetRequiredService<IRoleManager>().ShouldNotBeNull();
     }
@@ -126,6 +133,7 @@ public class WebHostCompositionTests
         moduleNames.ShouldNotContain(nameof(PermissionManagementPersistenceModule));
         moduleNames.ShouldNotContain(nameof(FeatureManagementPersistenceModule));
         moduleNames.ShouldNotContain(nameof(AuditLoggingPersistenceModule));
+        moduleNames.ShouldNotContain(nameof(OutboxPersistenceModule));
     }
 
     [Fact]
@@ -161,6 +169,45 @@ public class WebHostCompositionTests
             roleNames.ShouldBe(["Administrators"]);
             tenantNames.ShouldBe(["Default"]);
         }
+    }
+
+    [Fact]
+    public async Task WebHostComposition_ShouldRollbackCommandRequestChanges_WhenEndpointThrows()
+    {
+        var databasePath = Path.Combine(Path.GetTempPath(), $"chengyuan-uow-rollback-{Guid.NewGuid():N}.db");
+        var builder = WebApplication.CreateBuilder();
+        builder.WebHost.UseTestServer();
+        builder.Services.UseSqlite($"Data Source={databasePath}");
+        builder.AddTestWebHost();
+
+        await using var app = builder.Build();
+        app.UseWebHostComposition();
+        app.MapPost("/uow/failing-command", static async (
+            ITenantManager tenantManager,
+            ISettingValueManager settingValueManager,
+            CancellationToken cancellationToken) =>
+        {
+            await tenantManager.CreateAsync("Acme", cancellationToken: cancellationToken);
+            await settingValueManager.SetAsync(
+                new SettingValueRecord("workspace.title", SettingScope.Global, "Main"),
+                cancellationToken);
+
+            throw new InvalidOperationException("Command failed after data changes.");
+        });
+
+        await EnsureDatabasesCreatedAsync(app.Services);
+        await app.StartAsync(TestContext.Current.CancellationToken);
+
+        var response = await app.GetTestClient().PostAsync("/uow/failing-command", null, TestContext.Current.CancellationToken);
+
+        response.StatusCode.ShouldBe(HttpStatusCode.InternalServerError);
+
+        await using var scope = app.Services.CreateAsyncScope();
+        var tenantDbContext = scope.ServiceProvider.GetRequiredService<TenantManagementDbContext>();
+        var settingDbContext = scope.ServiceProvider.GetRequiredService<SettingManagementDbContext>();
+
+        (await tenantDbContext.Tenants.CountAsync(TestContext.Current.CancellationToken)).ShouldBe(0);
+        (await settingDbContext.SettingValues.CountAsync(TestContext.Current.CancellationToken)).ShouldBe(0);
     }
 
     [Fact]
@@ -218,4 +265,16 @@ public class WebHostCompositionTests
     }
 
     private sealed class WebOnlyHostModule : HostModule;
+
+    private static async Task EnsureDatabasesCreatedAsync(IServiceProvider serviceProvider)
+    {
+        await using var scope = serviceProvider.CreateAsyncScope();
+        await scope.ServiceProvider.GetRequiredService<IdentityDbContext>().Database.MigrateAsync(TestContext.Current.CancellationToken);
+        await scope.ServiceProvider.GetRequiredService<TenantManagementDbContext>().Database.MigrateAsync(TestContext.Current.CancellationToken);
+        await scope.ServiceProvider.GetRequiredService<SettingManagementDbContext>().Database.MigrateAsync(TestContext.Current.CancellationToken);
+        await scope.ServiceProvider.GetRequiredService<PermissionManagementDbContext>().Database.MigrateAsync(TestContext.Current.CancellationToken);
+        await scope.ServiceProvider.GetRequiredService<FeatureManagementDbContext>().Database.MigrateAsync(TestContext.Current.CancellationToken);
+        await scope.ServiceProvider.GetRequiredService<AuditLoggingDbContext>().Database.MigrateAsync(TestContext.Current.CancellationToken);
+        await scope.ServiceProvider.GetRequiredService<OutboxDbContext>().Database.MigrateAsync(TestContext.Current.CancellationToken);
+    }
 }

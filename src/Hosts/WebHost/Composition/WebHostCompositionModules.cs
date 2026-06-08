@@ -3,6 +3,7 @@ using ChengYuan.BackgroundJobs;
 using ChengYuan.Core.Modularity;
 using ChengYuan.FeatureManagement;
 using ChengYuan.Identity;
+using ChengYuan.Outbox;
 using ChengYuan.PermissionManagement;
 using ChengYuan.SettingManagement;
 using ChengYuan.TenantManagement;
@@ -26,4 +27,5 @@ internal sealed class WebHostApplicationCompositionModule : HostModule;
 [DependsOn(typeof(PermissionManagementPersistenceModule))]
 [DependsOn(typeof(FeatureManagementPersistenceModule))]
 [DependsOn(typeof(AuditLoggingPersistenceModule))]
+[DependsOn(typeof(OutboxPersistenceModule))]
 internal sealed class WebHostRuntimeGlueModule : HostModule;

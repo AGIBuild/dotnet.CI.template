@@ -14,6 +14,8 @@ public sealed class OutboxMessageEntity
 
     public DateTimeOffset CreatedAtUtc { get; set; }
 
+    public long CreatedAtUtcTicks { get; set; }
+
     public Guid? TenantId { get; set; }
 
     public string? CorrelationId { get; set; }
@@ -50,6 +52,7 @@ public sealed class OutboxMessageEntity
             PayloadContent = message.Payload.Content,
             PayloadTypeName = message.Payload.TypeName,
             CreatedAtUtc = message.CreatedAtUtc,
+            CreatedAtUtcTicks = message.CreatedAtUtc.UtcTicks,
             TenantId = message.TenantId,
             CorrelationId = message.CorrelationId,
             Status = message.Status,

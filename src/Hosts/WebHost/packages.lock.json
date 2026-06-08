@@ -701,6 +701,22 @@
           "ChengYuan.Core": "[0.2.10-local, )"
         }
       },
+      "chengyuan.outbox": {
+        "type": "Project",
+        "dependencies": {
+          "ChengYuan.Core": "[0.2.10-local, )",
+          "ChengYuan.ExecutionContext": "[0.2.10-local, )",
+          "ChengYuan.MultiTenancy": "[0.2.10-local, )"
+        }
+      },
+      "chengyuan.outbox.persistence": {
+        "type": "Project",
+        "dependencies": {
+          "ChengYuan.Core": "[0.2.10-local, )",
+          "ChengYuan.EntityFrameworkCore": "[0.2.10-local, )",
+          "ChengYuan.Outbox": "[0.2.10-local, )"
+        }
+      },
       "chengyuan.permissionmanagement.application": {
         "type": "Project",
         "dependencies": {

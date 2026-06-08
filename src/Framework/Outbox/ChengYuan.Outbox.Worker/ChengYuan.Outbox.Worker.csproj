@@ -7,7 +7,7 @@
   <ItemGroup>
     <ProjectReference Include="..\..\Core\ChengYuan.Core.csproj" />
     <ProjectReference Include="..\..\BackgroundWorkers\ChengYuan.BackgroundWorkers\ChengYuan.BackgroundWorkers.csproj" />
-    <ProjectReference Include="..\ChengYuan.Outbox.Persistence\ChengYuan.Outbox.Persistence.csproj" />
+    <ProjectReference Include="..\ChengYuan.Outbox\ChengYuan.Outbox.csproj" />
   </ItemGroup>
 
 </Project>

@@ -107,10 +107,12 @@ public class TenantManagementPersistenceModuleTests
         await using var serviceProvider = services.BuildServiceProvider();
         await using var scope = serviceProvider.CreateAsyncScope();
         var tenantStore = scope.ServiceProvider.GetRequiredService<ITenantStore>();
+        var unitOfWork = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
 
         await tenantStore.SetAsync(new TenantRecord(Guid.NewGuid(), "gamma"), TestContext.Current.CancellationToken);
         await tenantStore.SetAsync(new TenantRecord(Guid.NewGuid(), "alpha"), TestContext.Current.CancellationToken);
         await tenantStore.SetAsync(new TenantRecord(Guid.NewGuid(), "beta"), TestContext.Current.CancellationToken);
+        await unitOfWork.SaveChangesAsync(TestContext.Current.CancellationToken);
 
         var tenants = await tenantStore.GetListAsync(TestContext.Current.CancellationToken);
         tenants.Select(tenant => tenant.Name).ShouldBe(["alpha", "beta", "gamma"]);

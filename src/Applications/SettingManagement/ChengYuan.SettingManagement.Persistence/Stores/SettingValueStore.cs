@@ -62,7 +62,6 @@ public sealed class SettingValueStore(SettingManagementDbContext dbContext) : IS
             entity.Update(record.Name, record.Value);
         }
 
-        await dbContext.SaveChangesAsync(cancellationToken);
     }
 
     public async ValueTask RemoveAsync(
@@ -88,7 +87,6 @@ public sealed class SettingValueStore(SettingManagementDbContext dbContext) : IS
         }
 
         dbContext.SettingValues.Remove(entity);
-        await dbContext.SaveChangesAsync(cancellationToken);
     }
 
     private static SettingValueRecord MapToRecord(SettingValueEntity entity)

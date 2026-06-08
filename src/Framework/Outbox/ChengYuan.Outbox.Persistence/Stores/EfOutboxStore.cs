@@ -13,7 +13,6 @@ internal sealed class EfOutboxStore(OutboxDbContext dbContext) : IOutboxStore
     {
         var entity = OutboxMessageEntity.FromOutboxMessage(message);
         await dbContext.OutboxMessages.AddAsync(entity, cancellationToken);
-        await dbContext.SaveChangesAsync(cancellationToken);
     }
 
     public async ValueTask<OutboxMessage?> GetAsync(Guid messageId, CancellationToken cancellationToken = default)
@@ -26,11 +25,14 @@ internal sealed class EfOutboxStore(OutboxDbContext dbContext) : IOutboxStore
     {
         var entities = await dbContext.OutboxMessages
             .Where(e => e.Status == OutboxMessageStatus.Pending)
-            .OrderBy(e => e.CreatedAtUtc)
+            .OrderBy(e => e.CreatedAtUtcTicks)
+            .ThenBy(e => e.Id)
             .Take(maxCount)
             .ToListAsync(cancellationToken);
 
-        return entities.ConvertAll(e => e.ToOutboxMessage());
+        return entities
+            .Select(e => e.ToOutboxMessage())
+            .ToArray();
     }
 
     public async ValueTask MarkDispatchedAsync(Guid messageId, DateTimeOffset dispatchedAtUtc, CancellationToken cancellationToken = default)

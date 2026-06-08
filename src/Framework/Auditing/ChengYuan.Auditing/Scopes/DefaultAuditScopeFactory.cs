@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using ChengYuan.Core.Data;
 using ChengYuan.Core.Timing;
 using ChengYuan.ExecutionContext;
 using ChengYuan.MultiTenancy;
@@ -15,6 +16,7 @@ internal sealed class DefaultAuditScopeFactory(
     ICurrentUser currentUser,
     ICurrentCorrelation currentCorrelation,
     IAuditScopeAccessor scopeAccessor,
+    IUnitOfWork unitOfWork,
     IEnumerable<IAuditLogContributor> contributors,
     IEnumerable<IAuditLogSink> sinks) : IAuditScopeFactory
 {
@@ -34,7 +36,7 @@ internal sealed class DefaultAuditScopeFactory(
             CorrelationId = currentCorrelation.CorrelationId
         };
 
-        return new DefaultAuditScope(entry, clock, scopeAccessor, _contributors, _sinks);
+        return new DefaultAuditScope(entry, clock, scopeAccessor, _contributors, _sinks, unitOfWork);
     }
 
     public async ValueTask ExecuteAsync(string name, Func<CancellationToken, ValueTask> action, CancellationToken cancellationToken = default)

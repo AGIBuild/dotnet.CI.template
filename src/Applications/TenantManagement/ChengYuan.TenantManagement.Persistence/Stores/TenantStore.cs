@@ -68,7 +68,6 @@ public sealed class TenantStore(TenantManagementDbContext dbContext) : ITenantSt
             existingTenant.Update(tenant.Name, tenant.IsActive);
         }
 
-        await dbContext.SaveChangesAsync(cancellationToken);
     }
 
     public async ValueTask RemoveAsync(Guid tenantId, CancellationToken cancellationToken = default)
@@ -87,7 +86,6 @@ public sealed class TenantStore(TenantManagementDbContext dbContext) : ITenantSt
         }
 
         tenant.MarkDeleted();
-        await dbContext.SaveChangesAsync(cancellationToken);
     }
 
     private static TenantRecord MapToRecord(TenantEntity tenant)

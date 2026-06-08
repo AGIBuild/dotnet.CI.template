@@ -1,10 +1,8 @@
-using ChengYuan.Core.Data;
+namespace ChengYuan.Core.Data;
 
-namespace ChengYuan.FrameworkKernel.Tests;
-
-internal sealed class NoopUnitOfWork : IUnitOfWork
+internal sealed class NullUnitOfWork : IUnitOfWork
 {
-    public UnitOfWorkOptions Options { get; } = UnitOfWorkOptions.Default;
+    public UnitOfWorkOptions Options => UnitOfWorkOptions.Default;
 
     public bool IsCompleted { get; private set; }
 

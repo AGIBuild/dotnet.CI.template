@@ -1,4 +1,5 @@
 using ChengYuan.Core.Modularity;
+using ChengYuan.Core.Data;
 using ChengYuan.EntityFrameworkCore;
 using ChengYuan.ExecutionContext;
 using ChengYuan.FeatureManagement;
@@ -45,6 +46,7 @@ public class FeatureManagementPersistenceModuleTests
         var featureChecker = serviceProvider.GetRequiredService<IFeatureChecker>();
         var featureValueManager = serviceProvider.GetRequiredService<IFeatureValueManager>();
         var featureValueStore = serviceProvider.GetRequiredService<IFeatureValueStore>();
+        var unitOfWork = serviceProvider.GetRequiredService<IUnitOfWork>();
         var currentTenant = serviceProvider.GetRequiredService<ICurrentTenantAccessor>();
         var currentUser = serviceProvider.GetRequiredService<ICurrentUserAccessor>();
         var tenantId = Guid.NewGuid();
@@ -59,6 +61,7 @@ public class FeatureManagementPersistenceModuleTests
             (await featureChecker.GetAsync<int>("workspace.max-users", TestContext.Current.CancellationToken)).ShouldBe(30);
 
             await featureValueStore.SetAsync(new FeatureValueRecord("workspace.max-users", FeatureScope.User, 40, userId: "alice"), TestContext.Current.CancellationToken);
+            await unitOfWork.SaveChangesAsync(TestContext.Current.CancellationToken);
 
             using (currentUser.Change(new CurrentUserInfo("alice", "Alice", true)))
             {
@@ -117,10 +120,12 @@ public class FeatureManagementPersistenceModuleTests
 
         await using var serviceProvider = services.BuildServiceProvider();
         var featureValueStore = serviceProvider.GetRequiredService<IFeatureValueStore>();
+        var unitOfWork = serviceProvider.GetRequiredService<IUnitOfWork>();
 
         await featureValueStore.SetAsync(new FeatureValueRecord("workspace.title", FeatureScope.Global, "Main"), TestContext.Current.CancellationToken);
         await featureValueStore.SetAsync(new FeatureValueRecord("workspace.region", FeatureScope.Tenant, "eu-west", Guid.NewGuid()), TestContext.Current.CancellationToken);
         await featureValueStore.SetAsync(new FeatureValueRecord("workspace.theme", FeatureScope.User, "light", userId: "alice"), TestContext.Current.CancellationToken);
+        await unitOfWork.SaveChangesAsync(TestContext.Current.CancellationToken);
 
         var records = await featureValueStore.GetListAsync(TestContext.Current.CancellationToken);
         records.Count.ShouldBe(3);

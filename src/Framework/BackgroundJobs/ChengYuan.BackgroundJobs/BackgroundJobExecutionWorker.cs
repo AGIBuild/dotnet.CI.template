@@ -4,6 +4,7 @@ using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using ChengYuan.BackgroundWorkers;
+using ChengYuan.Core.Data;
 using ChengYuan.Core.Timing;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -25,6 +26,7 @@ public sealed partial class BackgroundJobExecutionWorker : AsyncPeriodicBackgrou
         var store = workerContext.ServiceProvider.GetRequiredService<IBackgroundJobStore>();
         var options = workerContext.ServiceProvider.GetRequiredService<IOptions<BackgroundJobOptions>>().Value;
         var clock = workerContext.ServiceProvider.GetRequiredService<IClock>();
+        var unitOfWorkManager = workerContext.ServiceProvider.GetRequiredService<IUnitOfWorkManager>();
 
         var waitingJobs = await store.GetWaitingJobsAsync(options.MaxJobFetchCount, workerContext.CancellationToken);
 
@@ -32,29 +34,41 @@ public sealed partial class BackgroundJobExecutionWorker : AsyncPeriodicBackgrou
         {
             try
             {
-                var jobType = options.GetJobType(jobInfo.JobName);
-                if (jobType is null)
+                await using var unitOfWork = BeginUnitOfWork(unitOfWorkManager);
+                try
                 {
-                    LogJobTypeNotFound(Logger, jobInfo.JobName);
-                    jobInfo.IsAbandoned = true;
-                    await store.UpdateAsync(jobInfo, workerContext.CancellationToken);
-                    continue;
+                    var jobType = options.GetJobType(jobInfo.JobName);
+                    if (jobType is null)
+                    {
+                        LogJobTypeNotFound(Logger, jobInfo.JobName);
+                        jobInfo.IsAbandoned = true;
+                        await store.UpdateAsync(jobInfo, workerContext.CancellationToken);
+                        await unitOfWork.CompleteAsync(workerContext.CancellationToken);
+                        continue;
+                    }
+
+                    var job = workerContext.ServiceProvider.GetRequiredService(jobType);
+                    var argsType = jobType.GetInterfaces()
+                        .First(i => i.IsGenericType && i.GetGenericTypeDefinition() == typeof(IBackgroundJob<>))
+                        .GetGenericArguments()[0];
+                    var args = JsonSerializer.Deserialize(jobInfo.JobArgs, argsType)!;
+
+                    var executeMethod = jobType.GetMethod(nameof(IBackgroundJob<object>.ExecuteAsync))!;
+                    var task = (Task)executeMethod.Invoke(job, [args, workerContext.CancellationToken])!;
+                    await task;
+
+                    await store.DeleteAsync(jobInfo.Id, workerContext.CancellationToken);
+                    await unitOfWork.CompleteAsync(workerContext.CancellationToken);
                 }
-
-                var job = workerContext.ServiceProvider.GetRequiredService(jobType);
-                var argsType = jobType.GetInterfaces()
-                    .First(i => i.IsGenericType && i.GetGenericTypeDefinition() == typeof(IBackgroundJob<>))
-                    .GetGenericArguments()[0];
-                var args = JsonSerializer.Deserialize(jobInfo.JobArgs, argsType)!;
-
-                var executeMethod = jobType.GetMethod(nameof(IBackgroundJob<object>.ExecuteAsync))!;
-                var task = (Task)executeMethod.Invoke(job, [args, workerContext.CancellationToken])!;
-                await task;
-
-                await store.DeleteAsync(jobInfo.Id, workerContext.CancellationToken);
+                catch
+                {
+                    await unitOfWork.RollbackAsync(workerContext.CancellationToken);
+                    throw;
+                }
             }
             catch (Exception ex)
             {
+                await using var statusUnitOfWork = BeginUnitOfWork(unitOfWorkManager);
                 jobInfo.TryCount++;
                 jobInfo.LastTryTime = clock.UtcNow;
 
@@ -71,9 +85,16 @@ public sealed partial class BackgroundJobExecutionWorker : AsyncPeriodicBackgrou
                 }
 
                 await store.UpdateAsync(jobInfo, workerContext.CancellationToken);
+                await statusUnitOfWork.CompleteAsync(workerContext.CancellationToken);
             }
         }
     }
+
+    private static IUnitOfWork BeginUnitOfWork(IUnitOfWorkManager unitOfWorkManager)
+        => unitOfWorkManager.Begin(new UnitOfWorkOptions
+        {
+            TransactionBehavior = UnitOfWorkTransactionBehavior.Enabled,
+        });
 
     [LoggerMessage(Level = LogLevel.Warning, Message = "Background job type not found for '{JobName}'.")]
     private static partial void LogJobTypeNotFound(ILogger logger, string jobName);

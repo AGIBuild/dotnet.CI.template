@@ -62,7 +62,6 @@ public sealed class PermissionGrantStore(PermissionManagementDbContext dbContext
             entity.Update(record.Name, record.IsGranted);
         }
 
-        await dbContext.SaveChangesAsync(cancellationToken);
     }
 
     public async ValueTask RemoveAsync(
@@ -88,7 +87,6 @@ public sealed class PermissionGrantStore(PermissionManagementDbContext dbContext
         }
 
         dbContext.PermissionGrants.Remove(entity);
-        await dbContext.SaveChangesAsync(cancellationToken);
     }
 
     private static PermissionGrantRecord MapToRecord(PermissionGrantEntity entity)

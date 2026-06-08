@@ -9,7 +9,6 @@ public sealed class EfBackgroundJobStore(BackgroundJobDbContext dbContext) : IBa
         ArgumentNullException.ThrowIfNull(jobInfo);
 
         await dbContext.BackgroundJobs.AddAsync(jobInfo, cancellationToken);
-        await dbContext.SaveChangesAsync(cancellationToken);
     }
 
     public async Task<List<BackgroundJobInfo>> GetWaitingJobsAsync(int maxResultCount, CancellationToken cancellationToken = default)
@@ -29,13 +28,17 @@ public sealed class EfBackgroundJobStore(BackgroundJobDbContext dbContext) : IBa
         ArgumentNullException.ThrowIfNull(jobInfo);
 
         dbContext.BackgroundJobs.Update(jobInfo);
-        await dbContext.SaveChangesAsync(cancellationToken);
     }
 
     public async Task DeleteAsync(string id, CancellationToken cancellationToken = default)
     {
-        await dbContext.BackgroundJobs
+        var jobInfo = await dbContext.BackgroundJobs
             .Where(job => job.Id == id)
-            .ExecuteDeleteAsync(cancellationToken);
+            .SingleOrDefaultAsync(cancellationToken);
+
+        if (jobInfo is not null)
+        {
+            dbContext.BackgroundJobs.Remove(jobInfo);
+        }
     }
 }

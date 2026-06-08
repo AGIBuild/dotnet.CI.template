@@ -1,4 +1,5 @@
 using ChengYuan.Authorization;
+using ChengYuan.Core.Data;
 using ChengYuan.Core.Modularity;
 using ChengYuan.EntityFrameworkCore;
 using ChengYuan.ExecutionContext;
@@ -45,6 +46,7 @@ public class PermissionManagementPersistenceModuleTests
         var permissionChecker = serviceProvider.GetRequiredService<IPermissionChecker>();
         var permissionGrantManager = serviceProvider.GetRequiredService<IPermissionGrantManager>();
         var permissionGrantStore = serviceProvider.GetRequiredService<IPermissionGrantStore>();
+        var unitOfWork = serviceProvider.GetRequiredService<IUnitOfWork>();
         var currentTenant = serviceProvider.GetRequiredService<ICurrentTenantAccessor>();
         var currentUser = serviceProvider.GetRequiredService<ICurrentUserAccessor>();
         var tenantId = Guid.NewGuid();
@@ -65,6 +67,7 @@ public class PermissionManagementPersistenceModuleTests
 
                 // Add User=Granted, but Tenant still Prohibited → Prohibited wins → false
                 await permissionGrantStore.SetAsync(new PermissionGrantRecord("workspace.members.delete", PermissionScope.User, true, userId: userId), TestContext.Current.CancellationToken);
+                await unitOfWork.SaveChangesAsync(TestContext.Current.CancellationToken);
 
                 (await permissionChecker.IsGrantedAsync("workspace.members.delete", TestContext.Current.CancellationToken)).ShouldBeFalse();
             }
@@ -103,10 +106,12 @@ public class PermissionManagementPersistenceModuleTests
 
         await using var serviceProvider = services.BuildServiceProvider();
         var permissionGrantStore = serviceProvider.GetRequiredService<IPermissionGrantStore>();
+        var unitOfWork = serviceProvider.GetRequiredService<IUnitOfWork>();
 
         await permissionGrantStore.SetAsync(new PermissionGrantRecord("workspace.members.list", PermissionScope.Global, true), TestContext.Current.CancellationToken);
         await permissionGrantStore.SetAsync(new PermissionGrantRecord("workspace.members.edit", PermissionScope.Tenant, false, Guid.NewGuid()), TestContext.Current.CancellationToken);
         await permissionGrantStore.SetAsync(new PermissionGrantRecord("workspace.members.invite", PermissionScope.User, true, userId: "alice"), TestContext.Current.CancellationToken);
+        await unitOfWork.SaveChangesAsync(TestContext.Current.CancellationToken);
 
         var records = await permissionGrantStore.GetListAsync(TestContext.Current.CancellationToken);
         records.Count.ShouldBe(3);

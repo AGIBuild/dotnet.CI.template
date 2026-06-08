@@ -1,5 +1,5 @@
 using ChengYuan.Core.Modularity;
-using Microsoft.EntityFrameworkCore;
+using ChengYuan.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace ChengYuan.Outbox;
@@ -9,16 +9,8 @@ public sealed class OutboxPersistenceModule : ExtensionModule
 {
     public override void ConfigureServices(ServiceConfigurationContext context)
     {
-        var hasDbContext = context.Services.Any(sd =>
-            sd.ServiceType == typeof(DbContextOptions<OutboxDbContext>));
-
-        if (hasDbContext)
-        {
-            context.Services.AddScoped<IOutboxStore, EfOutboxStore>();
-        }
-        else
-        {
-            context.Services.AddSingleton<IOutboxStore, InMemoryOutboxStore>();
-        }
+        context.Services.AddConfiguredDbContext<OutboxDbContext>();
+        context.Services.AddEntityFrameworkCoreDataAccess<OutboxDbContext>();
+        context.Services.AddScoped<IOutboxStore, EfOutboxStore>();
     }
 }

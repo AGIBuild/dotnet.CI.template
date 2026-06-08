@@ -2,6 +2,7 @@ using System.Net;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using ChengYuan.AuditLogging;
+using ChengYuan.Core.Data;
 using ChengYuan.EntityFrameworkCore;
 using ChengYuan.Identity;
 using ChengYuan.TenantManagement;
@@ -106,6 +107,7 @@ public class AuditLoggingTenantScopeWebEndpointTests
     {
         using var scope = app.Services.CreateScope();
         var store = scope.ServiceProvider.GetRequiredService<IAuditLogStore>();
+        var unitOfWork = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
 
         await store.AppendAsync(
             new AuditLogRecord(
@@ -123,6 +125,7 @@ public class AuditLoggingTenantScopeWebEndpointTests
                 properties: new Dictionary<string, object?>(),
                 entityChanges: []),
             TestContext.Current.CancellationToken);
+        await unitOfWork.SaveChangesAsync(TestContext.Current.CancellationToken);
     }
 
     private sealed class AuditLogDto

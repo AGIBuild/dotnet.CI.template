@@ -1,13 +1,15 @@
 using System;
 using System.Text.Json;
 using System.Threading.Tasks;
+using ChengYuan.Core.Data;
 using ChengYuan.Core.Timing;
 
 namespace ChengYuan.BackgroundJobs;
 
 public sealed class DefaultBackgroundJobManager(
     IBackgroundJobStore store,
-    IClock clock) : IBackgroundJobManager
+    IClock clock,
+    IUnitOfWork unitOfWork) : IBackgroundJobManager
 {
     public async Task<string> EnqueueAsync<TArgs>(TArgs args, BackgroundJobPriority priority = BackgroundJobPriority.Normal, TimeSpan? delay = null)
     {
@@ -25,6 +27,7 @@ public sealed class DefaultBackgroundJobManager(
         };
 
         await store.InsertAsync(jobInfo);
+        await unitOfWork.SaveChangesAsync();
 
         return jobInfo.Id;
     }

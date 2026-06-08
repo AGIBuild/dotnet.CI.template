@@ -38,7 +38,6 @@ public sealed class AuditLogStore(AuditLoggingDbContext dbContext) : IAuditLogSt
         }
 
         await dbContext.AuditLogs.AddAsync(auditLogEntity, cancellationToken);
-        await dbContext.SaveChangesAsync(cancellationToken);
     }
 
     public async ValueTask<IReadOnlyList<AuditLogRecord>> GetListAsync(CancellationToken cancellationToken = default)

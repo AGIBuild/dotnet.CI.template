@@ -13,6 +13,8 @@ public sealed class DataModule : FrameworkCoreModule
         context.Services.TryAddSingleton(typeof(IDataFilter<>), typeof(DataFilter<>));
         context.Services.TryAddSingleton<IDataTenantProvider, NullDataTenantProvider>();
         context.Services.TryAddSingleton<IUnitOfWorkAccessor, UnitOfWorkAccessor>();
+        context.Services.TryAddScoped<IUnitOfWorkManager, UnitOfWorkManager>();
+        context.Services.TryAddScoped<IUnitOfWork, NullUnitOfWork>();
         context.Services.TryAddTransient<IDataSeeder, DataSeeder>();
         context.Services.TryAddSingleton<IDomainEventPublisher, NullDomainEventPublisher>();
         context.Services.TryAddTransient<IConnectionStringResolver, DefaultConnectionStringResolver>();

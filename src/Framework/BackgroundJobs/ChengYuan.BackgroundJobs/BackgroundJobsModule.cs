@@ -1,9 +1,11 @@
 using ChengYuan.BackgroundWorkers;
+using ChengYuan.Core.Data;
 using ChengYuan.Core.Modularity;
 
 namespace ChengYuan.BackgroundJobs;
 
 [DependsOn(typeof(BackgroundWorkersModule))]
+[DependsOn(typeof(DataModule))]
 public sealed class BackgroundJobsModule : FrameworkCoreModule
 {
     public override void ConfigureServices(ServiceConfigurationContext context)

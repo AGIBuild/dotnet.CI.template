@@ -1,4 +1,5 @@
 using ChengYuan.Core.Modularity;
+using ChengYuan.Core.Data;
 using ChengYuan.EntityFrameworkCore;
 using ChengYuan.ExecutionContext;
 using ChengYuan.MultiTenancy;
@@ -45,6 +46,7 @@ public class SettingManagementPersistenceModuleTests
         var settingProvider = serviceProvider.GetRequiredService<ISettingProvider>();
         var settingValueManager = serviceProvider.GetRequiredService<ISettingValueManager>();
         var settingValueStore = serviceProvider.GetRequiredService<ISettingValueStore>();
+        var unitOfWork = serviceProvider.GetRequiredService<IUnitOfWork>();
         var currentTenant = serviceProvider.GetRequiredService<ICurrentTenantAccessor>();
         var currentUser = serviceProvider.GetRequiredService<ICurrentUserAccessor>();
         var tenantId = Guid.NewGuid();
@@ -59,6 +61,7 @@ public class SettingManagementPersistenceModuleTests
             (await settingProvider.GetAsync<int>("workspace.max-users", TestContext.Current.CancellationToken)).ShouldBe(30);
 
             await settingValueStore.SetAsync(new SettingValueRecord("workspace.max-users", SettingScope.User, 40, userId: "alice"), TestContext.Current.CancellationToken);
+            await unitOfWork.SaveChangesAsync(TestContext.Current.CancellationToken);
 
             using (currentUser.Change(new CurrentUserInfo("alice", "Alice", true)))
             {
@@ -117,16 +120,52 @@ public class SettingManagementPersistenceModuleTests
 
         await using var serviceProvider = services.BuildServiceProvider();
         var settingValueStore = serviceProvider.GetRequiredService<ISettingValueStore>();
+        var unitOfWork = serviceProvider.GetRequiredService<IUnitOfWork>();
 
         await settingValueStore.SetAsync(new SettingValueRecord("workspace.title", SettingScope.Global, "Main"), TestContext.Current.CancellationToken);
         await settingValueStore.SetAsync(new SettingValueRecord("workspace.region", SettingScope.Tenant, "eu-west", Guid.NewGuid()), TestContext.Current.CancellationToken);
         await settingValueStore.SetAsync(new SettingValueRecord("workspace.theme", SettingScope.User, "light", userId: "alice"), TestContext.Current.CancellationToken);
+        await unitOfWork.SaveChangesAsync(TestContext.Current.CancellationToken);
 
         var records = await settingValueStore.GetListAsync(TestContext.Current.CancellationToken);
         records.Count.ShouldBe(3);
         records.Select(record => record.Name).ShouldContain("workspace.title");
         records.Select(record => record.Name).ShouldContain("workspace.region");
         records.Select(record => record.Name).ShouldContain("workspace.theme");
+    }
+
+    [Fact]
+    public async Task SettingValueStore_ShouldNotPersistBeforeUnitOfWorkCompletes()
+    {
+        var services = CreateServices();
+
+        await using var serviceProvider = services.BuildServiceProvider();
+        await using (var scope = serviceProvider.CreateAsyncScope())
+        {
+            var store = scope.ServiceProvider.GetRequiredService<ISettingValueStore>();
+            var unitOfWork = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
+
+            await store.SetAsync(
+                new SettingValueRecord("workspace.title", SettingScope.Global, "Main"),
+                TestContext.Current.CancellationToken);
+
+            await using (var beforeCompleteScope = serviceProvider.CreateAsyncScope())
+            {
+                var dbContext = beforeCompleteScope.ServiceProvider.GetRequiredService<SettingManagementDbContext>();
+                var records = await dbContext.SettingValues.ToArrayAsync(TestContext.Current.CancellationToken);
+                records.ShouldBeEmpty();
+            }
+
+            await unitOfWork.CompleteAsync(TestContext.Current.CancellationToken);
+        }
+
+        await using (var verificationScope = serviceProvider.CreateAsyncScope())
+        {
+            var dbContext = verificationScope.ServiceProvider.GetRequiredService<SettingManagementDbContext>();
+            var records = await dbContext.SettingValues.ToArrayAsync(TestContext.Current.CancellationToken);
+            records.Length.ShouldBe(1);
+            records[0].Name.ShouldBe("workspace.title");
+        }
     }
 
     private static ServiceCollection CreateServices()

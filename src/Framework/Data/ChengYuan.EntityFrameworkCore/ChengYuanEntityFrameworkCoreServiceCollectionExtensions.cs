@@ -18,7 +18,7 @@ public static class ChengYuanEntityFrameworkCoreServiceCollectionExtensions
         services.TryAddSingleton<IDomainEventPublisher, NullDomainEventPublisher>();
         services.AddScoped<IDbContextUnitOfWorkParticipant>(serviceProvider =>
             new DbContextUnitOfWork(serviceProvider.GetRequiredService<TDbContext>()));
-        services.TryAddScoped<IUnitOfWork>(serviceProvider =>
+        services.AddScoped<IUnitOfWork>(serviceProvider =>
             new CompositeDbContextUnitOfWork(
                 serviceProvider.GetServices<IDbContextUnitOfWorkParticipant>(),
                 serviceProvider.GetRequiredService<IDomainEventPublisher>()));

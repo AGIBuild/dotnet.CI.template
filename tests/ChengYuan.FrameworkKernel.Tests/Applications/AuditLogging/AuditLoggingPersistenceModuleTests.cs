@@ -1,5 +1,6 @@
 using ChengYuan.Auditing;
 using ChengYuan.AuditLogging;
+using ChengYuan.Core.Data;
 using ChengYuan.Core.Modularity;
 using ChengYuan.EntityFrameworkCore;
 using ChengYuan.ExecutionContext;
@@ -95,6 +96,7 @@ public class AuditLoggingPersistenceModuleTests
 
         await using var serviceProvider = services.BuildServiceProvider();
         var auditLogStore = serviceProvider.GetRequiredService<IAuditLogStore>();
+        var unitOfWork = serviceProvider.GetRequiredService<IUnitOfWork>();
 
         await auditLogStore.AppendAsync(
             new AuditLogRecord(
@@ -112,6 +114,7 @@ public class AuditLoggingPersistenceModuleTests
                 new Dictionary<string, object?>(),
                 []),
             TestContext.Current.CancellationToken);
+        await unitOfWork.SaveChangesAsync(TestContext.Current.CancellationToken);
 
         var records = await auditLogStore.GetListAsync(TestContext.Current.CancellationToken);
         records.Count.ShouldBe(1);

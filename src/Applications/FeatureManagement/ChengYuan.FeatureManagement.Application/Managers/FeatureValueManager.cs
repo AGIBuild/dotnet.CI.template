@@ -1,3 +1,4 @@
+using ChengYuan.Core.Data;
 using ChengYuan.Features;
 using ChengYuan.MultiTenancy;
 
@@ -5,7 +6,8 @@ namespace ChengYuan.FeatureManagement;
 
 public sealed class FeatureValueManager(
     IFeatureValueStore store,
-    ITenantScopeAccessPolicy tenantScopeAccessPolicy) : IFeatureValueManager
+    ITenantScopeAccessPolicy tenantScopeAccessPolicy,
+    IUnitOfWork unitOfWork) : IFeatureValueManager
 {
     public async ValueTask<IReadOnlyList<FeatureValueRecord>> GetListAsync(CancellationToken cancellationToken = default)
     {
@@ -13,13 +15,14 @@ public sealed class FeatureValueManager(
         return tenantScopeAccessPolicy.FilterAccessible(records, record => record.TenantId);
     }
 
-    public ValueTask SetAsync(FeatureValueRecord record, CancellationToken cancellationToken = default)
+    public async ValueTask SetAsync(FeatureValueRecord record, CancellationToken cancellationToken = default)
     {
         tenantScopeAccessPolicy.EnsureCanAccess(record.TenantId);
-        return store.SetAsync(record, cancellationToken);
+        await store.SetAsync(record, cancellationToken);
+        await unitOfWork.SaveChangesAsync(cancellationToken);
     }
 
-    public ValueTask RemoveAsync(
+    public async ValueTask RemoveAsync(
         string name,
         FeatureScope scope,
         Guid? tenantId = null,
@@ -27,6 +30,7 @@ public sealed class FeatureValueManager(
         CancellationToken cancellationToken = default)
     {
         tenantScopeAccessPolicy.EnsureCanAccess(tenantId);
-        return store.RemoveAsync(name, scope, tenantId, userId, cancellationToken);
+        await store.RemoveAsync(name, scope, tenantId, userId, cancellationToken);
+        await unitOfWork.SaveChangesAsync(cancellationToken);
     }
 }
