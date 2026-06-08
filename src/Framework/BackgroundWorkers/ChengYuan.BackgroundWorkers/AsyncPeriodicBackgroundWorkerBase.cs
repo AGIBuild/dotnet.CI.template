@@ -70,7 +70,7 @@ public abstract partial class AsyncPeriodicBackgroundWorkerBase : BackgroundWork
             {
                 break;
             }
-            catch (ObjectDisposedException)
+            catch (ObjectDisposedException) when (stoppingToken.IsCancellationRequested)
             {
                 break;
             }
