@@ -9,6 +9,14 @@ namespace ChengYuan.AspNetCore;
 public static class ChengYuanWebBuilderExtensions
 {
     /// <summary>
+    /// Adds the ChengYuan modular framework to an ASP.NET Core host with default options.
+    /// </summary>
+    public static WebApplicationBuilder AddChengYuan<TWebRootModule>(
+        this WebApplicationBuilder builder)
+        where TWebRootModule : HostModule, new()
+        => builder.AddChengYuan<TWebRootModule>(_ => { });
+
+    /// <summary>
     /// Adds the ChengYuan modular framework to an ASP.NET Core host.
     /// The specified <typeparamref name="TWebRootModule"/> serves as the module graph root
     /// and should configure HTTP-layer services (auth, CORS, versioning, etc.).

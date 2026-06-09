@@ -18,6 +18,7 @@
     <ProjectReference Include="..\..\Applications\SettingManagement\ChengYuan.SettingManagement.Persistence\ChengYuan.SettingManagement.Persistence.csproj" />
     <ProjectReference Include="..\..\Applications\TenantManagement\ChengYuan.TenantManagement.Persistence\ChengYuan.TenantManagement.Persistence.csproj" />
     <ProjectReference Include="..\..\Framework\Data\ChengYuan.Data.Sqlite\ChengYuan.Data.Sqlite.csproj" />
+    <ProjectReference Include="..\..\Framework\Hosting\ChengYuan.Hosting.csproj" />
     <ProjectReference Include="..\..\Framework\Caching\ChengYuan.Caching.Memory\ChengYuan.Caching.Memory.csproj" />
     <ProjectReference Include="..\..\Framework\ExecutionContext\ChengYuan.ExecutionContext\ChengYuan.ExecutionContext.csproj" />
     <ProjectReference Include="..\..\Framework\MultiTenancy\ChengYuan.MultiTenancy\ChengYuan.MultiTenancy.csproj" />

@@ -1,4 +1,6 @@
-namespace ChengYuan.Architecture;
+using System.Collections.Generic;
+
+namespace ChengYuan.ArchitectureAnalyzer;
 
 internal static class ArchitectureDiagnosticCatalog
 {
@@ -11,11 +13,11 @@ internal static class ArchitectureDiagnosticCatalog
             "Web project '{0}' must not reference persistence project '{1}'.",
             "Web modules expose HTTP endpoints and depend on application contracts; host composition owns persistence wiring."),
         new(
-            ArchitectureDiagnosticIds.PersistenceFacetMustBeProviderNeutral,
-            "Persistence facets must be provider-neutral",
-            "DataAccess",
-            "Persistence project '{0}' must not reference provider project or package '{1}'.",
-            "Database provider choice belongs to host/runtime tooling, not reusable persistence facets."),
+            ArchitectureDiagnosticIds.ProviderFacetMustNotReferenceHosting,
+            "Provider facets must not reference hosting",
+            "ModuleBoundaries",
+            "Provider project '{0}' must not reference host project '{1}'.",
+            "Provider packages expose infrastructure-specific configuration; host composition owns runtime application bootstrapping."),
         new(
             ArchitectureDiagnosticIds.HostMustOwnRuntimePersistenceComposition,
             "Host must own runtime persistence composition",

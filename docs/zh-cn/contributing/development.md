@@ -14,7 +14,7 @@
 - `Framework` modules 只能依赖其他 `Framework` modules。
 - `Application` modules 可以依赖 `Framework` modules，也只能通过 `Contracts` 依赖其他 `Application` modules。
 - Hosts 只做模块组合，不承载业务用例实现。
-- 引入新模块或新 facet 形态时，必须补充架构测试。
+- 引入新模块或新 facet 形态并带来新的架构边界时，必须更新 `ChengYuan.ArchitectureAnalyzer`。
 
 ## 前置要求
 
@@ -42,7 +42,7 @@ build.ps1           # Windows
 2. 再确定模块 profile 或 facet 组合。
 3. 只创建模块真正需要的项目。
 4. 显式声明直接依赖。
-5. 添加或更新架构测试。
+5. 如果改动引入新的架构边界，更新 `ChengYuan.ArchitectureAnalyzer`。
 6. 只有在需要对应传输方式时，才把模块接入 Web 或 CLI。
 
 ## NUKE 构建 Target

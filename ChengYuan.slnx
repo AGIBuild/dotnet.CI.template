@@ -72,7 +72,7 @@
     <Project Path="src/Hosts/CliHost/ChengYuan.CliHost.csproj" />
   </Folder>
   <Folder Name="/src/Analyzers/">
-    <Project Path="src/Analyzers/ChengYuan.Architecture/ChengYuan.Architecture.csproj" />
+    <Project Path="src/Analyzers/ChengYuan.ArchitectureAnalyzer/ChengYuan.ArchitectureAnalyzer.csproj" />
   </Folder>
   <Folder Name="/tests/">
     <Project Path="tests/ChengYuan.FrameworkKernel.Tests/ChengYuan.FrameworkKernel.Tests.csproj" />

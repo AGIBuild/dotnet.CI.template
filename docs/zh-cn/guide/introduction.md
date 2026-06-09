@@ -35,7 +35,7 @@ docs/               # 文档
 
 例如，更推荐 `src/Applications/Identity/ChengYuan.Identity.Application/`，而不是 `src/Applications/ChengYuan.Identity/ChengYuan.Identity.Application/`，也不要引入 `src/Applications/Identity/Application/ChengYuan.Identity.Application/` 这种只表达角色的中间层。
 
-测试目录遵循同样的镜像规则。模块测试放在 `tests/ChengYuan.FrameworkKernel.Tests/<Family>/<Module>/...` 下，架构测试按测试套件放在 `tests/ChengYuan.ArchitectureTests/<Suite>/...` 下。
+测试目录遵循同样的镜像规则。模块测试放在 `tests/ChengYuan.FrameworkKernel.Tests/<Family>/<Module>/...` 下；架构边界由编译期 `ChengYuan.ArchitectureAnalyzer` 强制执行。
 
 ## 承渊不是什么
 

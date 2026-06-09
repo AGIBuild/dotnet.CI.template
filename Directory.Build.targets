@@ -18,6 +18,14 @@
     <PackageReference Include="Microsoft.CodeAnalysis.PublicApiAnalyzers" PrivateAssets="all" />
   </ItemGroup>
 
+  <!-- Compile-time architecture guardrails for source projects. -->
+  <ItemGroup Condition="'$(MSBuildProjectName)' != 'ChengYuan.ArchitectureAnalyzer' AND '$(MSBuildProjectName)' != '_build'">
+    <ProjectReference Include="$(MSBuildThisFileDirectory)src/Analyzers/ChengYuan.ArchitectureAnalyzer/ChengYuan.ArchitectureAnalyzer.csproj"
+                      OutputItemType="Analyzer"
+                      ReferenceOutputAssembly="false"
+                      PrivateAssets="all" />
+  </ItemGroup>
+
   <!-- Populate NuGet package metadata from GitHub environment variables -->
   <PropertyGroup Condition="'$(GITHUB_REPOSITORY)' != '' AND '$(RepositoryUrl)' == ''">
     <RepositoryUrl>https://github.com/$(GITHUB_REPOSITORY)</RepositoryUrl>

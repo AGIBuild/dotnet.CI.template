@@ -18,8 +18,8 @@ try
     var connectionString = builder.Configuration.GetConnectionString("Default")
         ?? throw new InvalidOperationException("Connection string 'Default' is not configured. Set it in appsettings.json under ConnectionStrings:Default.");
 
-    builder.AddChengYuan<WebHostHttpCompositionModule>(cy => cy
-        .UseSqlite(connectionString));
+    builder.Services.UseSqlite(connectionString);
+    builder.AddChengYuan<WebHostHttpCompositionModule>();
 
     builder.Services.AddDatabaseMigration();
     builder.Services.AddHostedService<DataSeedingHostedService>();

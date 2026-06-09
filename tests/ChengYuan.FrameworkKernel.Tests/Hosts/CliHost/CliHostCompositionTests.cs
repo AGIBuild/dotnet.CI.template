@@ -15,11 +15,9 @@ public class CliHostCompositionTests
     {
         var connectionString = $"Data Source={Path.Combine(Path.GetTempPath(), $"chengyuan-cli-{Guid.NewGuid():N}.db")}";
         var services = new ServiceCollection();
+        services.UseSqlite(connectionString);
         services.AddChengYuan<CliHostModule>(cy => cy
-            .UseSqlite(connectionString)
             .DisableMultiTenancy()
-            .AddModule<IdentityPersistenceModule>()
-            .AddModule<TenantManagementPersistenceModule>()
         );
 
         using var serviceProvider = services.BuildServiceProvider();
@@ -27,6 +25,8 @@ public class CliHostCompositionTests
         var moduleNames = moduleCatalog.ModuleTypes.Select(moduleType => moduleType.Name).ToArray();
 
         moduleNames.ShouldContain(nameof(CliHostModule));
+        moduleNames.ShouldContain(nameof(IdentityPersistenceModule));
+        moduleNames.ShouldContain(nameof(TenantManagementPersistenceModule));
         moduleNames.ShouldContain("ChengYuanEntityFrameworkCoreSqliteModule");
 
         using var scope = serviceProvider.CreateScope();

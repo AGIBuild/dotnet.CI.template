@@ -11,7 +11,7 @@
 - 将可复用切面拆开，让技术系统、可复用应用能力与可选扩展各自演进。
 - 允许模块深度不一致，不强制所有模块都暴露相同层次或相同传输方式。
 - Web 和 CLI 都是可选的 transport facet。
-- 所有依赖必须显式声明，并通过架构测试约束。
+- 所有依赖必须显式声明，并通过编译期 `ChengYuan.ArchitectureAnalyzer` 约束。
 - 保留强工程约束：构建自动化、锁定还原、版本管理、测试和文档。
 
 ## 顶层结构
@@ -52,7 +52,7 @@ src/
 
 推荐路径形态是 `家族根目录 -> 短模块目录 -> 项目目录`。应使用 `src/Applications/Identity/ChengYuan.Identity.Application/`，而不是 `src/Applications/ChengYuan.Identity/ChengYuan.Identity.Application/`，也不要再引入 `src/Applications/Identity/Application/` 这类只表达角色的中间目录。
 
-测试目录遵循同样的镜像规则。模块测试放在 `tests/ChengYuan.FrameworkKernel.Tests/Applications/Identity/` 这类路径下，架构测试放在 `tests/ChengYuan.ArchitectureTests/Structure/` 这类按测试套件划分的路径下。
+测试目录遵循同样的镜像规则。模块测试放在 `tests/ChengYuan.FrameworkKernel.Tests/Applications/Identity/` 这类路径下；架构边界由编译期 `ChengYuan.ArchitectureAnalyzer` 强制执行。
 
 `Framework`、`Applications`、`Hosts` 这类家族词只属于目录，不属于项目名。`Application`、`Persistence`、`Web` 这类 facet 词如果是在描述项目职责，则继续保留在项目名中。
 
@@ -206,7 +206,7 @@ src/
 
 1. Wave A：创建 `ChengYuan.Core` 家族，并把模块化所有权从 `ChengYuan.Hosting` 迁出。
 2. Wave B：建立 Core 的失败模型和 DDD 基线，包括异常、错误码、`Result`、实体、聚合根、值对象、强类型 Id、`IClock`、`IGuidGenerator`。
-3. Wave C：增加 `ChengYuan.Core.Json`、`ChengYuan.Core.Validation`、`ChengYuan.Core.Localization`、`ChengYuan.Core.Data`，并用架构测试约束依赖边界。
+3. Wave C：增加 `ChengYuan.Core.Json`、`ChengYuan.Core.Validation`、`ChengYuan.Core.Localization`、`ChengYuan.Core.Data`，并用 `ChengYuan.ArchitectureAnalyzer` 约束依赖边界。
 4. Wave D：增加 `ChengYuan.Core.EntityFrameworkCore`，承载转换器、仓储、工作单元和数据过滤器实现。
 5. Wave E：将 `ExecutionContext`、`MultiTenancy`、`Caching`、`Outbox`，以及后续的 `Authorization`、`Settings`、`Features`、`Auditing` 重建到新的 Core 家族之上。
 6. Wave F：把测试拆分并收紧为 core modularity、core primitives、provider、framework-kernel 四类。
@@ -303,7 +303,7 @@ CLI 场景可以有意省略某些与命令行无关的模块。不要把 Web tr
 3. 不要为了形式统一而创建空的 `Web`、`Cli` 或 `Persistence` 项目。
 4. 目录结构固定为 `家族根目录 -> 短模块目录 -> 项目目录`。
 5. 项目名中不要带家族词，但描述项目职责的 facet 词应保留。
-6. 每次引入新模块或新 facet，都补充架构测试。
+6. 每次引入新模块或新 facet 并带来新的架构边界时，都更新 `ChengYuan.ArchitectureAnalyzer`。
 7. 重复出现的技术能力应提升到 `Framework`，而不是塞进共享应用项目。
 8. 可复用管理能力应进入 `Applications`，而不是堆到 host 中。
 9. Hosts 必须保持薄且声明式。

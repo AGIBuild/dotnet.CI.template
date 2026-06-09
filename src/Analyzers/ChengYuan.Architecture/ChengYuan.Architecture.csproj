@@ -1,8 +1,0 @@
-<Project Sdk="Microsoft.NET.Sdk">
-
-  <PropertyGroup>
-    <IsPackable>true</IsPackable>
-    <RootNamespace>ChengYuan.Architecture</RootNamespace>
-  </PropertyGroup>
-
-</Project>

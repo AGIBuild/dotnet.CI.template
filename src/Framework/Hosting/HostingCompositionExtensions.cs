@@ -8,6 +8,14 @@ namespace ChengYuan.Hosting;
 public static class HostingCompositionExtensions
 {
     /// <summary>
+    /// Adds the ChengYuan modular framework to a generic host with default options.
+    /// </summary>
+    public static IHostApplicationBuilder AddChengYuan<TRootModule>(
+        this IHostApplicationBuilder builder)
+        where TRootModule : HostModule, new()
+        => builder.AddChengYuan<TRootModule>(_ => { });
+
+    /// <summary>
     /// Adds the ChengYuan modular framework to a generic host (console, worker, desktop).
     /// Uses the specified <typeparamref name="TRootModule"/> as the module graph root.
     /// </summary>
@@ -29,6 +37,14 @@ public static class HostingCompositionExtensions
         builder.Services.AddHostedService<ModularApplicationHostedService>();
         return builder;
     }
+
+    /// <summary>
+    /// Adds the ChengYuan modular framework to a raw <see cref="IServiceCollection"/> with default options.
+    /// </summary>
+    public static IServiceCollection AddChengYuan<TRootModule>(
+        this IServiceCollection services)
+        where TRootModule : HostModule, new()
+        => services.AddChengYuan<TRootModule>(_ => { });
 
     /// <summary>
     /// Adds the ChengYuan modular framework to a raw <see cref="IServiceCollection"/>

@@ -14,8 +14,8 @@ If the current source tree and the architecture guide differ, prefer the guide a
 - `Framework` modules may depend only on other `Framework` modules.
 - `Application` modules may depend on `Framework` modules and on other `Application` modules through `Contracts` only.
 - Hosts compose modules; hosts do not implement business use cases.
-- Mirror source families in tests. Keep module tests under `tests/ChengYuan.FrameworkKernel.Tests/<Family>/<Module>/...` and architecture suites under `tests/ChengYuan.ArchitectureTests/<Suite>/...`.
-- Add architecture tests when you introduce a new module or a new facet profile.
+- Mirror source families in tests. Keep module tests under `tests/ChengYuan.FrameworkKernel.Tests/<Family>/<Module>/...`.
+- Update `ChengYuan.ArchitectureAnalyzer` when you introduce a new module family, facet profile, or compile-time architecture boundary.
 
 ## Prerequisites
 
@@ -43,7 +43,7 @@ The default target is **Build** (Restore → Build).
 2. Pick the module profile or facet set.
 3. Add only the projects the module actually needs.
 4. Declare direct dependencies explicitly.
-5. Add or update architecture tests.
+5. Update `ChengYuan.ArchitectureAnalyzer` when the change introduces a new architecture boundary.
 6. Wire the module into Web or CLI only if a transport facet is required.
 
 ## NUKE Build Targets

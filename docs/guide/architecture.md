@@ -11,7 +11,7 @@ When existing code and this guide differ, use this guide as the default rule for
 - Split reusable slices so technical systems stay separate from reusable application capabilities and optional extensions.
 - Allow uneven module depth. Do not force every module to expose the same layers or transports.
 - Keep Web and CLI as optional transport facets.
-- Require explicit dependencies and architecture tests.
+- Require explicit dependencies and compile-time architecture guardrails through `ChengYuan.ArchitectureAnalyzer`.
 - Preserve strong engineering guardrails: build automation, locked restore, versioning, tests, and documentation.
 
 ## Top-Level Structure
@@ -52,7 +52,7 @@ src/
 
 The preferred path shape is `family root -> short module folder -> project`. Use `src/Applications/Identity/ChengYuan.Identity.Application/`, not `src/Applications/ChengYuan.Identity/ChengYuan.Identity.Application/`, and do not add role-only intermediate folders such as `src/Applications/Identity/Application/`.
 
-Apply the same mirroring rule to tests. Keep module tests under paths such as `tests/ChengYuan.FrameworkKernel.Tests/Applications/Identity/` and architecture suites under paths such as `tests/ChengYuan.ArchitectureTests/Structure/`.
+Apply the same mirroring rule to tests. Keep module tests under paths such as `tests/ChengYuan.FrameworkKernel.Tests/Applications/Identity/`; architecture boundaries are enforced at compile time by `ChengYuan.ArchitectureAnalyzer`.
 
 Family words such as `Framework`, `Applications`, and `Hosts` belong in directories, not in project names. Facet words such as `Application`, `Persistence`, and `Web` stay in project names when they describe the project role.
 
@@ -232,7 +232,7 @@ The rule is simple:
 
 1. Wave A: create the `ChengYuan.Core` family and move modularity ownership out of `ChengYuan.Hosting`.
 2. Wave B: establish the core failure model and DDD baseline with exceptions, error codes, `Result`, entities, aggregate roots, value objects, strongly typed IDs, `IClock`, and `IGuidGenerator`.
-3. Wave C: add `ChengYuan.Core.Json`, `ChengYuan.Core.Validation`, `ChengYuan.Core.Localization`, and `ChengYuan.Core.Data`, then enforce their dependency boundaries with architecture tests.
+3. Wave C: add `ChengYuan.Core.Json`, `ChengYuan.Core.Validation`, `ChengYuan.Core.Localization`, and `ChengYuan.Core.Data`, then enforce their dependency boundaries with `ChengYuan.ArchitectureAnalyzer`.
 4. Wave D: add `ChengYuan.Core.EntityFrameworkCore` for converters, repositories, unit of work, and data-filter implementations.
 5. Wave E: rebase `ExecutionContext`, `MultiTenancy`, `Caching`, `Outbox`, and later `Authorization`, `Settings`, `Features`, and `Auditing` on the new Core family.
 6. Wave F: split and tighten tests into core modularity, core primitives, provider, and framework-kernel suites.
@@ -329,7 +329,7 @@ It may intentionally omit modules that are irrelevant to a command-line scenario
 3. Do not create empty `Web`, `Cli`, or `Persistence` projects just for symmetry.
 4. Keep the directory shape `family root -> short module folder -> project`.
 5. Do not put family words in project names, but keep facet words in project names when they describe the project role.
-6. Add architecture tests whenever a new module or facet is introduced.
+6. Update `ChengYuan.ArchitectureAnalyzer` whenever a new module or facet introduces a new architecture boundary.
 7. Promote recurring technical concerns into `Framework`, not into shared application dumping grounds.
 8. Promote reusable management capabilities into `Applications`, not into hosts.
 9. Keep hosts thin and declarative.
