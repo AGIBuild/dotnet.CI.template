@@ -1,6 +1,6 @@
 using ChengYuan.Core.Data;
-using ChengYuan.Settings;
 using ChengYuan.MultiTenancy;
+using ChengYuan.Settings;
 
 namespace ChengYuan.SettingManagement;
 

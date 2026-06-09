@@ -1,5 +1,5 @@
-using ChengYuan.Core.Modularity;
 using ChengYuan.Core.Data;
+using ChengYuan.Core.Modularity;
 using ChengYuan.Settings;
 
 namespace ChengYuan.SettingManagement;

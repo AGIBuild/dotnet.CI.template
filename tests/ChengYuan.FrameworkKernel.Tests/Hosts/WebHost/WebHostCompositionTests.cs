@@ -1,3 +1,5 @@
+using System.Collections.Concurrent;
+using System.Net;
 using ChengYuan.AuditLogging;
 using ChengYuan.Core.Data;
 using ChengYuan.Core.Entities;
@@ -19,8 +21,6 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.TestHost;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
-using System.Collections.Concurrent;
-using System.Net;
 using Shouldly;
 
 namespace ChengYuan.FrameworkKernel.Tests;
