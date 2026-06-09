@@ -9,6 +9,6 @@ partial class BuildTask
         .Executes(() =>
         {
             TestResultsDirectory.CreateOrCleanDirectory();
-            DotNet($"test --project {RootDirectory / "tests" / "ChengYuan.FrameworkKernel.Tests" / "ChengYuan.FrameworkKernel.Tests.csproj"} --configuration {Configuration} --no-build");
+            DotNet($"test --project {RootDirectory / "tests" / "ChengYuan.FrameworkKernel.Tests" / "ChengYuan.FrameworkKernel.Tests.csproj"} --configuration {Configuration} --no-build --results-directory {TestResultsDirectory} -- --report-xunit-trx --report-xunit-trx-filename framework-kernel.trx");
         });
 }
