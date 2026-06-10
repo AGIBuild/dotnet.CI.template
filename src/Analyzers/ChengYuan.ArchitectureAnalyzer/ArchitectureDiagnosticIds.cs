@@ -8,4 +8,6 @@ internal static class ArchitectureDiagnosticIds
     public const string ModuleDependencyMustRespectCategoryOrder = "CYARCH004";
     public const string EfStoreMustUseScopedDbContext = "CYARCH005";
     public const string HostDiagnosticsMustBeExplicitlyEnabled = "CYARCH006";
+    public const string CoreMustRemainFoundationOnly = "CYARCH007";
+    public const string ModuleMustNotReferenceForeignFacet = "CYARCH008";
 }

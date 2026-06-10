@@ -14,6 +14,19 @@
 - 所有依赖必须显式声明，并通过编译期 `ChengYuan.ArchitectureAnalyzer` 约束。
 - 保留强工程约束：构建自动化、锁定还原、版本管理、测试和文档。
 
+## 编译期架构 Analyzer
+
+`ChengYuan.ArchitectureAnalyzer` 不是独立运行的验证项目。它通过 `Directory.Build.targets` 被集中接入到需要检查的项目编译中，并作为编译器 Analyzer 执行：
+
+```xml
+<ProjectReference Include="$(MSBuildThisFileDirectory)src/Analyzers/ChengYuan.ArchitectureAnalyzer/ChengYuan.ArchitectureAnalyzer.csproj"
+                  OutputItemType="Analyzer"
+                  ReferenceOutputAssembly="false"
+                  PrivateAssets="all" />
+```
+
+`OutputItemType="Analyzer"` 让普通 `dotnet build` 和 `dotnet test` 都会执行架构诊断。`ReferenceOutputAssembly="false"` 确保业务与框架项目不会在运行时引用 analyzer 程序集。
+
 ## 顶层结构
 
 ```text
@@ -161,33 +174,33 @@ src/
 
 ## Core 基础层设计
 
-基础层边界已经明确：`ChengYuan.Core` 家族专门负责平台级基础能力，旧的 `ChengYuan.Domain` 基线不再属于当前有效架构。
+`ChengYuan.Core` 是唯一的 Core 项目，专门负责平台级基础能力。旧的 `ChengYuan.Domain` 基线不再属于当前有效架构，也不应再把 Core 拆成多个项目，以免增加认知负载和引用歧义。
 
 这里遵循的是一组更清晰的规则：
 
-- `Core` 只拥有平台级基础概念。
-- Provider 相关能力放在 Core 邻接模块中。
+- `Core` 在一个物理项目内拥有平台级基础概念。
+- Core 内部能力通过目录和命名空间表达，不通过独立项目或包表达。
+- Provider 相关能力放在 Core 邻接的 framework 模块中。
 - `ExecutionContext`、`MultiTenancy`、`Caching`、`Outbox` 这类技术系统建立在 `Core` 之上，而不是被折叠进 `Core`。
 - 已退场的 `ChengYuan.Domain` 基线不得被重新引入。
 
-### 目标 Core 家族
+### Core 内部区域
 
-| 模块 | 负责内容 | 明确不负责 | 依赖 |
-|---|---|---|---|
-| `ChengYuan.Core` | 基础异常、错误码、`Result`、DDD 原语、强类型 Id、对象扩展契约、`IClock`、`IGuidGenerator` | Json、EF Core、租户上下文、当前用户上下文、缓存、Outbox | 不依赖内部模块 |
-| `ChengYuan.Core.Runtime` | 模块描述、模块目录、生命周期钩子、模块引导与排序、`ServiceConfigurationContext`、初始化日志（`IInitLoggerFactory`、`IInitLogger<T>`）、日志工具（`IHasLogLevel`、`IExceptionWithSelfLogging`）、异步服务注册（`AddModuleAsync`、`AddModularApplicationAsync`）、生命周期贡献者（`IModuleLifecycleContributor`、`ModuleLifecycleOptions`）、依赖注入原语（`ObjectAccessor<T>`、`PreConfigureActionList<T>`、约定式注册标记） | 领域原语、序列化 Provider、数据 Provider | `ChengYuan.Core` |
-| `ChengYuan.Core.Json` | 序列化抽象、System.Text.Json 集成、强类型 Id 转换器 | EF Core、仓储或 UoW 逻辑 | `ChengYuan.Core` |
-| `ChengYuan.Core.Validation` | 校验契约与默认校验管道 | 本地化资源、持久化 Provider | `ChengYuan.Core` |
-| `ChengYuan.Core.Localization` | 资源注册与异常/错误消息本地化缝隙 | 校验运行时策略、持久化 Provider | `ChengYuan.Core` |
-| `ChengYuan.Core.Data` | 仓储契约、工作单元契约、数据过滤器、面向持久化的软删除等 trait | EF Core 特定实现细节 | `ChengYuan.Core` |
-| `ChengYuan.Core.EntityFrameworkCore` | EF Core 模型约定、值转换器、仓储与 UoW Provider 实现 | Core 抽象本身或非 EF Provider 规则 | `ChengYuan.Core`、`ChengYuan.Core.Data` |
+| 内部区域 | 负责内容 | 明确不负责 |
+|---|---|---|
+| `Primitives` / 根 `ChengYuan.Core` | 基础异常、错误码、`Result`、DDD 原语、强类型 Id、对象扩展契约、`IClock`、`IGuidGenerator` | EF Core、租户上下文、当前用户上下文、缓存、Outbox |
+| `Runtime` / `ChengYuan.Core.Modularity` / `ChengYuan.Core.Lifecycle` | 模块描述、模块目录、生命周期钩子、模块引导与排序、`ServiceConfigurationContext`、初始化日志、异步服务注册、生命周期贡献者、依赖注入原语 | 领域原语、序列化 Provider、数据 Provider |
+| `Json` / `ChengYuan.Core.Json` | 序列化抽象、System.Text.Json 集成、强类型 Id 转换器 | EF Core、仓储或 UoW 逻辑 |
+| `Validation` / `ChengYuan.Core.Validation` | 校验契约与默认校验管道 | 本地化资源、持久化 Provider |
+| `Localization` / `ChengYuan.Core.Localization` | 资源注册与异常/错误消息本地化缝隙 | 校验运行时策略、持久化 Provider |
+| `Data` / `ChengYuan.Core.Data` | 仓储契约、工作单元契约、数据过滤器、面向持久化的软删除等 trait | EF Core 特定实现细节 |
 
 ### Core 公开能力的优先顺序
 
 1. 先做模块化：`DependsOnAttribute`、`ModuleBase`、模块描述、模块目录、排序逻辑，以及 pre-configure 和 post-configure 等生命周期钩子。
 2. 再做失败模型：`ChengYuanException`、`BusinessException`、稳定的 `ErrorCode`、`Result` 与 `Result<T>`，统一到同一套错误表达之上。
 3. 然后是 DDD 原语：`Entity`、`AggregateRoot`、`ValueObject`、领域事件集合、强类型 Id、`IClock`、`IGuidGenerator`。
-4. 接着拆出支撑模块：Json、Validation、Localization 成为显式扩展缝隙，而不是散落在 runtime 或 host 里。
+4. 接着整理支撑区域：Json、Validation、Localization 成为显式 Core 内部区域，而不是散落在 runtime 或 host 里。
 5. 再引入数据抽象：仓储、工作单元、软删除和多租户等过滤器接入点。
 6. 最后再做 Provider：EF Core 约定、强类型 Id 转换器、仓储、过滤器与持久化辅助能力。
 
@@ -195,28 +208,28 @@ src/
 
 | 当前位置 | 目标位置 | 迁移规则 |
 |---|---|---|
-| `ChengYuan.Hosting` 中的模块原语 | `ChengYuan.Core.Runtime` | `Hosting` 不再拥有模块化模型，只保留薄的组合辅助职责 |
+| `ChengYuan.Hosting` 中的模块原语 | `ChengYuan.Core` runtime/modularity 命名空间 | `Hosting` 不再拥有模块化模型，只保留薄的组合辅助职责 |
 | `ChengYuan.Domain` 中的 Result 与强类型 Id 原语 | `ChengYuan.Core` | 核心原语迁移到明确的 Core 命名空间，不再伪装成单独的 Domain 模块 |
-| `ChengYuan.Domain` 中的 Json 转换器 | `ChengYuan.Core.Json` | 序列化支持成为 Core 邻接模块，而不是 core runtime 的一部分 |
-| `ChengYuan.Domain.EntityFrameworkCore` 中的转换器 | `ChengYuan.Core.EntityFrameworkCore` | EF Core 支持依赖 Core，Core 绝不能反向依赖 EF Core |
+| `ChengYuan.Domain` 中的 Json 转换器 | `ChengYuan.Core.Json` 命名空间 | 序列化支持成为显式 Core 内部区域，而不是 core runtime 的一部分 |
+| `ChengYuan.Domain.EntityFrameworkCore` 中的转换器 | `ChengYuan.EntityFrameworkCore` Provider 模块 | EF Core 支持依赖 Core，Core 绝不能反向依赖 EF Core |
 | `ExecutionContext.IClock` | `ChengYuan.Core` | 先把抽象提升到 Core，运行时实现保持可迁移 |
 | `MultiTenancy` 的 tenant 契约 | 保持在 `ChengYuan.MultiTenancy` | 后续通过 `Core.Data` 过滤器接入，而不是把租户上下文并入 Core |
 
 ### 实施波次
 
-1. Wave A：创建 `ChengYuan.Core` 家族，并把模块化所有权从 `ChengYuan.Hosting` 迁出。
+1. Wave A：保留一个 `ChengYuan.Core` 项目，并把模块化所有权从 `ChengYuan.Hosting` 迁出。
 2. Wave B：建立 Core 的失败模型和 DDD 基线，包括异常、错误码、`Result`、实体、聚合根、值对象、强类型 Id、`IClock`、`IGuidGenerator`。
-3. Wave C：增加 `ChengYuan.Core.Json`、`ChengYuan.Core.Validation`、`ChengYuan.Core.Localization`、`ChengYuan.Core.Data`，并用 `ChengYuan.ArchitectureAnalyzer` 约束依赖边界。
-4. Wave D：增加 `ChengYuan.Core.EntityFrameworkCore`，承载转换器、仓储、工作单元和数据过滤器实现。
-5. Wave E：将 `ExecutionContext`、`MultiTenancy`、`Caching`、`Outbox`，以及后续的 `Authorization`、`Settings`、`Features`、`Auditing` 重建到新的 Core 家族之上。
+3. Wave C：将 Json、Validation、Localization、Data 整理为 Core 内部区域，并用 `ChengYuan.ArchitectureAnalyzer` 约束依赖边界。
+4. Wave D：将 EF Core 约定、转换器、仓储、工作单元和数据过滤器实现保留在 `ChengYuan.EntityFrameworkCore`。
+5. Wave E：将 `ExecutionContext`、`MultiTenancy`、`Caching`、`Outbox`，以及后续的 `Authorization`、`Settings`、`Features`、`Auditing` 重建到 Core 基础层之上。
 6. Wave F：把测试拆分并收紧为 core modularity、core primitives、provider、framework-kernel 四类。
 7. Wave G：在全部引用迁移完成后，正式移除旧的 `ChengYuan.Domain` 命名。已完成。
 
 ### 架构护栏
 
-- `Core` 不得依赖 `ExecutionContext`、`MultiTenancy`、`Caching`、`Outbox`、Json runtime 或 EF Core。
+- `Core` 不得引用任何其他 `ChengYuan.*` 程序集。
 - `Hosting` 不得继续拥有模块基类、模块描述或生命周期契约。
-- Json 和 EF Core 支持必须作为显式可选模块依赖存在，不能隐藏在 `Core` 内部自动生效。
+- Json 支持可以位于单一 Core 项目内部；EF Core 支持必须保留为 Core 外部的显式可选 Provider 依赖。
 - 数据层默认仓储只服务于聚合根。
 - `CurrentUser` 和 `CurrentTenant` 保持在各自技术系统中，不迁入 `Core`。
 - 第一轮 Core 重构不引入大包堆叠、动态代理、自动生成 API 层或 UI 框架层。
@@ -226,12 +239,6 @@ src/
 ### Framework 家族
 
 - `ChengYuan.Core`
-- `ChengYuan.Core.Runtime`
-- `ChengYuan.Core.Json`
-- `ChengYuan.Core.Validation`
-- `ChengYuan.Core.Localization`
-- `ChengYuan.Core.Data`
-- `ChengYuan.Core.EntityFrameworkCore`
 - `ChengYuan.Hosting`
 - `ChengYuan.ExecutionContext`
 - `ChengYuan.MultiTenancy`
@@ -256,7 +263,7 @@ src/
 
 - `Framework` modules 只能依赖其他 `Framework` modules 和被批准的外部库。
 - 所有 `Framework` 与 `Application` modules 都可以依赖 `ChengYuan.Core`。
-- 只有宿主和参与模块引导的 framework runtime facet 才允许依赖 `ChengYuan.Core.Runtime`。
+- `ChengYuan.Core` 不得依赖任何其他 `ChengYuan.*` 程序集。
 - `Application` modules 可以依赖 `Framework` modules，也只能通过 `Contracts` 依赖其他 `Application` modules。
 - 任何模块都不能依赖别的模块的 `Persistence`、`Web` 或 `Cli` facet。
 - `Web` 和 `Cli` facet 应通过 DI 解析应用服务，只依赖契约，不直接依赖实现项目。

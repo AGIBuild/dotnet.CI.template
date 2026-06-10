@@ -16,6 +16,7 @@ If the current source tree and the architecture guide differ, prefer the guide a
 - Hosts compose modules; hosts do not implement business use cases.
 - Mirror source families in tests. Keep module tests under `tests/ChengYuan.FrameworkKernel.Tests/<Family>/<Module>/...`.
 - Update `ChengYuan.ArchitectureAnalyzer` when you introduce a new module family, facet profile, or compile-time architecture boundary.
+- The architecture analyzer is centrally referenced from `Directory.Build.targets` as an MSBuild Analyzer for checked projects; do not add duplicate per-project analyzer references.
 
 ## Prerequisites
 
@@ -45,6 +46,7 @@ The default target is **Build** (Restore → Build).
 4. Declare direct dependencies explicitly.
 5. Update `ChengYuan.ArchitectureAnalyzer` when the change introduces a new architecture boundary.
 6. Wire the module into Web or CLI only if a transport facet is required.
+7. Verify the new boundary with normal `dotnet build` or `./build.sh Test`; the analyzer runs as part of project compilation.
 
 ## NUKE Build Targets
 

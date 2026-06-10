@@ -1,7 +1,7 @@
 using ChengYuan.Core.Data;
+using ChengYuan.Core.Exceptions;
 using ChengYuan.Core.Timing;
 using ChengYuan.EntityFrameworkCore;
-using ChengYuan.ExceptionHandling;
 using Microsoft.EntityFrameworkCore;
 
 namespace ChengYuan.Identity;

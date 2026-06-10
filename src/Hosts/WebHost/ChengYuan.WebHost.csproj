@@ -20,6 +20,8 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\Framework\Core\ChengYuan.Core.csproj" />
+    <ProjectReference Include="..\..\Framework\Data\ChengYuan.EntityFrameworkCore\ChengYuan.EntityFrameworkCore.csproj" />
     <ProjectReference Include="..\..\Framework\Data\ChengYuan.Data.Sqlite\ChengYuan.Data.Sqlite.csproj" />
     <ProjectReference Include="..\..\Applications\AuditLogging\ChengYuan.AuditLogging.Web\ChengYuan.AuditLogging.Web.csproj" />
     <ProjectReference Include="..\..\Applications\FeatureManagement\ChengYuan.FeatureManagement.Web\ChengYuan.FeatureManagement.Web.csproj" />
@@ -36,22 +38,16 @@
     <ProjectReference Include="..\..\Framework\Caching\ChengYuan.Caching.Memory\ChengYuan.Caching.Memory.csproj" />
     <ProjectReference Include="..\..\Framework\ExecutionContext\ChengYuan.ExecutionContext\ChengYuan.ExecutionContext.csproj" />
     <ProjectReference Include="..\..\Framework\MultiTenancy\ChengYuan.MultiTenancy\ChengYuan.MultiTenancy.csproj" />
-    <ProjectReference Include="..\..\Framework\EventBus\ChengYuan.EventBus\ChengYuan.EventBus.csproj" />
+    <ProjectReference Include="..\..\Framework\Auditing\ChengYuan.Auditing\ChengYuan.Auditing.csproj" />
+    <ProjectReference Include="..\..\Framework\Authorization\ChengYuan.Authorization\ChengYuan.Authorization.csproj" />
     <ProjectReference Include="..\..\Framework\ExceptionHandling\ChengYuan.ExceptionHandling\ChengYuan.ExceptionHandling.csproj" />
-    <ProjectReference Include="..\..\Framework\DistributedLocking\ChengYuan.DistributedLocking\ChengYuan.DistributedLocking.csproj" />
-    <ProjectReference Include="..\..\Framework\BackgroundJobs\ChengYuan.BackgroundJobs\ChengYuan.BackgroundJobs.csproj" />
     <ProjectReference Include="..\..\Framework\BackgroundJobs\ChengYuan.BackgroundJobs.Persistence\ChengYuan.BackgroundJobs.Persistence.csproj" />
     <ProjectReference Include="..\..\Framework\EventBus\ChengYuan.EventBus.Outbox\ChengYuan.EventBus.Outbox.csproj" />
     <ProjectReference Include="..\..\Framework\Outbox\ChengYuan.Outbox.Persistence\ChengYuan.Outbox.Persistence.csproj" />
     <ProjectReference Include="..\..\Framework\Outbox\ChengYuan.Outbox.Worker\ChengYuan.Outbox.Worker.csproj" />
-    <ProjectReference Include="..\..\Framework\BlobStoring\ChengYuan.BlobStoring\ChengYuan.BlobStoring.csproj" />
-    <ProjectReference Include="..\..\Framework\Emailing\ChengYuan.Emailing\ChengYuan.Emailing.csproj" />
-    <ProjectReference Include="..\..\Framework\Sms\ChengYuan.Sms\ChengYuan.Sms.csproj" />
-    <ProjectReference Include="..\..\Framework\ObjectMapping\ChengYuan.ObjectMapping\ChengYuan.ObjectMapping.csproj" />
-    <ProjectReference Include="..\..\Framework\TextTemplating\ChengYuan.TextTemplating\ChengYuan.TextTemplating.csproj" />
     <ProjectReference Include="..\..\Framework\AspNetCore\ChengYuan.AspNetCore\ChengYuan.AspNetCore.csproj" />
     <ProjectReference Include="..\..\Framework\AspNetCore\ChengYuan.HealthChecks\ChengYuan.HealthChecks.csproj" />
-    <ProjectReference Include="..\..\Framework\Notifications\ChengYuan.Notifications\ChengYuan.Notifications.csproj" />
+    <ProjectReference Include="..\..\Framework\UI\ChengYuan.UI.Navigation\ChengYuan.UI.Navigation.csproj" />
   </ItemGroup>
 
 </Project>

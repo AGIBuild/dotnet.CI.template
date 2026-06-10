@@ -15,6 +15,7 @@
 - `Application` modules 可以依赖 `Framework` modules，也只能通过 `Contracts` 依赖其他 `Application` modules。
 - Hosts 只做模块组合，不承载业务用例实现。
 - 引入新模块或新 facet 形态并带来新的架构边界时，必须更新 `ChengYuan.ArchitectureAnalyzer`。
+- 架构 analyzer 通过 `Directory.Build.targets` 集中作为 MSBuild Analyzer 接入被检查项目；不要在各 `.csproj` 中重复手写 analyzer 引用。
 
 ## 前置要求
 
@@ -44,6 +45,7 @@ build.ps1           # Windows
 4. 显式声明直接依赖。
 5. 如果改动引入新的架构边界，更新 `ChengYuan.ArchitectureAnalyzer`。
 6. 只有在需要对应传输方式时，才把模块接入 Web 或 CLI。
+7. 用普通 `dotnet build` 或 `./build.sh Test` 验证新边界；analyzer 会随项目编译执行。
 
 ## NUKE 构建 Target
 

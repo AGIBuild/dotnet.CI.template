@@ -2,6 +2,8 @@
 
 ## 当前公开接口面
 
+下面的 Core 分组默认表示单一 `ChengYuan.Core` 项目内的命名空间分组，除非明确说明为独立项目。
+
 ### `ChengYuan.Core`
 
 基础结果模型、标识与 DDD 原语。
@@ -32,9 +34,9 @@
 | `IClock` | 运行时与基础设施代码使用的时间抽象。 |
 | `IGuidGenerator` | 由框架控制 Guid 生成的抽象接口。 |
 
-### `ChengYuan.Core.Runtime`
+### `ChengYuan.Core` 命名空间分组：Runtime
 
-模块组合核心原语。
+单一 `ChengYuan.Core` 项目内的模块组合核心原语。
 
 #### 关键类型
 
@@ -75,9 +77,9 @@
 | `DisableConventionalRegistrationAttribute` | 将类排除在约定式服务注册扫描之外的特性标记。 |
 | `AddConventionalServices(Assembly)` | 扫描程序集中实现 `ITransientService`、`IScopedService` 或 `ISingletonService` 的类，并使用 `TryAdd` 语义按匹配的服务类型注册。 |
 
-### `ChengYuan.Core.Json`
+### `ChengYuan.Core` 命名空间分组：Json
 
-核心原语的 Json 集成。
+单一 `ChengYuan.Core` 项目内的核心原语 Json 集成。
 
 #### 关键类型
 
@@ -86,9 +88,9 @@
 | `JsonModule` | 承载 Json 相关核心集成的可选模块。 |
 | `StronglyTypedIdJsonConverterFactory` | 为 System.Text.Json 注册强类型 Id 转换器。 |
 
-### `ChengYuan.Core.Validation`
+### `ChengYuan.Core` 命名空间分组：Validation
 
-核心层默认校验管道。
+单一 `ChengYuan.Core` 项目内的核心层默认校验管道。
 
 #### 关键类型
 
@@ -99,9 +101,9 @@
 | `IObjectValidator<TValue>` | 聚合给定输入的全部规则并返回校验结果。 |
 | `ValidationResult` | 承载校验错误，而不耦合传输层或持久化层。 |
 
-### `ChengYuan.Core.Localization`
+### `ChengYuan.Core` 命名空间分组：Localization
 
-核心契约的错误与资源本地化缝隙。
+单一 `ChengYuan.Core` 项目内的核心契约错误与资源本地化缝隙。
 
 #### 关键类型
 
@@ -111,9 +113,9 @@
 | `ILocalizationResource` | 按错误码解析本地化字符串的资源缝隙。 |
 | `IErrorLocalizer` | 以资源优先、原始消息兜底的方式本地化 `ResultError`。 |
 
-### `ChengYuan.Core.Data`
+### `ChengYuan.Core` 命名空间分组：Data
 
-Repository、工作单元与过滤器缝隙的 provider 无关数据契约。
+单一 `ChengYuan.Core` 项目内的 provider 无关数据契约，覆盖 Repository、工作单元与过滤器缝隙。
 
 #### 关键类型
 
@@ -131,9 +133,9 @@ Repository、工作单元与过滤器缝隙的 provider 无关数据契约。
 | `IUnitOfWork` | 将持久化提交延后给 provider 实现的工作单元契约。 |
 | `IUnitOfWorkAccessor` | 供 provider 实现传播当前工作单元的环境式访问器。 |
 
-### `ChengYuan.Core.EntityFrameworkCore`
+### `ChengYuan.EntityFrameworkCore`
 
-核心原语的 EF Core 集成。
+核心原语的 EF Core Provider 集成。该实现有意位于 `ChengYuan.Core` 之外。
 
 #### 关键类型
 

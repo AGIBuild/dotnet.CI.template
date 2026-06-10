@@ -41,6 +41,18 @@ internal static class ArchitectureDiagnosticCatalog
             "Host diagnostics must be explicitly enabled",
             "Security",
             "Diagnostic endpoint or OpenAPI mapping '{0}' must be gated by environment or explicit configuration.",
-            "Templates should not expose module catalogs, OpenAPI, or detailed health output by default in production.")
+            "Templates should not expose module catalogs, OpenAPI, or detailed health output by default in production."),
+        new(
+            ArchitectureDiagnosticIds.CoreMustRemainFoundationOnly,
+            "Core must remain foundation only",
+            "ModuleBoundaries",
+            "Core project '{0}' must not reference ChengYuan assembly '{1}'.",
+            "ChengYuan.Core is the foundation project; higher-level framework, application, extension, and host assemblies depend on Core, not the other way around."),
+        new(
+            ArchitectureDiagnosticIds.ModuleMustNotReferenceForeignFacet,
+            "Modules must not reference foreign facets",
+            "ModuleBoundaries",
+            "Module project '{0}' must not reference foreign facet project '{1}'.",
+            "Web, Persistence, and Cli facets are composed by hosts; modules consume their own capability or contracts instead of another module's transport or persistence facet.")
     ];
 }

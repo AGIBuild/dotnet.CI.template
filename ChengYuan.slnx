@@ -75,6 +75,7 @@
     <Project Path="src/Analyzers/ChengYuan.ArchitectureAnalyzer/ChengYuan.ArchitectureAnalyzer.csproj" />
   </Folder>
   <Folder Name="/tests/">
+    <Project Path="tests/ChengYuan.ArchitectureAnalyzer.Tests/ChengYuan.ArchitectureAnalyzer.Tests.csproj" />
     <Project Path="tests/ChengYuan.FrameworkKernel.Tests/ChengYuan.FrameworkKernel.Tests.csproj" />
   </Folder>
   <Project Path="build/_build.csproj" />

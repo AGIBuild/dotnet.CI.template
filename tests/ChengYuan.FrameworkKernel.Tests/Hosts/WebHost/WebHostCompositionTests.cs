@@ -1,6 +1,7 @@
 using System.Collections.Concurrent;
 using System.Net;
 using ChengYuan.AuditLogging;
+using ChengYuan.Caching;
 using ChengYuan.Core.Data;
 using ChengYuan.Core.Entities;
 using ChengYuan.Core.Modularity;
@@ -74,6 +75,8 @@ public class WebHostCompositionTests
         moduleNames.ShouldContain(nameof(WebHostFrameworkCompositionModule));
         moduleNames.ShouldContain(nameof(WebHostApplicationCompositionModule));
         moduleNames.ShouldContain(nameof(WebHostRuntimeGlueModule));
+        moduleNames.ShouldContain(nameof(CachingModule));
+        moduleNames.ShouldContain(nameof(MemoryCachingModule));
         moduleNames.ShouldContain(nameof(IdentityWebModule));
         moduleNames.ShouldContain(nameof(IdentityPersistenceModule));
         moduleNames.ShouldContain(nameof(TenantManagementPersistenceModule));
@@ -95,6 +98,7 @@ public class WebHostCompositionTests
         scope.ServiceProvider.GetRequiredService<AuditLoggingDbContext>().ShouldNotBeNull();
         scope.ServiceProvider.GetRequiredService<OutboxDbContext>().ShouldNotBeNull();
         scope.ServiceProvider.GetRequiredService<IOutboxWorker>().ShouldNotBeNull();
+        scope.ServiceProvider.GetRequiredService<IChengYuanCache>().ShouldNotBeNull();
         scope.ServiceProvider.GetRequiredService<IUserManager>().ShouldNotBeNull();
         scope.ServiceProvider.GetRequiredService<IRoleManager>().ShouldNotBeNull();
     }

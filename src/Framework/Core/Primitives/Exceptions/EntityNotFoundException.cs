@@ -1,7 +1,4 @@
-using System;
-using ChengYuan.Core.Exceptions;
-
-namespace ChengYuan.ExceptionHandling;
+namespace ChengYuan.Core.Exceptions;
 
 public sealed class EntityNotFoundException : ChengYuanException
 {

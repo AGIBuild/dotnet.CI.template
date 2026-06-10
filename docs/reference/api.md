@@ -2,6 +2,8 @@
 
 ## Current Public Surface
 
+Core sections below are namespace groups inside the single `ChengYuan.Core` project unless explicitly noted otherwise.
+
 ### `ChengYuan.Core`
 
 Foundational result, identity, and DDD primitives.
@@ -32,9 +34,9 @@ Foundational result, identity, and DDD primitives.
 | `IClock` | Time abstraction consumed by runtime and infrastructure code. |
 | `IGuidGenerator` | Abstraction for framework-controlled guid generation. |
 
-### `ChengYuan.Core.Runtime`
+### `ChengYuan.Core` namespace group: Runtime
 
-Core module composition primitives.
+Core module composition primitives inside the single `ChengYuan.Core` project.
 
 #### Key Types
 
@@ -75,9 +77,9 @@ Core module composition primitives.
 | `DisableConventionalRegistrationAttribute` | Attribute that opts a class out of conventional service registration scanning. |
 | `AddConventionalServices(Assembly)` | Scans an assembly for classes implementing `ITransientService`, `IScopedService`, or `ISingletonService` and registers them with matching service types using `TryAdd` semantics. |
 
-### `ChengYuan.Core.Json`
+### `ChengYuan.Core` namespace group: Json
 
-Core Json integration for foundational primitives.
+Core Json integration for foundational primitives inside the single `ChengYuan.Core` project.
 
 #### Key Types
 
@@ -86,9 +88,9 @@ Core Json integration for foundational primitives.
 | `JsonModule` | Optional module that hosts Json-related core integration. |
 | `StronglyTypedIdJsonConverterFactory` | Registers strongly typed ID converters for System.Text.Json. |
 
-### `ChengYuan.Core.Validation`
+### `ChengYuan.Core` namespace group: Validation
 
-Default validation pipeline for core-level contracts.
+Default validation pipeline for core-level contracts inside the single `ChengYuan.Core` project.
 
 #### Key Types
 
@@ -99,9 +101,9 @@ Default validation pipeline for core-level contracts.
 | `IObjectValidator<TValue>` | Aggregates all rules for a given input and returns a validation result. |
 | `ValidationResult` | Carries validation errors without forcing a transport or persistence dependency. |
 
-### `ChengYuan.Core.Localization`
+### `ChengYuan.Core` namespace group: Localization
 
-Error and resource localization seams for core contracts.
+Error and resource localization seams for core contracts inside the single `ChengYuan.Core` project.
 
 #### Key Types
 
@@ -111,9 +113,9 @@ Error and resource localization seams for core contracts.
 | `ILocalizationResource` | Resource seam for resolving localized strings by error code. |
 | `IErrorLocalizer` | Localizes a `ResultError` with resource-first and fallback behavior. |
 
-### `ChengYuan.Core.Data`
+### `ChengYuan.Core` namespace group: Data
 
-Provider-agnostic data contracts for repositories, unit of work, and filter seams.
+Provider-agnostic data contracts for repositories, unit of work, and filter seams inside the single `ChengYuan.Core` project.
 
 #### Key Types
 
@@ -131,9 +133,9 @@ Provider-agnostic data contracts for repositories, unit of work, and filter seam
 | `IUnitOfWork` | Contract for deferring persistence commits to a provider implementation. |
 | `IUnitOfWorkAccessor` | Ambient accessor used by provider implementations to flow the current unit of work. |
 
-### `ChengYuan.Core.EntityFrameworkCore`
+### `ChengYuan.EntityFrameworkCore`
 
-EF Core integration for foundational primitives.
+EF Core provider integration for foundational primitives. This is intentionally outside `ChengYuan.Core`.
 
 #### Key Types
 

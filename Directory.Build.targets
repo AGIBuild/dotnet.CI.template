@@ -18,7 +18,12 @@
     <PackageReference Include="Microsoft.CodeAnalysis.PublicApiAnalyzers" PrivateAssets="all" />
   </ItemGroup>
 
-  <!-- Compile-time architecture guardrails for source projects. -->
+  <!--
+    Compile-time architecture guardrails.
+    The architecture analyzer is referenced as a compiler analyzer by every checked project.
+    ReferenceOutputAssembly=false keeps it out of runtime references; OutputItemType=Analyzer
+    makes violations surface during normal dotnet build/test execution.
+  -->
   <ItemGroup Condition="'$(MSBuildProjectName)' != 'ChengYuan.ArchitectureAnalyzer' AND '$(MSBuildProjectName)' != '_build'">
     <ProjectReference Include="$(MSBuildThisFileDirectory)src/Analyzers/ChengYuan.ArchitectureAnalyzer/ChengYuan.ArchitectureAnalyzer.csproj"
                       OutputItemType="Analyzer"
